@@ -1,22 +1,24 @@
 #include <iostream>
 
-class App
-{
-    public:
-        // Constructor
-        App() {
-            std::cout << "Chess App Initialized" << std::endl;
-        }
+enum class whoPlays {
+  white,
+  black,
+};
 
-        // Start the application
-        void run() {
-            std::cout << "Welcome to the Chess App!" << std::endl;
-            // Add game loop or menu logic here
-        }
+class App {
+public:
+  // Constructor
+  App() { std::cout << "Chess App Initialized" << std::endl; }
 
-    private:
-        // Add member variables for game state, board, and players
-        // Example:
-        // ChessBoard board;
-        // Player player1, player2;
+  // Start the application
+  void run() {
+    std::cout << "Welcome to the Chess App!" << std::endl;
+    // Add game loop or menu logic here
+  }
+
+private:
+  // Add member variables for game state, board, and players
+  // Example:
+  // ChessBoard board;
+  // Player player1, player2;
 };
