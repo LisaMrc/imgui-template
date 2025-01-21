@@ -1,9 +1,5 @@
 #include <iostream>
 
-enum class whoPlays {
-  white,
-  black,
-};
 
 class App {
 public:
