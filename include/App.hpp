@@ -1,17 +1,21 @@
 #pragma once
 
 #include "Board.hpp"
+#include "Player.hpp"
 
 class App {
 public:
   // Constructor
   App() = default;
 
-  // Start the application
+  void initializePlayer();
+  void setRounds();
+
   void update();
 
+//   TODO (lisam) : create destructor
+
 private:
-  Chessboard board;
-  int round = 1;
-//   Player player1, player2;
+  Player playerWhite, playerBlack;
+  Player* whoPlays = &playerWhite;
 };

@@ -1,10 +1,8 @@
-#include <iostream>
-#include "color.hpp"
+#pragma once
 
 class piece {
 private:
   int range{};
-  color color{};
 
 public:
   void movement();
