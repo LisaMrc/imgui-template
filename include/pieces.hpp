@@ -2,16 +2,22 @@
 
 enum class piece_type {
   pawn,
-  tower,
+  rook,
   knight,
-  fool,
+  bishop,
   king,
   queen,
 };
+
+struct position {
+  int x{};
+  int y{};
+};
+
 class piece {
 private:
   piece_type type{};
-  color color{};
+  position position{};
 
 public:
   void range();
