@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "Pieces.hpp"
+#include "pieces.hpp"
 
 class Player {
 private:

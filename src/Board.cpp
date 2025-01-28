@@ -3,6 +3,9 @@
 #include <iostream>
 #include <vector>
 
+
+
+
 void draw_board()
 {
     // for (int i = 1; i <= 64; i++)
