@@ -28,6 +28,7 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 [ DONE ] ... == end of task
 [ UPDATE ] ... == improved a task previously marked as DONE (optimisation or debug)
 [ CLEANUP ] ... == deletions of useless parts, files organisation, typos
+[ MERGE ] ... = merge
 
 
 ## 4 | Other notes
