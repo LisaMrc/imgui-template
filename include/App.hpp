@@ -1,19 +1,21 @@
 #pragma once
 
-#include <iostream>
 #include "Board.hpp"
+#include "Player.hpp"
 
 class App {
 public:
     // Constructor
-    App() { std::cout << "Chess App Initialized" << std::endl; }
+    App() = default;
 
-    // Start the application
+    void initializePlayer();
+    void setRounds();
+
     void update();
 
+    //   TODO (lisam) : create destructor
+
 private:
-    // Add member variables for game state, board, and players
-    // Example:
-    // ChessBoard board;
-    // Player player1, player2;
+    Player  playerWhite, playerBlack;
+    Player* whoPlays = &playerWhite;
 };
