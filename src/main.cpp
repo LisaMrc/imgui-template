@@ -7,9 +7,10 @@ int main() {
 
   App app{};
 
-  quick_imgui::loop(
-      "Chess",
-      /* init: */ [&]() {},
-      /* loop: */
-      [&]() { app.update(); });
+    quick_imgui::loop(
+        "Chess",
+        /* init: */ [&]() {},
+        /* loop: */
+        [&]() { app.update(); }
+    );
 }
