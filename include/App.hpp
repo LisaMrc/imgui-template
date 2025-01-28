@@ -5,17 +5,20 @@
 
 class App {
 public:
-  // Constructor
-  App() = default;
+    App() = default;
 
-  void initializePlayer();
-  void setRounds();
+    void initializePlayers()
+    {
+        playerWhite.setColor(true);
+        playerBlack.setColor(false);
+    };
 
-  void update();
-
-//   TODO (lisam) : create destructor
+    void placePieces();
+    void setRounds();
+    void update();
 
 private:
-  Player playerWhite, playerBlack;
-  Player* whoPlays = &playerWhite;
+    int     RoundNbr = 0;
+    Player  playerWhite, playerBlack;
+    Player* whoPlays = &playerWhite;
 };
