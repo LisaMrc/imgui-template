@@ -1,5 +1,3 @@
-#include "color.hpp"
-
 enum class piece_type {
   pawn,
   rook,
