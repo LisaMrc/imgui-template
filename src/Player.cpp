@@ -1,3 +1,10 @@
-Player::Player(){
-    // implement the code of the creation of the pieces for each player
-}
+// #include "../include/Player.hpp"
+
+// This functions creates a player and its pieces
+// Player::Player()
+// {
+//     for (pieces:playerPieces)
+//     {
+//         playerPieces.
+//     }
+// }

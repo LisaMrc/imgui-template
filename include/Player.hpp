@@ -9,5 +9,5 @@ private:
   std::array<piece, 16> playerPieces;
 
 public:
-  Player() ;
+//   Player();
 };
