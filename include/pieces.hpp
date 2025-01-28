@@ -1,4 +1,7 @@
-enum class piece_type {
+#include <cmath>
+#include <iostream>
+
+enum class PieceType {
   pawn,
   rook,
   knight,
@@ -7,16 +10,43 @@ enum class piece_type {
   queen,
 };
 
-struct position {
+struct Position {
   int x{};
   int y{};
 };
 
-class piece {
+class Piece {
 private:
-  piece_type type{};
-  position position{};
+  Position position{};
+  bool isOnBoard = true;
 
 public:
-  void range();
+  virtual PieceType getType() const = 0;
+
+  Position getPosition() const { return position; }
+  void setPosition(const Position &newPosition) { position = newPosition; }
+
+  virtual void whereTo();
+  virtual void move(Position newPosition) = 0;
+
+  virtual ~Piece() = default;
+  //   TODO (lisam) : copy constructor etc = default
+};
+
+class King : public Piece {
+public:
+  PieceType getType() const override { return PieceType::king; }
+
+  void move(Position newPosition) override {
+    int dx = std::abs(newPosition.x - getPosition().x);
+    int dy = std::abs(newPosition.y - getPosition().y);
+
+    if (dx <= 1 && dy <= 1) {
+      getPosition() = newPosition;
+      std::cout << "King moved to (" << getPosition().x << ", " << getPosition().y << ")"
+                << '\n';
+    } else {
+      std::cout << "Invalid move for King" << '\n';
+    }
+  }
 };

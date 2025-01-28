@@ -1,13 +1,14 @@
 #pragma once
 
-#include "pieces.hpp"
+#include "Pieces.hpp"
 
 #include <array>
 
 class Player {
 private:
-  std::array<piece, 16> playerPieces;
+  std::array<std::unique_ptr<Piece>, 16> playerPieces;
+  bool didTheyWin = false;
 
 public:
-//   Player();
+  Player();
 };
