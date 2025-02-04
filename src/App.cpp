@@ -1,11 +1,16 @@
 #pragma once
 
 #include "../include/App.hpp"
-#include "../include/Board.hpp"
-#include "../include/Player.hpp"
-
 #include <imgui.h>
+#include "../include/Board.hpp"
 
+App::App()
+{
+    initializePlayerColor(playerWhite, true);
+    initializePlayerColor(playerBlack, false);
+    initializePieces(playerWhite);
+    initializePieces(playerBlack);
+}
 
 void App::update()
 {
@@ -22,15 +27,49 @@ void App::update()
     ImGui::End();
 }
 
-void App::initializePlayers()
+void App::initializePlayerColor(Player& player, bool newColor)
 {
-    playerWhite.setColor(true);
-    playerBlack.setColor(false);
+    player.setColor(newColor);
 }
 
-void initializeBlackPieces(Player player)
+void App::initializePieces(Player& player)
 {
-    // if (getColor()) {
-    
-    // }
+    if (player.getColor())
+    {
+        player.playerPieces[0] = std::make_unique<King>(Position(5, 1));
+        player.playerPieces[1] = std::make_unique<Queen>(Position(3, 1));
+
+        player.playerPieces[2] = std::make_unique<Bishop>(Position(3, 1));
+        player.playerPieces[3] = std::make_unique<Bishop>(Position(6, 1));
+
+        player.playerPieces[4] = std::make_unique<Knight>(Position(2, 1));
+        player.playerPieces[5] = std::make_unique<Knight>(Position(7, 1));
+
+        player.playerPieces[6] = std::make_unique<Rook>(Position(1, 1));
+        player.playerPieces[7] = std::make_unique<Rook>(Position(8, 1));
+
+        for (int i = 8; i < 16; i++)
+        {
+            player.playerPieces[i] = std::make_unique<Pawn>(Position(i - 7, 2));
+        }
+    }
+    else
+    {
+        player.playerPieces[0] = std::make_unique<King>(Position(5, 8));
+        player.playerPieces[1] = std::make_unique<Queen>(Position(3, 8));
+
+        player.playerPieces[2] = std::make_unique<Bishop>(Position(3, 8));
+        player.playerPieces[3] = std::make_unique<Bishop>(Position(6, 8));
+
+        player.playerPieces[4] = std::make_unique<Knight>(Position(2, 8));
+        player.playerPieces[5] = std::make_unique<Knight>(Position(7, 8));
+
+        player.playerPieces[6] = std::make_unique<Rook>(Position(1, 8));
+        player.playerPieces[7] = std::make_unique<Rook>(Position(8, 8));
+
+        for (int i = 8; i < 16; i++)
+        {
+            player.playerPieces[i] = std::make_unique<Pawn>(Position(i - 7, 7));
+        }
+    }
 }

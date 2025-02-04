@@ -5,14 +5,15 @@
 
 class App {
 public:
-    App() = default;
-
-    void initializePlayers();
-    void initializeBlackPieces(Player player);
+    App();
     void update();
 
 private:
     int     RoundNbr = 0;
-    Player  playerWhite, playerBlack;
+    Player  playerWhite;
+    Player  playerBlack;
     Player* whoPlays = &playerWhite;
+
+    void initializePlayerColor(Player& player, bool newColor);
+    void initializePieces(Player& player);
 };

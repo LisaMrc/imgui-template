@@ -1,18 +1,17 @@
 #pragma once
 
 #include <array>
-
 #include "Pieces.hpp"
 
 class Player {
 private:
-    std::array<std::unique_ptr<Piece>, 16> playerPieces;
-    bool                                   didTheyWin = false;
-    bool                                   isWhite    = true;
+    bool didTheyWin = false;
+    bool isWhite    = true;
 
 public:
-    Player();
+    Player() = default;
 
-    bool getColor() const { return isWhite; }
-    void setColor(bool newColor);
+    std::array<std::unique_ptr<Piece>, 16> playerPieces;
+    bool                                   getColor() const { return isWhite; }
+    void                                   setColor(bool newColor);
 };

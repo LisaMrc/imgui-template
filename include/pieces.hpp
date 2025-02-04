@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cmath>
 #include <iostream>
 
@@ -22,6 +24,8 @@ private:
     bool     isOnBoard = true;
 
 public:
+    Piece() = default;
+    explicit Piece(Position const& position);
     virtual PieceType getType() const = 0;
     Position          getPosition() const { return position; }
     void              setPosition(const Position& newPosition) { position = newPosition; }
@@ -35,6 +39,11 @@ public:
 
 class King : public Piece {
 public:
+    explicit King(Position const& position)
+    {
+        setPosition(position);
+    }
+
     PieceType getType() const override { return PieceType::king; }
 
     void move(Position newPosition) override
@@ -57,6 +66,11 @@ public:
 
 class Queen : public Piece {
 public:
+    explicit Queen(Position const& position)
+    {
+        setPosition(position);
+    }
+
     PieceType getType() const override { return PieceType::queen; }
 
     void move(Position newPosition) override
@@ -78,6 +92,11 @@ public:
 
 class Rook : public Piece {
 public:
+    explicit Rook(Position const& position)
+    {
+        setPosition(position);
+    }
+
     PieceType getType() const override { return PieceType::rook; }
 
     void move(Position newPosition) override
@@ -96,6 +115,11 @@ public:
 
 class Bishop : public Piece {
 public:
+    explicit Bishop(Position const& position)
+    {
+        setPosition(position);
+    }
+
     PieceType getType() const override { return PieceType::bishop; }
 
     void move(Position newPosition) override
@@ -117,6 +141,11 @@ public:
 
 class Knight : public Piece {
 public:
+    explicit Knight(Position const& position)
+    {
+        setPosition(position);
+    }
+
     PieceType getType() const override { return PieceType::knight; }
 
     void move(Position newPosition) override
@@ -138,6 +167,11 @@ public:
 
 class Pawn : public Piece {
 public:
+    explicit Pawn(Position const& position)
+    {
+        setPosition(position);
+    }
+
     PieceType getType() const override { return PieceType::pawn; }
 
     void move(Position newPosition) override
