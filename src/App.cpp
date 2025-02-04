@@ -1,8 +1,11 @@
 #pragma once
 
 #include "../include/App.hpp"
-#include <imgui.h>
 #include "../include/Board.hpp"
+#include "../include/Player.hpp"
+
+#include <imgui.h>
+
 
 void App::update()
 {
@@ -17,4 +20,17 @@ void App::update()
     ImGui::Begin("Chess");
     draw_board();
     ImGui::End();
+}
+
+void App::initializePlayers()
+{
+    playerWhite.setColor(true);
+    playerBlack.setColor(false);
+}
+
+void initializeBlackPieces(Player player)
+{
+    // if (getColor()) {
+    
+    // }
 }

@@ -33,7 +33,7 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 
 ## 4 | Other notes
 - Pieces do not have a color, the player does. The pieces belong to the player
-- 
+- Pieces coordinates start at the bottom left with white player at the bottom. The coordinates are all numbers and they start at 1 (not 0)
 
 ## 5 | Naming conventions
 **Classes** are in PascalCase
