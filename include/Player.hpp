@@ -12,5 +12,7 @@ private:
 
 public:
     Player();
+
+    bool getColor() const { return isWhite; }
     void setColor(bool newColor);
 };

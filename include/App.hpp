@@ -7,14 +7,8 @@ class App {
 public:
     App() = default;
 
-    void initializePlayers()
-    {
-        playerWhite.setColor(true);
-        playerBlack.setColor(false);
-    };
-
-    void placePieces();
-    void setRounds();
+    void initializePlayers();
+    void initializeBlackPieces(Player player);
     void update();
 
 private:
