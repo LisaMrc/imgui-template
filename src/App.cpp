@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../include/App.hpp"
 #include <imgui.h>
+
+#include "../include/App.hpp"
 #include "../include/Board.hpp"
 
 App::App()
