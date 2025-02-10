@@ -26,6 +26,11 @@ void App::update()
     ImGui::Begin("Chess");
     draw_board();
     ImGui::End();
+
+    // TODO(lisam : define a condition where if playerX'king is out of the board, (isOnBoard=0), game stops and displays victory message
+    // if (playerWhite.playerPieces[0]) {
+    
+    // }
 }
 
 void App::initializePlayerColor(Player& player, bool newColor)
