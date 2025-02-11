@@ -1,8 +1,7 @@
 #pragma once
 
-#include <imgui.h>
-
 #include "../include/App.hpp"
+#include <imgui.h>
 #include "../include/Board.hpp"
 
 App::App()
@@ -27,10 +26,14 @@ void App::update()
     draw_board();
     ImGui::End();
 
-    // TODO(lisam : define a condition where if playerX'king is out of the board, (isOnBoard=0), game stops and displays victory message
-    // if (playerWhite.playerPieces[0]) {
-    
-    // }
+    if (playerWhite.playerPieces[0]->getStatus() == 0)
+    {
+        std::cout << "Black Player wins !" << '\n';
+    }
+    else if (playerBlack.playerPieces[0]->getStatus() == 0)
+    {
+        std::cout << "White Player wins !" << '\n';
+    }
 }
 
 void App::initializePlayerColor(Player& player, bool newColor)

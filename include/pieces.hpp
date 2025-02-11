@@ -24,11 +24,15 @@ private:
     bool     isOnBoard = true;
 
 public:
-    Piece() = default;
-    explicit Piece(Position const& position);
+    Piece()                           = default;
     virtual PieceType getType() const = 0;
-    Position          getPosition() const { return position; }
-    void              setPosition(const Position& newPosition) { position = newPosition; }
+
+    explicit Piece(Position const& position);
+    Position getPosition() const { return position; }
+    void     setPosition(const Position& newPosition) { position = newPosition; }
+
+    bool getStatus() const { return isOnBoard; }
+    void steStatus(const bool& newStatus) { isOnBoard = newStatus; }
 
     //   virtual void whereTo();
     virtual void move(Position newPosition) = 0;
