@@ -1,159 +1,161 @@
-#include <cmath>
-#include <iostream>
+// #pragma once
 
-enum class PieceType {
-    pawn,
-    rook,
-    knight,
-    bishop,
-    king,
-    queen,
-};
+// #include <cmath>
+// #include <iostream>
 
-struct Position {
-    // TODO(lisam): create something to block values from 1 to 8
-    int x{};
-    int y{};
-};
+// enum class PieceType {
+//     pawn,
+//     rook,
+//     knight,
+//     bishop,
+//     king,
+//     queen,
+// };
 
-class Piece {
-private:
-    Position position{};
-    bool     isOnBoard = true;
+// struct Position {
+//     // TODO(lisam): create something to block values from 1 to 8
+//     int x{};
+//     int y{};
+// };
 
-public:
-    virtual PieceType getType() const = 0;
-    Position          getPosition() const { return position; }
-    void              setPosition(const Position& newPosition) { position = newPosition; }
+// class Piece {
+// private:
+//     Position position{};
+//     bool     isOnBoard = true;
 
-    //   virtual void whereTo();
-    virtual void move(Position newPosition) = 0;
+// public:
+//     virtual PieceType getType() const = 0;
+//     Position          getPosition() const { return position; }
+//     void              setPosition(const Position& newPosition) { position = newPosition; }
 
-    virtual ~Piece() = default;
-    //   TODO (lisam) : copy constructor etc = default
-};
+//     //   virtual void whereTo();
+//     virtual void move(Position newPosition) = 0;
 
-class King : public Piece {
-public:
-    PieceType getType() const override { return PieceType::king; }
+//     virtual ~Piece() = default;
+//     //   TODO (lisam) : copy constructor etc = default
+// };
 
-    void move(Position newPosition) override
-    {
-        int dx = std::abs(newPosition.x - getPosition().x);
-        int dy = std::abs(newPosition.y - getPosition().y);
+// class King : public Piece {
+// public:
+//     PieceType getType() const override { return PieceType::king; }
 
-        if (dx <= 1 && dy <= 1)
-        {
-            getPosition() = newPosition;
-            std::cout << "King moved to (" << getPosition().x << ", " << getPosition().y << ")"
-                      << '\n';
-        }
-        else
-        {
-            std::cout << "Invalid move for King" << '\n';
-        }
-    }
-};
+//     void move(Position newPosition) override
+//     {
+//         int dx = std::abs(newPosition.x - getPosition().x);
+//         int dy = std::abs(newPosition.y - getPosition().y);
 
-class Queen : public Piece {
-public:
-    PieceType getType() const override { return PieceType::queen; }
+//         if (dx <= 1 && dy <= 1)
+//         {
+//             getPosition() = newPosition;
+//             std::cout << "King moved to (" << getPosition().x << ", " << getPosition().y << ")"
+//                       << '\n';
+//         }
+//         else
+//         {
+//             std::cout << "Invalid move for King" << '\n';
+//         }
+//     }
+// };
 
-    void move(Position newPosition) override
-    {
-        int dx = std::abs(newPosition.x - getPosition().x);
-        int dy = std::abs(newPosition.y - getPosition().y);
+// class Queen : public Piece {
+// public:
+//     PieceType getType() const override { return PieceType::queen; }
 
-        if (dx == dy || dx == 0 || dy == 0)
-        {
-            getPosition() = newPosition;
-            std::cout << "Queen moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
-        }
-        else
-        {
-            std::cout << "Invalid move for Queen" << '\n';
-        }
-    }
-};
+//     void move(Position newPosition) override
+//     {
+//         int dx = std::abs(newPosition.x - getPosition().x);
+//         int dy = std::abs(newPosition.y - getPosition().y);
 
-class Rook : public Piece {
-public:
-    PieceType getType() const override { return PieceType::rook; }
+//         if (dx == dy || dx == 0 || dy == 0)
+//         {
+//             getPosition() = newPosition;
+//             std::cout << "Queen moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
+//         }
+//         else
+//         {
+//             std::cout << "Invalid move for Queen" << '\n';
+//         }
+//     }
+// };
 
-    void move(Position newPosition) override
-    {
-        if (newPosition.x == getPosition().x || newPosition.y == getPosition().y)
-        {
-            getPosition() = newPosition;
-            std::cout << "Rook moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
-        }
-        else
-        {
-            std::cout << "Invalid move for Rook" << '\n';
-        }
-    }
-};
+// class Rook : public Piece {
+// public:
+//     PieceType getType() const override { return PieceType::rook; }
 
-class Bishop : public Piece {
-public:
-    PieceType getType() const override { return PieceType::bishop; }
+//     void move(Position newPosition) override
+//     {
+//         if (newPosition.x == getPosition().x || newPosition.y == getPosition().y)
+//         {
+//             getPosition() = newPosition;
+//             std::cout << "Rook moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
+//         }
+//         else
+//         {
+//             std::cout << "Invalid move for Rook" << '\n';
+//         }
+//     }
+// };
 
-    void move(Position newPosition) override
-    {
-        int dx = std::abs(newPosition.x - getPosition().x);
-        int dy = std::abs(newPosition.y - getPosition().y);
+// class Bishop : public Piece {
+// public:
+//     PieceType getType() const override { return PieceType::bishop; }
 
-        if (dx == dy)
-        {
-            getPosition() = newPosition;
-            std::cout << "Bishop moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
-        }
-        else
-        {
-            std::cout << "Invalid move for Bishop" << '\n';
-        }
-    }
-};
+//     void move(Position newPosition) override
+//     {
+//         int dx = std::abs(newPosition.x - getPosition().x);
+//         int dy = std::abs(newPosition.y - getPosition().y);
 
-class Knight : public Piece {
-public:
-    PieceType getType() const override { return PieceType::knight; }
+//         if (dx == dy)
+//         {
+//             getPosition() = newPosition;
+//             std::cout << "Bishop moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
+//         }
+//         else
+//         {
+//             std::cout << "Invalid move for Bishop" << '\n';
+//         }
+//     }
+// };
 
-    void move(Position newPosition) override
-    {
-        int dx = std::abs(newPosition.x - getPosition().x);
-        int dy = std::abs(newPosition.y - getPosition().y);
+// class Knight : public Piece {
+// public:
+//     PieceType getType() const override { return PieceType::knight; }
 
-        if ((dx == 2 && dy == 1) || (dx == 1 && dy == 2))
-        {
-            getPosition() = newPosition;
-            std::cout << "Knight moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
-        }
-        else
-        {
-            std::cout << "Invalid move for Knight" << '\n';
-        }
-    }
-};
+//     void move(Position newPosition) override
+//     {
+//         int dx = std::abs(newPosition.x - getPosition().x);
+//         int dy = std::abs(newPosition.y - getPosition().y);
 
-class Pawn : public Piece {
-public:
-    PieceType getType() const override { return PieceType::pawn; }
+//         if ((dx == 2 && dy == 1) || (dx == 1 && dy == 2))
+//         {
+//             getPosition() = newPosition;
+//             std::cout << "Knight moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
+//         }
+//         else
+//         {
+//             std::cout << "Invalid move for Knight" << '\n';
+//         }
+//     }
+// };
 
-    void move(Position newPosition) override
-    {
-        int dy = newPosition.y - getPosition().y;
-        int dx = std::abs(newPosition.x - getPosition().x);
+// class Pawn : public Piece {
+// public:
+//     PieceType getType() const override { return PieceType::pawn; }
 
-        // Pawn moves forward 1 square or 2 squares from the initial position
-        if ((dy == 1 && dx == 0) || (dy == 2 && getPosition().y == 1 && dx == 0))
-        {
-            getPosition() = newPosition;
-            std::cout << "Pawn moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
-        }
-        else
-        {
-            std::cout << "Invalid move for Pawn" << '\n';
-        }
-    }
-};
+//     void move(Position newPosition) override
+//     {
+//         int dy = newPosition.y - getPosition().y;
+//         int dx = std::abs(newPosition.x - getPosition().x);
+
+//         // Pawn moves forward 1 square or 2 squares from the initial position
+//         if ((dy == 1 && dx == 0) || (dy == 2 && getPosition().y == 1 && dx == 0))
+//         {
+//             getPosition() = newPosition;
+//             std::cout << "Pawn moved to (" << getPosition().x << ", " << getPosition().y << ")" << '\n';
+//         }
+//         else
+//         {
+//             std::cout << "Invalid move for Pawn" << '\n';
+//         }
+//     }
+// };

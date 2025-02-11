@@ -6,6 +6,7 @@
 int main()
 {
     App app{};
+    app.init();
 
     quick_imgui::loop(
         "Chess",

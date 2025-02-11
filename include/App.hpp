@@ -1,18 +1,17 @@
 #pragma once
 
 #include "Board.hpp"
-#include "Player.hpp"
 
 class App {
 public:
     App() = default;
 
-    void initializePlayers();
-    void initializeBlackPieces(Player player);
+    void init();
     void update();
 
 private:
-    int     RoundNbr = 0;
-    Player  playerWhite, playerBlack;
-    Player* whoPlays = &playerWhite;
+    int RoundNbr = 0;
+    // Player  playerWhite, playerBlack;
+    // Player* whoPlays = &playerWhite;
+    Board board;
 };
