@@ -18,6 +18,15 @@ void App::update()
     ImGui::Begin("Chess");
     board.draw();
     ImGui::End();
+
+    // if (playerWhite.playerPieces[0]->getStatus() == 0)
+    // {
+    //     std::cout << "Black Player wins !" << '\n';
+    // }
+    // else if (playerBlack.playerPieces[0]->getStatus() == 0)
+    // {
+    //     std::cout << "White Player wins !" << '\n';
+    // }
 }
 
 void App::init()

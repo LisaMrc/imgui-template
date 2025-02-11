@@ -1,7 +1,8 @@
 #pragma once
 
 #include <array>
-#include "Pieces.hpp"
+#include <memory>
+#include "Piece.hpp"
 
 class Player {
 private:
@@ -13,6 +14,7 @@ public:
     explicit Player(bool isW)
         : isWhite(isW) {}
 
-    bool getColor() const { return isWhite; }
-    void setColor(bool newColor);
+    std::array<std::unique_ptr<Piece>, 16> playerPieces;
+    bool                                   getColor() const { return isWhite; }
+    void                                   setColor(bool newColor);
 };
