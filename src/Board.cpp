@@ -1,7 +1,5 @@
 #include "../include/Board.hpp"
 #include <imgui.h>
-#include <iostream>
-#include <vector>
 
 void draw_board()
 {
