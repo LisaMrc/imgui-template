@@ -16,15 +16,19 @@ void App::update()
 
     ImGui::Begin("Chess");
     board.draw();
+
+    if (!board.isKingOnBoard())
+    {
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetCursorScreenPos(ImVec2(center.x - 100, center.y - 50));
+        ImGui::Text("Game Over!");
+        return;
+    }
+
     ImGui::End();
-
-
 }
 
 void App::init()
 {
-    // playerWhite.setColor(true);
-    // playerBlack.setColor(false);
-
     board.init();
 }

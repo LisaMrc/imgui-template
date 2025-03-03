@@ -3,14 +3,18 @@
 
 class Piece {
 public:
-    int          row, col;
-    bool         isWhite;
+    int  row, col;
+    bool isWhite;
+    bool isOnBoard = true;
+
     virtual char getSymbol() const { return '_'; }
     virtual bool canMove(int row, int col) { return false; }
     Piece(int r, int c, bool isW)
         : row(r), col(c), isWhite(isW) {}
     virtual ~Piece() = default;
     // 'P' for Pawn, 'R' for Rook, 'N' for Knight, 'B' for Bishop, 'Q' for Queen, 'K' for King
+
+    void eatPiece();
 };
 
 class Pawn : public Piece {
@@ -42,6 +46,8 @@ public:
         }
         return false;
     }
+
+    void eatPiece();
 };
 
 class Rook : public Piece {

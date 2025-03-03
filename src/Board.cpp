@@ -56,6 +56,14 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     return piece->canMove(row, col);
 }
 
+// bool Board::IsValidCatch(Piece* piece, int row, int col)
+// {
+//      if (!piece || piece->isWhite != activePlayer->getColor())
+//         return false;
+
+//     return piece->canCatch(row, col);   
+// }
+
 void Board::draw()
 {
     ImDrawList* draw_list   = ImGui::GetWindowDrawList();
@@ -118,4 +126,22 @@ void Board::draw()
 
         draw_list->AddText(piece_pos, IM_COL32(0, 0, 0, 255), std::string(1, symbol).c_str());
     }
+}
+
+bool Board::isKingOnBoard()
+{
+    for (const auto& piece : pieces)
+    {
+        if (!piece->isOnBoard && piece->getSymbol() == 'K' && piece->isWhite)
+        {
+            return false;
+            std::cout << "Black player wins !";
+        }
+        else if (!piece->isOnBoard && piece->getSymbol() == 'K' && !piece->isWhite)
+        {
+            return false;
+            std::cout << "White player wins !";
+        }
+    }
+    return true;
 }
