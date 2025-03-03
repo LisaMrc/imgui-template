@@ -56,13 +56,13 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     return piece->canMove(row, col);
 }
 
-// bool Board::IsValidCatch(Piece* piece, int row, int col)
-// {
-//      if (!piece || piece->isWhite != activePlayer->getColor())
-//         return false;
+bool Board::IsValidCatch(Piece* piece, int row, int col)
+{
+     if (!piece || piece->isWhite != activePlayer->getColor())
+        return false;
 
-//     return piece->canCatch(row, col);   
-// }
+    return piece->canCatch(row, col);
+}
 
 void Board::draw()
 {

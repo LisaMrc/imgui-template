@@ -14,7 +14,7 @@ public:
     virtual ~Piece() = default;
     // 'P' for Pawn, 'R' for Rook, 'N' for Knight, 'B' for Bishop, 'Q' for Queen, 'K' for King
 
-    void eatPiece();
+    virtual bool canCatch(int row, int col) { return false; }
 };
 
 class Pawn : public Piece {
@@ -47,7 +47,39 @@ public:
         return false;
     }
 
-    void eatPiece();
+    // bool canCatch(int sRow, int sCol, const std::vector<std::unique_ptr<Piece>>& pieces) override
+    // {
+    //     if (isWhite)
+    //     {
+    //         // Capture en diagonale
+    //         if ((sCol == col - 1 || sCol == col + 1) && sRow == row - 1)
+    //         {
+    //             for (const auto& piece : pieces)
+    //             {
+    //                 if (piece->row == sRow && piece->col == sCol && !piece->isWhite)
+    //                 {
+    //                     return true; // Capture possible
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // Capture en diagonale
+    //         if ((sCol == col - 1 || sCol == col + 1) && sRow == row + 1)
+    //         {
+    //             for (const auto& piece : pieces)
+    //             {
+    //                 if (piece->row == sRow && piece->col == sCol && piece->isWhite)
+    //                 {
+    //                     return true; // Capture possible
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     return false;
+    // }
 };
 
 class Rook : public Piece {
