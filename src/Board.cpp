@@ -1,5 +1,6 @@
 #include "../include/Board.hpp"
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -46,14 +47,112 @@ void Board::init()
 
     pieces.emplace_back(std::make_unique<King>(7, 4, true));
     pieces.emplace_back(std::make_unique<King>(0, 4, false));
+
+    for (auto& piece : pieces)
+    {
+        piece->board = this;
+    }
 }
 
 bool Board::IsValidMove(Piece* piece, int row, int col)
 {
-    if (!piece || piece->isWhite != whiteTurn)
+    if (!piece || piece->isWhite != activePlayer->getColor())
         return false;
 
+    Piece* targetPiece = getPieceAt(row, col);
+
+    if (!isPathClear(piece, row, col) && piece->getSymbol() != 'N')
+    {
+        return false;
+    }
+
+    if (piece->getSymbol() == 'P')
+        piece->isCapture = (targetPiece && targetPiece->isWhite != piece->isWhite);
+
+    // Special case: Castling for the King
+    if (piece->getSymbol() == 'K')
+    {
+        King* king = dynamic_cast<King*>(piece);
+        if (king && king->canCastle(row, col))
+        {
+            performCastle(king, row, col);
+            return true;
+        }
+    }
+
     return piece->canMove(row, col);
+}
+
+bool Board::isPathClear(Piece* piece, int destRow, int destCol)
+{
+    int startRow = piece->row;
+    int startCol = piece->col;
+
+    int rowDirection = (destRow > startRow) ? 1 : (destRow < startRow) ? -1
+                                                                       : 0;
+    int colDirection = (destCol > startCol) ? 1 : (destCol < startCol) ? -1
+                                                                       : 0;
+
+    int r = startRow + rowDirection;
+    int c = startCol + colDirection;
+
+    while (r != destRow || c != destCol)
+    {
+        if (getPieceAt(r, c) != nullptr)
+        {
+            return false;
+        }
+        r += rowDirection;
+        c += colDirection;
+
+        if (r < 0 || r >= 8 || c < 0 || c >= 8)
+            return false;
+    }
+
+    return true;
+}
+
+Piece* Board::getPieceAt(int row, int col)
+{
+    for (const auto& piece : pieces)
+    {
+        if (piece->row == row && piece->col == col)
+        {
+            return piece.get();
+        }
+    }
+    return nullptr;
+}
+
+void Board::removePiece(Piece* piece)
+{
+    if (!piece)
+        return;
+
+    pieces.erase(std::remove_if(pieces.begin(), pieces.end(), [piece](const std::unique_ptr<Piece>& p) {
+                     return p.get() == piece;
+                 }),
+                 pieces.end());
+}
+
+void Board::performCastle(King* king, int destRow, int destCol)
+{
+    int    direction = (destCol > king->col) ? 1 : -1; // Determine kingside or queenside castling
+    int    rookCol   = (direction == 1) ? 7 : 0;
+    Piece* rook      = getPieceAt(king->row, rookCol);
+
+    if (!rook)
+        return;
+
+    // Move the king two squares towards the rook
+    king->col = destCol;
+
+    // Move the rook to the other side of the king
+    rook->col = king->col - direction;
+
+    // Update firstMove flags
+    king->firstMove = false;
+    rook->firstMove = false;
 }
 
 void Board::draw()
@@ -88,9 +187,14 @@ void Board::draw()
             {
                 if (selectedPiece && IsValidMove(selectedPiece, row, col))
                 {
+                    Piece* targetPiece = getPieceAt(row, col);
+                    if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
+                    {
+                        removePiece(targetPiece);
+                    }
                     selectedPiece->row = row;
                     selectedPiece->col = col;
-                    whiteTurn          = !whiteTurn;
+                    activePlayer       = activePlayer == &white ? &black : &white;
                     selectedPiece      = nullptr;
                 }
                 else
