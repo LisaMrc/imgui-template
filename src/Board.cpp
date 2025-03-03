@@ -50,7 +50,7 @@ void Board::init()
 
 bool Board::IsValidMove(Piece* piece, int row, int col)
 {
-    if (!piece || piece->isWhite != whiteTurn)
+    if (!piece || piece->isWhite != activePlayer->getColor())
         return false;
 
     return piece->canMove(row, col);
@@ -90,7 +90,7 @@ void Board::draw()
                 {
                     selectedPiece->row = row;
                     selectedPiece->col = col;
-                    whiteTurn          = !whiteTurn;
+                    activePlayer       = activePlayer == &white ? &black : &white;
                     selectedPiece      = nullptr;
                 }
                 else
