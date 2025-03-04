@@ -1,109 +1,133 @@
 #include "../include/Board.hpp"
-#include <imgui.h>
+#include <GLFW/glfw3.h>
+#include <chrono>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <thread>
 #include <vector>
+#include "../include/Piece.hpp"
+#include "imgui.h"
 
 
-
-
-void draw_board()
+void Board::init()
 {
-    // for (int i = 1; i <= 64; i++)
-    // {
-    //     if (i % 2 == 0)
-    //     {
-    //         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.f, 0.f, 0.f, 1.f});
-    //     }
-    //     else
-    //     {
-    //         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{1.f, 1.f, 1.f, 1.f});
-    //     }
-    //     ImGui::PushID(i); // When some ImGui items have the same label (for exemple the next two buttons are labeled "Yo") ImGui needs you to specify an ID so that it can distinguish them. It can be an int, a pointer, a string, etc.
-    //     // You will definitely run into this when you create a button for each of your chess pieces, so remember to give them an ID!
-    //     if (ImGui::Button("", ImVec2{100.f, 100.f}))
-    //         std::cout << "Clicked button\n";
-    //     if (i % 8 != 0)
-    //         ImGui::SameLine();
-    //     ImGui::PopID(); // Then pop the id you pushed after you created the widget
-    //     ImGui::PopStyleColor();
-    // }
+    pieces.emplace_back(std::make_unique<Pawn>(6, 0, true));
+    pieces.emplace_back(std::make_unique<Pawn>(6, 1, true));
+    pieces.emplace_back(std::make_unique<Pawn>(6, 2, true));
+    pieces.emplace_back(std::make_unique<Pawn>(6, 3, true));
+    pieces.emplace_back(std::make_unique<Pawn>(6, 4, true));
+    pieces.emplace_back(std::make_unique<Pawn>(6, 5, true));
+    pieces.emplace_back(std::make_unique<Pawn>(6, 6, true));
+    pieces.emplace_back(std::make_unique<Pawn>(6, 7, true));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 0, false));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 1, false));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 2, false));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 3, false));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 4, false));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 5, false));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 6, false));
+    pieces.emplace_back(std::make_unique<Pawn>(1, 7, false));
 
-    const int   rows       = 8;
-    const int   cols       = 8;
-    const float buttonSize = 100.0f;                          // Size of each button
-    const float spacingX   = ImGui::GetStyle().ItemSpacing.x; // Horizontal spacing between buttons
-    const float spacingY   = ImGui::GetStyle().ItemSpacing.y; // Vertical spacing between buttons
+    pieces.emplace_back(std::make_unique<Rook>(7, 0, true));
+    pieces.emplace_back(std::make_unique<Rook>(7, 7, true));
+    pieces.emplace_back(std::make_unique<Rook>(0, 0, false));
+    pieces.emplace_back(std::make_unique<Rook>(0, 7, false));
 
-    // Calculate grid dimensions
-    const float gridWidth  = (buttonSize + spacingX) * cols - spacingX;
-    const float gridHeight = (buttonSize + spacingY) * rows - spacingY;
+    pieces.emplace_back(std::make_unique<Knight>(7, 1, true));
+    pieces.emplace_back(std::make_unique<Knight>(7, 6, true));
+    pieces.emplace_back(std::make_unique<Knight>(0, 1, false));
+    pieces.emplace_back(std::make_unique<Knight>(0, 6, false));
 
-    // Calculate available space in the window
-    float windowWidth  = ImGui::GetContentRegionAvail().x;
-    float windowHeight = ImGui::GetContentRegionAvail().y;
+    pieces.emplace_back(std::make_unique<Bishop>(7, 2, true));
+    pieces.emplace_back(std::make_unique<Bishop>(7, 5, true));
+    pieces.emplace_back(std::make_unique<Bishop>(0, 2, false));
+    pieces.emplace_back(std::make_unique<Bishop>(0, 5, false));
 
-    // Calculate offsets for centering
-    float offsetX = (windowWidth - gridWidth) / 2.0f;
-    float offsetY = (windowHeight - gridHeight) / 2.0f;
+    pieces.emplace_back(std::make_unique<Queen>(7, 3, true));
+    pieces.emplace_back(std::make_unique<Queen>(0, 3, false));
 
-    // Adjust cursor position to center the grid
-    if (offsetX > 0.0f)
+    pieces.emplace_back(std::make_unique<King>(7, 4, true));
+    pieces.emplace_back(std::make_unique<King>(0, 4, false));
+}
+
+bool Board::IsValidMove(Piece* piece, int row, int col)
+{
+    if (!piece || piece->isWhite != whiteTurn)
+        return false;
+
+    return piece->canMove(row, col);
+}
+
+void Board::draw()
+{
+    ImDrawList* draw_list   = ImGui::GetWindowDrawList();
+    ImVec2      window_pos  = ImGui::GetWindowPos();
+    ImVec2      window_size = ImGui::GetWindowSize();
+
+    float  board_size = 800.0f;
+    float  tile_size  = board_size / 8.0f;
+    ImVec2 p(window_pos.x + (window_size.x - board_size) * 0.5f, window_pos.y + (window_size.y - board_size) * 0.5f);
+
+    ImU32 lightSquare     = IM_COL32(255, 206, 158, 255);
+    ImU32 darkSquare      = IM_COL32(209, 139, 71, 255);
+    ImU32 highlight_color = IM_COL32(0, 255, 0, 255);
+
+    for (int row = 0; row < 8; ++row)
     {
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
-    }
-    if (offsetY > 0.0f)
-    {
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + offsetY);
-    }
-
-    // Draw the grid
-    for (int row = 0; row < rows; ++row)
-    {
-        for (int col = 0; col < cols; ++col)
+        for (int col = 0; col < 8; ++col)
         {
-            // Generate the chessboard label (a1, b1, ..., h8)
-            char label[4];
-            snprintf(label, sizeof(label), "%c%d", 'a' + col, 8 - row);
+            ImVec2 min(p.x + col * tile_size, p.y + row * tile_size);
+            ImVec2 max(min.x + tile_size, min.y + tile_size);
+            draw_list->AddRectFilled(min, max, (row + col) % 2 == 0 ? lightSquare : darkSquare);
 
-            // Determine the square color (light or dark)
-            bool   isDarkSquare = (row + col) % 2 == 1;
-            ImVec4 normalColor  = isDarkSquare ? ImVec4(0.4f, 0.2f, 0.1f, 1.0f)  // Dark brown
-                                               : ImVec4(0.9f, 0.9f, 0.9f, 1.0f); // Light beige
-
-            // Define hover and active colors
-            ImVec4 hoverColor  = isDarkSquare ? ImVec4(0.6f, 0.4f, 0.2f, 1.0f)  // Lighter dark
-                                              : ImVec4(1.0f, 1.0f, 0.8f, 1.0f); // Lighter beige
-            ImVec4 activeColor = isDarkSquare ? ImVec4(0.5f, 0.3f, 0.15f, 1.0f) // Darker dark
-                                              : ImVec4(0.8f, 0.8f, 0.6f, 1.0f); // Darker beige
-
-            // Push the button styles
-            ImGui::PushStyleColor(ImGuiCol_Button, normalColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeColor);
-
-            // Push the text color (black)
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-
-            // Draw the button
-            if (ImGui::Button(label, ImVec2(buttonSize, buttonSize)))
+            if (selectedPiece && selectedPiece->row == row && selectedPiece->col == col)
             {
-                // Action when button is clicked
-                printf("Button %s clicked\n", label);
+                draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
             }
 
-            // Pop the style colors
-            ImGui::PopStyleColor(4); // 3 for button colors + 1 for text color
-
-            // Place buttons on the same line, except for the last one in the row
-            if (col < cols - 1)
+            ImGui::SetCursorScreenPos(min);
+            if (ImGui::Button(("##tile" + std::to_string(row) + std::to_string(col)).c_str(), ImVec2(tile_size, tile_size)))
             {
-                ImGui::SameLine();
+                if (selectedPiece && IsValidMove(selectedPiece, row, col))
+                {
+                    selectedPiece->row = row;
+                    selectedPiece->col = col;
+                    whiteTurn          = !whiteTurn;
+                    selectedPiece      = nullptr;
+                }
+                else
+                {
+                    for (auto& piece : Board::pieces)
+                    {
+                        if (piece->row == row && piece->col == col)
+                        {
+                            selectedPiece = piece.get();
+                            break;
+                        }
+                    }
+                }
             }
         }
-        // Adjust the cursor for centering the next row
-        if (row < rows - 1 && offsetX > 0.0f)
-        {
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
-        }
     }
+
+    // Draw pieces
+    for (auto& piece : Board::pieces)
+    {
+        ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.35f, p.y + piece->row * tile_size + tile_size * 0.35f);
+        char   symbol = piece->getSymbol();
+        if (!piece->isWhite)
+            symbol = tolower(symbol);
+
+        draw_list->AddText(piece_pos, IM_COL32(0, 0, 0, 255), std::string(1, symbol).c_str());
+    }
+}
+
+void Board::update()
+{
+    for (int i = 60; i >= 0; --i)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    Board::king_is_dead = true;
 }

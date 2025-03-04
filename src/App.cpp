@@ -1,9 +1,9 @@
 #pragma once
 
-#include <imgui.h>
-
 #include "../include/App.hpp"
+#include <imgui.h>
 #include "../include/Board.hpp"
+#include "../include/Player.hpp"
 
 void App::update()
 {
@@ -16,6 +16,23 @@ void App::update()
                              // your IDE!
 
     ImGui::Begin("Chess");
-    draw_board();
+    board.draw();
     ImGui::End();
+
+    // if (playerWhite.playerPieces[0]->getStatus() == 0)
+    // {
+    //     std::cout << "Black Player wins !" << '\n';
+    // }
+    // else if (playerBlack.playerPieces[0]->getStatus() == 0)
+    // {
+    //     std::cout << "White Player wins !" << '\n';
+    // }
+}
+
+void App::init()
+{
+    // playerWhite.setColor(true);
+    // playerBlack.setColor(false);
+
+    board.init();
 }

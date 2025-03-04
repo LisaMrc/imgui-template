@@ -1,9 +1,10 @@
 # Chess Game
-♟️ *This game is currently in progress* ♟️
+♟️ *This game is currently in progress. Hopefully will be finished by may !* ♟️
 
 ## 1 | General Info
+🧑‍💻 Developers : Anass Doublal, Jean Le Chaudelec, Lisa Muracciole
 📚 Library : OpenGL
-
+🖥️ Developed for : Windows, MacOS and Linux
 
 ## 2 | Files Organisation
 All **.cpp** files are into the "src" folder. All **.hpp** files are into the "include" folder.
@@ -33,9 +34,19 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 
 ## 4 | Other notes
 - Pieces do not have a color, the player does. The pieces belong to the player
-- 
+- Pieces coordinates start at the bottom left with white player at the bottom. The coordinates are all numbers and they start at 1 (not 0)
 
 ## 5 | Naming conventions
 **Classes** are in PascalCase
 **Functions and booleans** are in camelCase
 **Files** all start with capital letter
+
+## 5 | Random variables
+1. Event : switches player
+2. Event : leaf falls on board in an empty spot
+3. Event : ORDI/AI player 2
+4. Random sounds 
+5. Random background music
+6. Fish swimming trajectory at the sides of the board
+7. Random color (you are playing as white or black and the machine sets it for you)
+8. Random animals at the pond
