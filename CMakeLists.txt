@@ -43,3 +43,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE src)
 # Add quick-imgui library
 add_subdirectory(lib/quick_imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE quick_imgui::quick_imgui)
+
+# Tinyobj library
+include(FetchContent)
+
+FetchContent_Declare(
+  tinyobj
+  GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader
+  GIT_TAG        3bb554cf74428d7db13418b4aca1b9752a1d2be8
+)
+
+FetchContent_MakeAvailable(tinyobj)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE tinyobjloader)
