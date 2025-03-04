@@ -1,22 +1,32 @@
-#pragma once
-
+#include "glad/glad.h"
+//
 #include <imgui.h>
 #include "../include/App.hpp"
-#include "quick_imgui/quick_imgui.hpp"
 #include "../include/debug.hpp"
+#include "GLFW/glfw3.h"
+#include "quick_imgui/quick_imgui.hpp"
 
 int main()
 {
     App app{};
     app.init();
 
+
     quick_imgui::loop(
         "Chess",
-        /* init: */ [&]() {
-            ImGuiIO& io = ImGui::GetIO();
-            io.Fonts->AddFontFromFileTTF("D:/Jean/docs/travail/IMAC/Semestre 4/Programmation/imgui-template/assets/font/Chess-7.TTF", 16.0f); // Assurez-vous de mettre le bon chemin vers la police
+        /* init: */
+        [&]() {
+            glEnable(GL_DEPTH_TEST); // Permet le rendu 3D correct
         },
-        /* loop: */
-        [&]() { app.update(); }
+        [&]() {
+            glClearColor(1, 1, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            display3DObj();  // Rendu 3D
+
+            app.update();
+        }
     );
+
+    return 0;
 }
