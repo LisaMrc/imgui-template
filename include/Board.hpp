@@ -15,10 +15,12 @@ public:
         : white(true), black(false) {}
     std::vector<std::unique_ptr<Piece>> pieces;
     void                                init();
-    void                                update();
     void                                draw();
+    bool                                isKingOnBoard();
     bool                                IsValidMove(Piece* piece, int row, int col);
-    Piece*                              selectedPiece = nullptr;
-    Player*                             activePlayer  = &white;
-    bool                                whiteTurn     = true;
+    bool                                IsValidCatch(Piece* piece, int row, int col);
+
+    Piece*  selectedPiece = nullptr;
+    Player* activePlayer  = &white;
+    bool    whiteTurn     = true;
 };

@@ -53,10 +53,18 @@ void Board::init()
 
 bool Board::IsValidMove(Piece* piece, int row, int col)
 {
-    if (!piece || piece->isWhite != whiteTurn)
+    if (!piece || piece->isWhite != activePlayer->getColor())
         return false;
 
     return piece->canMove(row, col);
+}
+
+bool Board::IsValidCatch(Piece* piece, int row, int col)
+{
+     if (!piece || piece->isWhite != activePlayer->getColor())
+        return false;
+
+    return piece->canCatch(row, col);
 }
 
 void Board::draw()
@@ -93,7 +101,7 @@ void Board::draw()
                 {
                     selectedPiece->row = row;
                     selectedPiece->col = col;
-                    whiteTurn          = !whiteTurn;
+                    activePlayer       = activePlayer == &white ? &black : &white;
                     selectedPiece      = nullptr;
                 }
                 else
@@ -123,11 +131,20 @@ void Board::draw()
     }
 }
 
-void Board::update()
+bool Board::isKingOnBoard()
 {
-    for (int i = 60; i >= 0; --i)
+    for (const auto& piece : pieces)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (!piece->isOnBoard && piece->getSymbol() == 'K' && piece->isWhite)
+        {
+            return false;
+            std::cout << "Black player wins !";
+        }
+        else if (!piece->isOnBoard && piece->getSymbol() == 'K' && !piece->isWhite)
+        {
+            return false;
+            std::cout << "White player wins !";
+        }
     }
-    Board::king_is_dead = true;
+    return true;
 }

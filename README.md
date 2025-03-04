@@ -13,6 +13,7 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 **main** : basic file who renders the game and launch the app. Almost not modified
 **App** : the main hub of all other files. Helps the game launch and update
 **Debug** : to test code and debug stuff
+**Math** : holds math-related and random functions
 
 #### User related files
 **Player** : holds player info and data
@@ -20,8 +21,7 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 
 #### Pieces related files
 **Board** : manages (draws) the board
-**Pawn** : defines the pawns of the game
-
+**Pieces** : defines the pieces of the game and their settings
 
 ## 3 | Github Lexicon
 [ WIP ] ... == Work in progress
@@ -30,11 +30,10 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 [ UPDATE ] ... == improved a task previously marked as DONE (optimisation or debug)
 [ CLEANUP ] ... == deletions of useless parts, files organisation, typos
 [ MERGE ] ... = merge
-
+[ NEEDS TESTING ] ... = written function that needs to be tested
 
 ## 4 | Other notes
-- Pieces do not have a color, the player does. The pieces belong to the player
-- Pieces coordinates start at the bottom left with white player at the bottom. The coordinates are all numbers and they start at 1 (not 0)
+
 
 ## 5 | Naming conventions
 **Classes** are in PascalCase

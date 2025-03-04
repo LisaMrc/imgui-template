@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "../include/App.hpp"
 #include "quick_imgui/quick_imgui.hpp"
+#include "../include/debug.hpp"
 
 int main()
 {

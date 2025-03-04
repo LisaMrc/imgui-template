@@ -3,7 +3,6 @@
 #include "../include/App.hpp"
 #include <imgui.h>
 #include "../include/Board.hpp"
-#include "../include/Player.hpp"
 
 void App::update()
 {
@@ -17,22 +16,19 @@ void App::update()
 
     ImGui::Begin("Chess");
     board.draw();
-    ImGui::End();
 
-    // if (playerWhite.playerPieces[0]->getStatus() == 0)
-    // {
-    //     std::cout << "Black Player wins !" << '\n';
-    // }
-    // else if (playerBlack.playerPieces[0]->getStatus() == 0)
-    // {
-    //     std::cout << "White Player wins !" << '\n';
-    // }
+    if (!board.isKingOnBoard())
+    {
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetCursorScreenPos(ImVec2(center.x - 100, center.y - 50));
+        ImGui::Text("Game Over!");
+        return;
+    }
+
+    ImGui::End();
 }
 
 void App::init()
 {
-    // playerWhite.setColor(true);
-    // playerBlack.setColor(false);
-
     board.init();
 }
