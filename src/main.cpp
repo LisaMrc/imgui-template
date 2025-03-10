@@ -11,18 +11,16 @@ int main()
     App app{};
     app.init();
 
-
     quick_imgui::loop(
-        "Chess",
+        "My Zen Chess",
         /* init: */
         [&]() {
             glEnable(GL_DEPTH_TEST); // Permet le rendu 3D correct
         },
         [&]() {
-            glClearColor(1, 1, 0, 1);
+            glClearColor(1, 0, 1, 1); // Principal window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            display3DObj();  // Rendu 3D
+            display3DObj(); // Rendu 3D
 
             app.update();
         }

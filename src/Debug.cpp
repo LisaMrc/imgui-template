@@ -2,33 +2,33 @@
 #include <imgui.h>
 #include <tiny_obj_loader.h>
 #include <iostream>
-
 #include "glad/glad.h"
-//
-#include <imgui.h>
+// #include <filesystem>
+
 #include "GLFW/glfw3.h"
 #include "quick_imgui/quick_imgui.hpp"
 
 void display3DObj()
 {
-    static GLuint VAO = 0;
-    static GLuint VBO = 0;
-    static bool initialized = false;
-    static size_t nb_vertex = 0;
+    static GLuint VAO         = 0;
+    static GLuint VBO         = 0;
+    static bool   initialized = false;
+    static size_t nb_vertex   = 0;
 
     if (!initialized)
     {
-        std::string inputfile = "D:/Jean/docs/travail/IMAC/Semestre 4/Programmation/imgui-template/Objects/Pawn.obj";
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
+        std::string                      inputfile = "../../Objects/Pawn.obj";
+        tinyobj::attrib_t                attrib;
+        std::vector<tinyobj::shape_t>    shapes;
         std::vector<tinyobj::material_t> materials;
-        std::string warn, err;
+        std::string                      warn;
+        std::string                      err;
 
         bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
 
         if (!ret)
         {
-            std::cout << "Failed to load OBJ: " << err << std::endl;
+            std::cout << "Failed to load OBJ: " << err << '\n';
             return;
         }
 
@@ -42,7 +42,9 @@ void display3DObj()
                 vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]); // z
             }
         }
+
         nb_vertex = vertices.size();
+
         // OpenGL : Création des buffers
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
