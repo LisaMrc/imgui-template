@@ -18,9 +18,13 @@ public:
     void                                draw();
     bool                                isKingOnBoard();
     bool                                IsValidMove(Piece* piece, int row, int col);
-    bool                                IsValidCatch(Piece* piece, int row, int col);
-
-    Piece*  selectedPiece = nullptr;
-    Player* activePlayer  = &white;
-    bool    whiteTurn     = true;
+    bool                                isPathClear(Piece* piece, int destRow, int destCol);
+    Piece*                              getPieceAt(int row, int col);
+    void                                removePiece(Piece* piece);
+    void                                performCastle(King* king, int destRow, int destCol);
+    bool                                isKingInCheck(bool isWhiteKing);
+    Piece*                              selectedPiece = nullptr;
+    Player*                             activePlayer  = &white;
+    bool                                whiteTurn     = true;
+    bool                                isInCheck     = false;
 };

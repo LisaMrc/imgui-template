@@ -1,20 +1,23 @@
 #pragma once
 #include <cmath>
+#include <iostream>
+
+class Board;
 
 class Piece {
 public:
-    int  row, col;
-    bool isWhite;
-    bool isOnBoard = true;
+    int    row, col;
+    bool   isWhite;
+    bool   isOnBoard = true;
+    bool   isCapture = true;
+    bool   firstMove = true;
+    Board* board;
 
     virtual char getSymbol() const { return '_'; }
     virtual bool canMove(int row, int col) { return false; }
     Piece(int r, int c, bool isW)
         : row(r), col(c), isWhite(isW) {}
     virtual ~Piece() = default;
-    // 'P' for Pawn, 'R' for Rook, 'N' for Knight, 'B' for Bishop, 'Q' for Queen, 'K' for King
-
-    virtual bool canCatch(int row, int col) { return false; }
 };
 
 class Pawn : public Piece {
@@ -30,20 +33,37 @@ public:
         {
             if (sCol == col && (sRow == row - 1 || (firstMove && sRow == row - 2)))
             {
+                if (!isCapture)
+                {
+                    firstMove = false;
+                    return true;
+                }
+                return false;
+            }
+            if (isCapture && abs(sCol - col) == 1 && sRow == row - 1)
+            {
                 firstMove = false;
                 return true;
             }
-            return false;
         }
         else
         {
             if (sCol == col && (sRow == row + 1 || (firstMove && sRow == row + 2)))
             {
+                if (!isCapture)
+                {
+                    firstMove = false;
+                    return true;
+                }
+                return false;
+            }
+            if (isCapture && abs(sCol - col) == 1 && sRow == row + 1)
+            {
                 firstMove = false;
                 return true;
             }
-            return false;
         }
+
         return false;
     }
 
@@ -120,4 +140,5 @@ public:
         : Piece(r, c, isW) {}
     char getSymbol() const override { return 'K'; }
     bool canMove(int sRow, int sCol) override { return abs(row - sRow) <= 1 && abs(col - sCol) <= 1; }
+    bool canCastle(int destRow, int destCol);
 };
