@@ -22,7 +22,9 @@ public:
     Piece*                              getPieceAt(int row, int col);
     void                                removePiece(Piece* piece);
     void                                performCastle(King* king, int destRow, int destCol);
+    bool                                isKingInCheck(bool isWhiteKing);
     Piece*                              selectedPiece = nullptr;
     Player*                             activePlayer  = &white;
     bool                                whiteTurn     = true;
+    bool                                isInCheck     = false;
 };
