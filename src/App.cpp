@@ -36,9 +36,6 @@ void App::update()
 void App::init()
 {
     board.init();
-
-    // FIXME : fix random song function (let program start)
-
 }
 
 void App::run()
