@@ -56,3 +56,14 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(tinyobj)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE tinyobjloader)
+
+# Miniaudio library
+FetchContent_Declare(
+  miniaudio
+  GIT_REPOSITORY https://github.com/mackron/miniaudio
+  GIT_TAG        350784a9467a79d0fa65802132668e5afbcf3777
+)
+
+FetchContent_MakeAvailable(miniaudio)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE miniaudio)

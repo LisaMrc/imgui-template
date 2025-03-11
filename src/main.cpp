@@ -1,30 +1,16 @@
-#include "glad/glad.h"
-//
-#include <imgui.h>
+#include <thread>
 #include "../include/App.hpp"
-#include "../include/debug.hpp"
-#include "GLFW/glfw3.h"
-#include "quick_imgui/quick_imgui.hpp"
+#include "../include/Math.hpp"
 
-int main()
-{
-    App app{};
-    app.init();
+int main() {
+    App app;
 
-    quick_imgui::loop(
-        "My Zen Chess",
-        /* init: */
-        [&]() {
-            glEnable(GL_DEPTH_TEST); // Permet le rendu 3D correct
-        },
-        [&]() {
-            glClearColor(1, 0, 1, 1); // Principal window
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            display3DObj(); // Rendu 3D
+    std::jthread audioThread([](std::stop_token st) {
+        playRandomSong(st);
+    });
 
-            app.update();
-        }
-    );
+    app.run(); // Runs the game
 
+    // When the game ends, the jthread will be destructed, stopping music
     return 0;
 }

@@ -3,6 +3,10 @@
 #include "../include/App.hpp"
 #include <imgui.h>
 #include "../include/Board.hpp"
+#include "../include/Debug.hpp"
+#include "../include/Render.hpp"
+#include "glad/glad.h"
+#include "quick_imgui/quick_imgui.hpp"
 
 void App::update()
 {
@@ -17,6 +21,7 @@ void App::update()
     ImGui::Begin("Chess");
     board.draw();
 
+    // TODO (lisam) : make it prettier ?
     if (!board.isKingOnBoard())
     {
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -31,4 +36,36 @@ void App::update()
 void App::init()
 {
     board.init();
+
+    // FIXME : fix random song function (let program start)
+
+}
+
+void App::run()
+{
+    init();
+
+    quick_imgui::loop(
+        "Zen Chess",
+        /* init: */
+        [&]() {
+            glEnable(GL_DEPTH_TEST); // Permet le rendu 3D correct
+        },
+        [&]() {
+            glClearColor(1, 0, 1, 1); // Principal window
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            display3DObj(); // Rendu 3D
+
+            update();
+        }
+    );
+}
+
+void App::handleEvent()
+{
+    // TODO(lisam) : enable mouse trigger
+    if (true)
+    {
+        TrackBallCamera.moveFront(.001);
+    }
 }

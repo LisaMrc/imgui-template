@@ -1,7 +1,7 @@
 #pragma once
 #include "../include/TrackballCamera.hpp"
 
-// Short functions : inline ?
+// TODO (lisam): short functions : inline ?
 void TrackballCamera::moveFront(float delta)
 {
     m_fDistance += delta;
@@ -19,7 +19,8 @@ void TrackballCamera::rotateUp(float degrees)
 
 glm::mat4 TrackballCamera::getViewMatrix() const
 {
-    glm::mat4 view = glm::mat4(1.0f); // Start with identity matrix
+    // Start with identity matrix
+    glm::mat4 view = glm::mat4(1.0f); 
 
     // Translate the scene backward (move camera forward)
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -m_fDistance));
@@ -34,7 +35,6 @@ glm::mat4 TrackballCamera::getViewMatrix() const
 }
 
 void TrackballCamera::handleMouseMotion(float deltaX, float deltaY) {
-    // Adjust sensitivity
     float sensitivity = 0.2f;  
     m_fAngleY += deltaX * sensitivity;  // Rotate left/right
     m_fAngleX += deltaY * sensitivity;  // Rotate up/down
