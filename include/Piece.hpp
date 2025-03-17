@@ -8,7 +8,6 @@ class Piece {
 public:
     int    row, col;
     bool   isWhite;
-    bool   isOnBoard = true;
     bool   isCapture = true;
     bool   firstMove = true;
     Board* board;

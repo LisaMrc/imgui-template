@@ -1,16 +1,13 @@
 #include "../include/Board.hpp"
 #include <GLFW/glfw3.h>
-#include <chrono>
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <thread>
 #include <vector>
 #include "../include/Piece.hpp"
 #include "imgui.h"
-
 
 void Board::init()
 {
@@ -72,7 +69,7 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
 
     if (!isPathClear(piece, row, col) && piece->getSymbol() != 'N')
     {
-        std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
+        // std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
         return false;
     }
 
@@ -144,6 +141,38 @@ void Board::removePiece(Piece* piece)
                  pieces.end());
 }
 
+// FIXME
+bool Board::wasKingRemoved()
+{
+    for (const auto& piece : pieces)
+    {
+        if (piece->getSymbol() == 'K' && piece->isWhite)
+        {
+            std::cout << "King here \n";
+            return false;
+        }
+        else
+        {
+            std::cout << "King out \n";
+            return true;
+        }
+    }
+}
+
+void Board::debug_removeWhiteKingButton()
+{
+    if (ImGui::Button("Remove white king"))
+    {
+        for (const auto& piece : pieces)
+        {
+            if (piece->getSymbol() == 'K' && piece->isWhite)
+            {
+                removePiece(piece.get());
+            }
+        }
+    }
+}
+
 void Board::performCastle(King* king, int destRow, int destCol)
 {
     int    direction = (destCol > king->col) ? 1 : -1;
@@ -175,7 +204,7 @@ bool Board::isKingInCheck(bool isWhiteKing)
 
     if (!king)
     {
-        std::cout << "Error: King not found!\n";
+        // std::cout << "Error: King not found!\n";
         return false;
     }
 
@@ -300,22 +329,4 @@ void Board::draw()
 
         draw_list->AddText(piece_pos, IM_COL32(0, 0, 0, 255), std::string(1, symbol).c_str());
     }
-}
-
-bool Board::isKingOnBoard()
-{
-    for (const auto& piece : pieces)
-    {
-        if (!piece->isOnBoard && piece->getSymbol() == 'K' && piece->isWhite)
-        {
-            return false;
-            std::cout << "Black player wins !";
-        }
-        else if (!piece->isOnBoard && piece->getSymbol() == 'K' && !piece->isWhite)
-        {
-            return false;
-            std::cout << "White player wins !";
-        }
-    }
-    return true;
 }

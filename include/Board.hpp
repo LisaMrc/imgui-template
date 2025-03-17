@@ -16,7 +16,6 @@ public:
     std::vector<std::unique_ptr<Piece>> pieces;
     void                                init();
     void                                draw();
-    bool                                isKingOnBoard();
     bool                                IsValidMove(Piece* piece, int row, int col);
     bool                                isPathClear(Piece* piece, int destRow, int destCol);
     Piece*                              getPieceAt(int row, int col);
@@ -27,4 +26,7 @@ public:
     Player*                             activePlayer  = &white;
     bool                                whiteTurn     = true;
     bool                                isInCheck     = false;
+    bool                                wasKingRemoved();
+
+    void debug_removeWhiteKingButton();
 };

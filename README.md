@@ -4,7 +4,7 @@
 ## 1 | General Info
 🧑‍💻 **Developers** : Anass Doublal, Jean Le Chaudelec, Lisa Muracciole
 ⌨️ **Language** : C++
-📚 **Libraries** : OpenGL, Quick Imgui, GFLW, tinyOBJ
+📚 **Libraries** : OpenGL, Quick Imgui, GFLW, tinyOBJ, miniaudio
 🖥️ **Developed for** : Windows, MacOS and Linux
 
 ## 2 | Files Organisation
@@ -13,7 +13,6 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 #### App related / core  files
 **main** : basic file who renders the game and launch the app. Almost not modified
 **App** : the main hub of all other files. Helps the game launch and update
-**Debug** : to test code and debug stuff
 **Math** : holds math-related and random functions
 
 #### User related files
@@ -39,7 +38,8 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 ## 5 | Naming conventions
 **Classes** are in PascalCase
 **Functions, variables and booleans** are in camelCase
-**Files** all start with capital letter, exept main.cpp
+**Files** all start with capital letter, except main.cpp
+Functions that are used for **debugging** are named debug_functionName
 
 ## 5 | Random variables
 1. Event : player switch

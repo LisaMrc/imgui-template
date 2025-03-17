@@ -12,6 +12,7 @@ public:
     void update();
     void run();
     void handleEvent();
+    void displayGameOverScreen();
 
 private:
     int             RoundNbr = 0;
