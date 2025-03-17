@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <chrono>
 #include <algorithm>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -245,6 +246,12 @@ void Board::draw()
             if (selectedPiece && selectedPiece->row == row && selectedPiece->col == col)
             {
                 draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
+            }
+
+            // Deselect piece with right mouse button
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+            {
+                selectedPiece = nullptr;
             }
 
             // Highlight the king if it is in check
