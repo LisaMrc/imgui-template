@@ -20,7 +20,9 @@ void App::update()
     ImGui::Begin("Chess");
     board.draw();
     board.debug_removeWhiteKingButton();
-    board.wasKingRemoved();
+    board.debug_removeBlackKingButton();
+    
+    displayGameOverScreen();
 
     ImGui::End();
 }
@@ -61,5 +63,27 @@ void App::handleEvent()
 
 void App::displayGameOverScreen()
 {
+    if (board.wasWhiteKingRemoved())
+    {
+        ImGui::SetNextWindowPos(ImVec2(400, 300), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(300, 150));
+        ImGui::Begin("Game Over", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 
+        ImGui::Text("Game Over!");
+        ImGui::Text("White king has been captured. Black wins !");
+
+        ImGui::End();
+    }
+
+    if (board.wasBlackKingRemoved())
+    {
+        ImGui::SetNextWindowPos(ImVec2(400, 300), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(300, 150));
+        ImGui::Begin("Game Over", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+
+        ImGui::Text("Game Over!");
+        ImGui::Text("Black king has been captured. White wins !");
+
+        ImGui::End();
+    }
 }

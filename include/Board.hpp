@@ -26,7 +26,8 @@ public:
     Player*                             activePlayer  = &white;
     bool                                whiteTurn     = true;
     bool                                isInCheck     = false;
-    bool                                wasKingRemoved();
-
-    void debug_removeWhiteKingButton();
+    bool                                wasWhiteKingRemoved();
+    bool                                wasBlackKingRemoved();
+    void                                debug_removeWhiteKingButton();
+    void                                debug_removeBlackKingButton();
 };
