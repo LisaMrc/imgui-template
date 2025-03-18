@@ -16,11 +16,17 @@ public:
     std::vector<std::unique_ptr<Piece>> pieces;
     void                                init();
     void                                draw();
-    bool                                isKingOnBoard();
     bool                                IsValidMove(Piece* piece, int row, int col);
-    bool                                IsValidCatch(Piece* piece, int row, int col);
+    bool                                isPathClear(Piece* piece, int destRow, int destCol);
+    Piece*                              getPieceAt(int row, int col);
+    void                                removePiece(Piece* piece);
+    void                                performCastle(King* king, int destRow, int destCol);
+    bool                                isKingInCheck(bool isWhiteKing);
+    Piece*                              selectedPiece = nullptr;
+    Player*                             activePlayer  = &white;
+    bool                                whiteTurn     = true;
+    bool                                isInCheck     = false;
+    bool                                wasKingRemoved();
 
-    Piece*  selectedPiece = nullptr;
-    Player* activePlayer  = &white;
-    bool    whiteTurn     = true;
+    void debug_removeWhiteKingButton();
 };

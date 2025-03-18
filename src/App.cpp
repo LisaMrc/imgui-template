@@ -3,7 +3,6 @@
 #include "../include/App.hpp"
 #include <imgui.h>
 #include "../include/Board.hpp"
-#include "../include/Debug.hpp"
 #include "../include/Render.hpp"
 #include "glad/glad.h"
 #include "quick_imgui/quick_imgui.hpp"
@@ -20,15 +19,8 @@ void App::update()
 
     ImGui::Begin("Chess");
     board.draw();
-
-    // TODO (lisam) : make it prettier ?
-    if (!board.isKingOnBoard())
-    {
-        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetCursorScreenPos(ImVec2(center.x - 100, center.y - 50));
-        ImGui::Text("Game Over!");
-        return;
-    }
+    board.debug_removeWhiteKingButton();
+    board.wasKingRemoved();
 
     ImGui::End();
 }
@@ -60,9 +52,14 @@ void App::run()
 
 void App::handleEvent()
 {
-    // TODO(lisam) : enable mouse trigger
+    // TODO(lisam) : enable mouse trigger for trackball camera
     if (true)
     {
         TrackBallCamera.moveFront(.001);
     }
+}
+
+void App::displayGameOverScreen()
+{
+
 }
