@@ -47,7 +47,6 @@ void playRandomSong(std::stop_token stopToken)
     std::srand(std::time(nullptr));
     int songIndex = std::rand() % songs.size();
     const std::string selectedSong = songs[songIndex];
-    std::cout << "Lecture de : " << selectedSong << std::endl;
 
     ma_engine engine;
     if (ma_engine_init(nullptr, &engine) != MA_SUCCESS)

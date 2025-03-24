@@ -1,3 +1,7 @@
 #pragma once
 
-void display3DObj();
+void render3DObj();
+
+void render3DBoard();
+void render3DPieces();
+void renderSkybox();

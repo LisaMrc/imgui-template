@@ -45,8 +45,7 @@ void App::run()
         [&]() {
             glClearColor(1, 0, 1, 1); // Principal window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            display3DObj(); // Rendu 3D
-
+            render3DObj();
             update();
         }
     );

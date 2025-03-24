@@ -4,7 +4,7 @@
 #include <iostream>
 #include "glad/glad.h"
 
-void display3DObj()
+void render3DObj()
 {
     static GLuint VAO         = 0;
     static GLuint VBO         = 0;
@@ -13,7 +13,7 @@ void display3DObj()
 
     if (!initialized)
     {
-        std::string                      inputfile = "../../Assets/Objects/Pawn.obj";
+        std::string                      inputfile = "../../Assets/Objects/Rook.obj";
         tinyobj::attrib_t                attrib;
         std::vector<tinyobj::shape_t>    shapes;
         std::vector<tinyobj::material_t> materials;

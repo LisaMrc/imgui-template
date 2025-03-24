@@ -1,12 +1,8 @@
 #pragma once
 
-#include <array>
-#include <memory>
-#include "Piece.hpp"
-
 class Player {
 private:
-    // std::array<std::unique_ptr<Piece>, 16> playerPieces;
+    // TODO(🚀) : use this bool to shorten removed king detection
     // bool                                   didTheyWin = false;
     bool isWhite = true;
 
@@ -14,7 +10,6 @@ public:
     explicit Player(bool isW)
         : isWhite(isW) {}
 
-    std::array<std::unique_ptr<Piece>, 16> playerPieces;
     bool                                   getColor() const { return isWhite; }
     void                                   setColor(bool newColor);
 };
