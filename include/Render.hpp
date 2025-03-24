@@ -1,7 +1,7 @@
 #pragma once
+#include <string>
 
-void render3DObj();
+void render3DObj(std::string const &ObjectPath);
 
-void render3DBoard();
 void render3DPieces();
 void renderSkybox();
