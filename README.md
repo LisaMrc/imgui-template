@@ -41,12 +41,12 @@ All **.cpp** files are into the "src" folder. All **.hpp** files are into the "i
 **Files** all start with capital letter, except main.cpp
 Functions that are used for **debugging** are named debug_functionName
 
-## 5 | Random variables
-1. Event : player switch
-2. Event : leaf falls on board in an empty spot
-3. Event : ORDI/AI player 2
-4. Random sounds (normal law)
-5. Random background music
-6. Fish swimming trajectory at the sides of the board
-7. Random color (you are playing as white or black and the machine sets it for you)
-8. Random animals at the pond / Numbers of animated "jumps" of the pieces until it reaches the target 
+## 6 | Probability laws
+1️⃣ Random Background Music (Uniform law) 🎵
+2️⃣ Player Switch in the Middle of the Game (Bernoulli law) 🔄
+3️⃣ Random Zen Sounds (Geometric law) 🌿
+4️⃣ Scene Setting (Multinomial law) 🌤️
+5️⃣ Leaf Falls on the Board (Poisson law) 🍃
+6️⃣ Drifting Breeze (Hyper geometric law) 🎐
+7️⃣ Meditative Promotion (Binomial law) ⏳
+8️⃣ AI player 2 🐟

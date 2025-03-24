@@ -7,10 +7,9 @@
 
 class Board {
 private:
+public:
     Player white;
     Player black;
-
-public:
     Board()
         : white(true), black(false) {}
     std::vector<std::unique_ptr<Piece>> pieces;
@@ -24,7 +23,6 @@ public:
     bool                                isKingInCheck(bool isWhiteKing);
     Piece*                              selectedPiece = nullptr;
     Player*                             activePlayer  = &white;
-    bool                                whiteTurn     = true;
     bool                                isInCheck     = false;
     bool                                wasWhiteKingRemoved();
     bool                                wasBlackKingRemoved();

@@ -9,8 +9,7 @@ int main() {
         playRandomSong(st);
     });
 
-    app.run(); // Runs the game
+    app.run();
 
-    // When the game ends, the jthread will be destructed, stopping music
     return 0;
 }

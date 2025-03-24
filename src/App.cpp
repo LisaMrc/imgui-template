@@ -3,6 +3,7 @@
 #include "../include/App.hpp"
 #include <imgui.h>
 #include "../include/Board.hpp"
+#include "../include/Math.hpp"
 #include "../include/Render.hpp"
 #include "glad/glad.h"
 #include "quick_imgui/quick_imgui.hpp"
@@ -21,10 +22,11 @@ void App::update()
     board.draw();
     board.debug_removeWhiteKingButton();
     board.debug_removeBlackKingButton();
-    
     displayGameOverScreen();
-
     ImGui::End();
+
+    // render3DObj("../../Assets/Objects/Chessboard.obj");
+    // render3DPieces();
 }
 
 void App::init()
@@ -45,7 +47,6 @@ void App::run()
         [&]() {
             glClearColor(1, 0, 1, 1); // Principal window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            render3DObj("../../Assets/Objects/Rook.obj");
             update();
         }
     );
@@ -84,5 +85,19 @@ void App::displayGameOverScreen()
         ImGui::Text("Black king has been captured. White wins !");
 
         ImGui::End();
+    }
+}
+
+void App::SwitchPlayer()
+{
+    double switchProbability = 0.1; // 10% chance to switch
+
+    if (shouldSwitchPlayer(switchProbability))
+    {
+        board.activePlayer = (board.activePlayer->getColor()) ? &board.black : &board.white;
+
+        std::cout << "⚡ Player SWITCHED! Now it's "
+                  << (board.activePlayer->getColor() ? "White" : "Black")
+                  << "'s turn!" << '\n';
     }
 }

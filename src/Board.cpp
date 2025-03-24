@@ -299,7 +299,7 @@ void Board::draw()
             // Highlight the king if it is in check
             if ((isWhiteInCheck && activeKing && activeKing->row == row && activeKing->col == col) || (isBlackInCheck && activeKing && activeKing->row == row && activeKing->col == col))
             {
-                draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f); // Highlight the king in check
+                draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f);
             }
 
             ImGui::SetCursorScreenPos(min);

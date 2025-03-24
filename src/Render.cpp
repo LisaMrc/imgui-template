@@ -1,10 +1,16 @@
 #include "../include/Render.hpp"
 #include <imgui.h>
 #include <tiny_obj_loader.h>
+#include <cstdlib>
+#include <ctime>
+#include <filesystem>
 #include <iostream>
+#include <vector>
 #include "glad/glad.h"
+#include "miniaudio.h"
+namespace fs = std::filesystem;
 
-void render3DObj(std::string const& ObjectPath)
+void render3DObj(std::string const& ObjectPath, int row, int col)
 {
     static GLuint VAO         = 0;
     static GLuint VBO         = 0;
@@ -41,7 +47,6 @@ void render3DObj(std::string const& ObjectPath)
 
         nb_vertex = vertices.size();
 
-        // OpenGL : Création des buffers
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
 
@@ -58,8 +63,56 @@ void render3DObj(std::string const& ObjectPath)
         initialized = true;
     }
 
-    // Affichage OpenGL
+    // FIXME
+    // Apply transformation before rendering
+    // glm::mat4 model = glm::mat4(1.0f);
+    // model           = glm::translate(model, glm::vec3(row, 0.0f, col)); // Move piece to correct position
+
+    // GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, nb_vertex); // Modifier selon ton modèle
+    glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
     glBindVertexArray(0);
+}
+
+void render3DPieces()
+{
+    const std::string directory = "../../Assets/Objects/Pieces";
+
+    std::vector<std::string> setPaths;
+
+    if (!fs::exists(directory) || !fs::is_directory(directory))
+    {
+        std::cout << "Wrong folder" << '\n';
+        return;
+    }
+
+    for (const auto& entry : fs::directory_iterator(directory))
+    {
+        if (entry.path().extension() == ".obj")
+        {
+            setPaths.push_back(entry.path().string());
+        }
+    }
+
+    if (setPaths.empty())
+    {
+        std::cout << "No objects in the folder" << '\n';
+        return;
+    }
+
+    for (std::string path : setPaths)
+    {
+        // render3DObj(path);
+
+        // Need to change the coordinates ?
+        // // Render pieces
+        // for (auto& piece : Board::pieces)
+        // {
+        //     ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.35f, p.y + piece->row * tile_size + tile_size * 0.35f);
+        //     char   symbol = piece->getSymbol();
+
+        // }
+    }
 }

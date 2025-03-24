@@ -1,12 +1,3 @@
-/*
-Affecter une proba
-uniforme sur chaque case
-
-matrice déterministe a autant de cases que de cases (1e ligne, 1e col)
-Départ col, ligne arrivée
-intersection : proba d'aller d'une case à l'autre
-*/
-
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
@@ -14,6 +5,7 @@ intersection : proba d'aller d'une case à l'autre
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <random>
 #include "miniaudio.h"
 namespace fs = std::filesystem;
 
@@ -60,11 +52,11 @@ while (!stopToken.stop_requested()) { // Check if the thread should stop
         int songIndex = std::rand() % songs.size();
         const std::string selectedSong = songs[songIndex];
 
-        std::cout << "Playing: " << selectedSong << std::endl;
+        std::cout << "Playing: " << selectedSong << '\n';
 
         ma_sound sound;
         if (ma_sound_init_from_file(&engine, selectedSong.c_str(), 0, NULL, NULL, &sound) != MA_SUCCESS) {
-            std::cout << "Error playing file." << std::endl;
+            std::cout << "Error playing file." << '\n';
             continue;
         }
 
@@ -79,5 +71,13 @@ while (!stopToken.stop_requested()) { // Check if the thread should stop
     }
 
     ma_engine_uninit(&engine);
-    std::cout << "Music stopped." << std::endl;
+    std::cout << "Music stopped." << '\n';
+}
+
+bool shouldSwitchPlayer(double probability) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());  
+    std::bernoulli_distribution d(probability);
+
+    return d(gen); // Returns true (switch) or false (don't switch)
 }
