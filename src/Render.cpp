@@ -8,6 +8,7 @@
 #include <vector>
 #include "glad/glad.h"
 #include "miniaudio.h"
+
 namespace fs = std::filesystem;
 
 void render3DObj(std::string const& ObjectPath, int row, int col)
@@ -71,9 +72,9 @@ void render3DObj(std::string const& ObjectPath, int row, int col)
     // GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
     // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
-    glBindVertexArray(0);
+    // glBindVertexArray(VAO);
+    // glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
+    // glBindVertexArray(0);
 }
 
 void render3DPieces()
