@@ -1,5 +1,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#pragma once
 
 class TrackballCamera {
 private:

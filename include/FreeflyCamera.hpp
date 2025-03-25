@@ -2,11 +2,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-enum class CameraMode {
-    Trackball,
-    PieceView
-};
-
 
 class FreeflyCamera {
     private:
