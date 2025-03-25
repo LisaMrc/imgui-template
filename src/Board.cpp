@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "../include/Math.hpp"
 #include "../include/Piece.hpp"
 #include "imgui.h"
 
@@ -315,7 +316,8 @@ void Board::draw()
                     selectedPiece->row = row;
                     selectedPiece->col = col;
                     activePlayer       = activePlayer == &white ? &black : &white;
-                    selectedPiece      = nullptr;
+                    SwitchPlayer(*this);
+                    selectedPiece = nullptr;
                 }
                 else
                 {

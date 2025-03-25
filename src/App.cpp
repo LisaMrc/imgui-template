@@ -3,7 +3,6 @@
 #include "../include/App.hpp"
 #include <imgui.h>
 #include "../include/Board.hpp"
-#include "../include/Math.hpp"
 #include "../include/Render.hpp"
 #include "glad/glad.h"
 #include "quick_imgui/quick_imgui.hpp"
@@ -25,7 +24,7 @@ void App::update()
     displayGameOverScreen();
     ImGui::End();
 
-    // render3DObj("../../Assets/Objects/Chessboard.obj");
+    // render3DObj("../../Assets/Objects/Pieces/Pawn.obj", 0, 0);
     // render3DPieces();
 }
 
@@ -85,19 +84,5 @@ void App::displayGameOverScreen()
         ImGui::Text("Black king has been captured. White wins !");
 
         ImGui::End();
-    }
-}
-
-void App::SwitchPlayer()
-{
-    double switchProbability = 0.1; // 10% chance to switch
-
-    if (shouldSwitchPlayer(switchProbability))
-    {
-        board.activePlayer = (board.activePlayer->getColor()) ? &board.black : &board.white;
-
-        std::cout << "⚡ Player SWITCHED! Now it's "
-                  << (board.activePlayer->getColor() ? "White" : "Black")
-                  << "'s turn!" << '\n';
     }
 }

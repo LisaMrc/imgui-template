@@ -1,11 +1,12 @@
+#include "../include/Math.hpp"
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
 #include <filesystem>
 #include <iostream>
+#include <random>
 #include <thread>
 #include <vector>
-#include <random>
 #include "miniaudio.h"
 namespace fs = std::filesystem;
 
@@ -37,7 +38,7 @@ void playRandomSong(std::stop_token stopToken)
     }
 
     std::srand(std::time(nullptr));
-    int songIndex = std::rand() % songs.size();
+    int               songIndex    = std::rand() % songs.size();
     const std::string selectedSong = songs[songIndex];
 
     ma_engine engine;
@@ -47,15 +48,17 @@ void playRandomSong(std::stop_token stopToken)
         return;
     }
 
-while (!stopToken.stop_requested()) { // Check if the thread should stop
+    while (!stopToken.stop_requested())
+    { // Check if the thread should stop
         std::srand(std::time(nullptr));
-        int songIndex = std::rand() % songs.size();
+        int               songIndex    = std::rand() % songs.size();
         const std::string selectedSong = songs[songIndex];
 
         std::cout << "Playing: " << selectedSong << '\n';
 
         ma_sound sound;
-        if (ma_sound_init_from_file(&engine, selectedSong.c_str(), 0, NULL, NULL, &sound) != MA_SUCCESS) {
+        if (ma_sound_init_from_file(&engine, selectedSong.c_str(), 0, NULL, NULL, &sound) != MA_SUCCESS)
+        {
             std::cout << "Error playing file." << '\n';
             continue;
         }
@@ -63,7 +66,8 @@ while (!stopToken.stop_requested()) { // Check if the thread should stop
         ma_sound_start(&sound);
 
         // Wait for song to finish OR stop request
-        while (!stopToken.stop_requested() && ma_sound_is_playing(&sound)) {
+        while (!stopToken.stop_requested() && ma_sound_is_playing(&sound))
+        {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
 
@@ -74,10 +78,25 @@ while (!stopToken.stop_requested()) { // Check if the thread should stop
     std::cout << "Music stopped." << '\n';
 }
 
-bool shouldSwitchPlayer(double probability) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());  
+bool shouldSwitchPlayer(double probability)
+{
+    static std::random_device   rd;
+    static std::mt19937         gen(rd());
     std::bernoulli_distribution d(probability);
 
-    return d(gen); // Returns true (switch) or false (don't switch)
+    return d(gen);
+}
+
+void SwitchPlayer(Board& board)
+{
+    double switchProbability = 0.1; // 10% chance to switch
+
+    if (shouldSwitchPlayer(switchProbability))
+    {
+        board.activePlayer = (board.activePlayer->getColor()) ? &board.black : &board.white;
+
+        std::cout << "⚡ Player SWITCHED! Now it's "
+                  << (board.activePlayer->getColor() ? "White" : "Black")
+                  << "'s turn!" << '\n';
+    }
 }

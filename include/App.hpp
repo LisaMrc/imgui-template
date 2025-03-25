@@ -16,8 +16,6 @@ public:
 
     void displayGameOverScreen();
 
-    void SwitchPlayer();
-
 private:
     int             RoundNbr = 0;
     Board           board;
