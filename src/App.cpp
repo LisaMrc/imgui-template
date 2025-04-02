@@ -40,15 +40,20 @@ void App::run()
     quick_imgui::loop(
         "Zen Chess",
         {
-            .init = [&]() {
-                glEnable(GL_DEPTH_TEST); // Permet le rendu 3D correct
-            },
-            .loop         = [&]() {
-            glClearColor(1, 0, 1, 1); // Principal window
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            update(); },
-            // .mouse_button_callback = [&](int key, int scancode, int action, int mods) 
+            .init = [&]() 
             {
+                glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
+            },
+            .loop = [&]() 
+            {
+                glClearColor(1, 0, 1, 1); // Principal window
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                update(); 
+            },
+
+            .mouse_button_callback = [&](int button, int action, int mods) 
+            {
+                // Handle mouse clicks if needed
             }
         }
     );

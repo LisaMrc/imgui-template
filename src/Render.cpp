@@ -4,14 +4,25 @@
 #include <cstdlib>
 #include <ctime>
 #include <filesystem>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <vector>
 #include "glad/glad.h"
 #include "miniaudio.h"
-
 namespace fs = std::filesystem;
 
-void render3DObj(std::string const& ObjectPath, int row, int col)
+// Converts board coordinates (row, col) to 3D world space
+glm::vec3 convertTo3D(int row, int col)
+{
+    float squareSize = 1.0f;                      // Adjust this based on your board scale
+    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
+    float z          = (row - 3.5f) * squareSize;
+    return glm::vec3(x, 0.0f, z);
+}
+
+void render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram)
 {
     static GLuint VAO         = 0;
     static GLuint VBO         = 0;
@@ -20,14 +31,12 @@ void render3DObj(std::string const& ObjectPath, int row, int col)
 
     if (!initialized)
     {
-        const std::string&               inputfile = ObjectPath;
         tinyobj::attrib_t                attrib;
         std::vector<tinyobj::shape_t>    shapes;
         std::vector<tinyobj::material_t> materials;
-        std::string                      warn;
-        std::string                      err;
+        std::string                      warn, err;
 
-        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
+        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, ObjectPath.c_str());
 
         if (!ret)
         {
@@ -46,7 +55,7 @@ void render3DObj(std::string const& ObjectPath, int row, int col)
             }
         }
 
-        nb_vertex = vertices.size();
+        nb_vertex = vertices.size() / 3;
 
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
@@ -64,17 +73,18 @@ void render3DObj(std::string const& ObjectPath, int row, int col)
         initialized = true;
     }
 
-    // FIXME
-    // Apply transformation before rendering
-    // glm::mat4 model = glm::mat4(1.0f);
-    // model           = glm::translate(model, glm::vec3(row, 0.0f, col)); // Move piece to correct position
+    // **Apply transformation before rendering**
+    glm::mat4 model = glm::mat4(1.0f);
+    model           = glm::translate(model, convertTo3D(row, col)); // Move piece to correct position
 
-    // GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-    // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    glUseProgram(shaderProgram);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-    // glBindVertexArray(VAO);
-    // glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
-    // glBindVertexArray(0);
+    // **Render the piece**
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
+    glBindVertexArray(0);
 }
 
 void render3DPieces()
