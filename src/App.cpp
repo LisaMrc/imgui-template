@@ -1,11 +1,18 @@
 #pragma once
 
 #include "../include/App.hpp"
-#include <imgui.h>
 #include "../include/Board.hpp"
 #include "../include/Render.hpp"
 #include "glad/glad.h"
 #include "quick_imgui/quick_imgui.hpp"
+
+void App::init()
+{
+    board.init();
+    
+    // FIXME Dang, it's ugly. Fix this mess please
+    renderEngine.loadShader("../Shaders/vertex_shader.glsl", "../Shaders/fragment_shader.glsl");
+}
 
 void App::update()
 {
@@ -24,39 +31,8 @@ void App::update()
     displayGameOverScreen();
     ImGui::End();
 
-    render3DObj("../../Assets/Objects/Pieces/Pawn.obj", 0, 0);
+    // renderEngine.render3DObj("../../Assets/Objects/Pieces/Pawn.obj", 0, 0, renderEngine.shaderProgram);
     // render3DPieces();
-}
-
-void App::init()
-{
-    board.init();
-}
-
-void App::run()
-{
-    init();
-
-    quick_imgui::loop(
-        "Zen Chess",
-        {
-            .init = [&]() 
-            {
-                glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
-            },
-            .loop = [&]() 
-            {
-                glClearColor(1, 0, 1, 1); // Principal window
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                update(); 
-            },
-
-            .mouse_button_callback = [&](int button, int action, int mods) 
-            {
-                // Handle mouse clicks if needed
-            }
-        }
-    );
 }
 
 void App::handleEvent()
@@ -93,4 +69,30 @@ void App::displayGameOverScreen()
 
         ImGui::End();
     }
+}
+
+void App::run()
+{
+    init();
+
+    quick_imgui::loop(
+        "Zen Chess",
+        {
+            .init = [&]() 
+            {
+                glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
+            },
+            .loop = [&]() 
+            {
+                glClearColor(1, 0, 1, 1); // Principal window
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                update(); 
+            },
+
+            .mouse_button_callback = [&](int button, int action, int mods) 
+            {
+                // Handle mouse clicks if needed
+            }
+        }
+    );
 }

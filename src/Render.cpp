@@ -13,8 +13,44 @@
 #include "miniaudio.h"
 namespace fs = std::filesystem;
 
+GLuint RenderEngine::loadShader(const char* vertexPath, const char* fragmentPath)
+{
+    // // Read shader source files
+    // std::ifstream vShaderFile(vertexPath);
+    // std::ifstream fShaderFile(fragmentPath);
+    // std::stringstream vShaderStream, fShaderStream;
+    // vShaderStream << vShaderFile.rdbuf();
+    // fShaderStream << fShaderFile.rdbuf();
+    // std::string vertexCode = vShaderStream.str();
+    // std::string fragmentCode = fShaderStream.str();
+    // const char* vShaderSource = vertexCode.c_str();
+    // const char* fShaderSource = fragmentCode.c_str();
+
+    // // Compile vertex shader
+    // GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    // glShaderSource(vertexShader, 1, &vShaderSource, NULL);
+    // glCompileShader(vertexShader);
+
+    // // Compile fragment shader
+    // GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    // glShaderSource(fragmentShader, 1, &fShaderSource, NULL);
+    // glCompileShader(fragmentShader);
+
+    // // Link shaders
+    // GLuint shaderProgram = glCreateProgram();
+    // glAttachShader(shaderProgram, vertexShader);
+    // glAttachShader(shaderProgram, fragmentShader);
+    // glLinkProgram(shaderProgram);
+
+    // // Cleanup
+    // glDeleteShader(vertexShader);
+    // glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}
+
 // Converts board coordinates (row, col) to 3D world space
-glm::vec3 convertTo3D(int row, int col)
+glm::vec3 RenderEngine::convertTo3D(int row, int col)
 {
     float squareSize = 1.0f;                      // Adjust this based on your board scale
     float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
@@ -22,7 +58,7 @@ glm::vec3 convertTo3D(int row, int col)
     return glm::vec3(x, 0.0f, z);
 }
 
-void render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram)
+void RenderEngine::render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram)
 {
     static GLuint VAO         = 0;
     static GLuint VBO         = 0;
@@ -87,7 +123,7 @@ void render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderP
     glBindVertexArray(0);
 }
 
-void render3DPieces()
+void RenderEngine::render3DPieces()
 {
     const std::string directory = "../../Assets/Objects/Pieces";
 
