@@ -8,7 +8,7 @@
 
 class RenderEngine {
 public:
-    GLuint    loadShader(const char* vertexPath, const char* fragmentPath);
+    void      loadShader();
     glm::vec3 convertTo3D(int row, int col);
     void      render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram);
     void      render3DPieces();

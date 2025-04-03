@@ -12,44 +12,45 @@
 #include "glad/glad.h"
 #include "miniaudio.h"
 namespace fs = std::filesystem;
+#include <fstream>
 
-GLuint RenderEngine::loadShader(const char* vertexPath, const char* fragmentPath)
+void RenderEngine::loadShader()
 {
-    // // Read shader source files
-    // std::ifstream vShaderFile(vertexPath);
-    // std::ifstream fShaderFile(fragmentPath);
-    // std::stringstream vShaderStream, fShaderStream;
-    // vShaderStream << vShaderFile.rdbuf();
-    // fShaderStream << fShaderFile.rdbuf();
-    // std::string vertexCode = vShaderStream.str();
-    // std::string fragmentCode = fShaderStream.str();
-    // const char* vShaderSource = vertexCode.c_str();
-    // const char* fShaderSource = fragmentCode.c_str();
+    // Read shader source files
+    std::ifstream     vShaderFile("../Shaders/vertex_shader.glsl");
+    std::ifstream     fShaderFile("../Shaders/fragment_shader.glsl");
+    std::stringstream vShaderStream;
+    std::stringstream fShaderStream;
+    vShaderStream << vShaderFile.rdbuf();
+    fShaderStream << fShaderFile.rdbuf();
+    std::string vertexCode    = vShaderStream.str();
+    std::string fragmentCode  = fShaderStream.str();
+    const char* vShaderSource = vertexCode.c_str();
+    const char* fShaderSource = fragmentCode.c_str();
 
-    // // Compile vertex shader
-    // GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    // glShaderSource(vertexShader, 1, &vShaderSource, NULL);
-    // glCompileShader(vertexShader);
+    // Compile vertex shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vShaderSource, nullptr);
+    glCompileShader(vertexShader);
 
-    // // Compile fragment shader
-    // GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    // glShaderSource(fragmentShader, 1, &fShaderSource, NULL);
-    // glCompileShader(fragmentShader);
+    // Compile fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fShaderSource, nullptr);
+    glCompileShader(fragmentShader);
 
-    // // Link shaders
-    // GLuint shaderProgram = glCreateProgram();
-    // glAttachShader(shaderProgram, vertexShader);
-    // glAttachShader(shaderProgram, fragmentShader);
-    // glLinkProgram(shaderProgram);
+    // Link shaders
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
 
-    // // Cleanup
-    // glDeleteShader(vertexShader);
-    // glDeleteShader(fragmentShader);
+    // Cleanup
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
-    return shaderProgram;
+    RenderEngine::shaderProgram = shaderProgram;
 }
 
-// Converts board coordinates (row, col) to 3D world space
 glm::vec3 RenderEngine::convertTo3D(int row, int col)
 {
     float squareSize = 1.0f;                      // Adjust this based on your board scale

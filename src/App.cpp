@@ -9,9 +9,7 @@
 void App::init()
 {
     board.init();
-    
-    // FIXME Dang, it's ugly. Fix this mess please
-    renderEngine.loadShader("../Shaders/vertex_shader.glsl", "../Shaders/fragment_shader.glsl");
+    renderEngine.loadShader();
 }
 
 void App::update()
@@ -77,22 +75,16 @@ void App::run()
 
     quick_imgui::loop(
         "Zen Chess",
-        {
-            .init = [&]() 
-            {
-                glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
-            },
-            .loop = [&]() 
-            {
+        {.init = [&]() {
+             glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
+         },
+         .loop = [&]() {
                 glClearColor(1, 0, 1, 1); // Principal window
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                update(); 
-            },
+                update(); },
 
-            .mouse_button_callback = [&](int button, int action, int mods) 
-            {
-                // Handle mouse clicks if needed
-            }
-        }
+         .mouse_button_callback = [&](int button, int action, int mods) {
+             // Handle mouse clicks if needed
+         }}
     );
 }
