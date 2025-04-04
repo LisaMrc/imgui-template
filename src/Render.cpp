@@ -1,10 +1,16 @@
 #include "../include/Render.hpp"
 #include <imgui.h>
 #include <tiny_obj_loader.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include "../include/App.hpp"
+#include "../include/ShaderLoader.hpp"
 #include "glad/glad.h"
 
-void display3DObj()
+
+void App::display3DObj()
 {
     static GLuint VAO         = 0;
     static GLuint VBO         = 0;
@@ -58,8 +64,28 @@ void display3DObj()
         initialized = true;
     }
 
+    camera.init_mat_proj();
+
+    glmax::Shader* shader = manager.getShaderLoader()->getProgram();
+    shader->use();
+    shader->set_uniform_matrix_4fv("uMVPMatrix", camera.get_MVP());
+    shader->set_uniform_matrix_4fv("uMVMatrix", camera.get_MVMatrix());
+    shader->set_uniform_matrix_4fv("uNormalMatrix", camera.get_NormalMatrix());
+
     // Affichage OpenGL
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, nb_vertex); // Modifier selon ton modèle
     glBindVertexArray(0);
 }
+
+// void Renderer::applyViewMatrix(const glm::mat4& viewMatrix, GLuint shaderProgram)
+// {
+//     glUseProgram(shaderProgram);
+//     GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+//     if (viewLoc == -1)
+//     {
+//         std::cerr << "Uniform 'view' not found in shader!" << std::endl;
+//         return;
+//     }
+//     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+// }

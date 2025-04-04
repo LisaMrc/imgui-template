@@ -16,6 +16,7 @@ public:
     void handleEvent();
     void displayGameOverScreen();
     void handleInput();
+    void display3DObj();
 
 private:
     int    RoundNbr = 0;
