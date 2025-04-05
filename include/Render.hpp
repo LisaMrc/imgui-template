@@ -10,20 +10,19 @@
 
 class RenderEngine {
 public:
-    glm::mat4 viewMatrix; // Camera view matrix
-public:
-    std::vector<GLuint> loadedMeshes; // Stocker les IDs des VAOs des objets
     GLuint              shaderProgram{};
+    std::vector<GLuint> loadedMeshes; // Stocker les IDs des VAOs des objets
+    glm::mat4           viewMatrix;
 
-    void      loadMeshes();
     void      loadShader();
+    void      loadMeshes();
+    void      setViewMatrix(const glm::mat4& view);
     glm::vec3 convertTo3D(int row, int col);
     void      render3DObj(const std::string& ObjectPath, int row, int col);
     void      render3DPieces();
     void      render3DBoard();
     void      renderSkybox();
     void      renderUpdate();
-    void      setViewMatrix(const glm::mat4& view);
 };
 
 class obj3D {
