@@ -56,19 +56,14 @@ void Board::init()
 
 bool Board::IsValidMove(Piece* piece, int row, int col)
 {
-    if (!piece || piece->isWhite != activePlayer->getColor())
+    if (!piece)
         return false;
 
     Piece* targetPiece = getPieceAt(row, col);
 
-    if (targetPiece != nullptr && targetPiece->isWhite == activePlayer->getColor())
-    {
-        return false;
-    }
-
     if (!isPathClear(piece, row, col) && piece->getSymbol() != 'N')
     {
-        std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
+        // std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
         return false;
     }
 
@@ -157,35 +152,99 @@ void Board::performCastle(King* king, int destRow, int destCol)
     rook->firstMove = false;
 }
 
-bool Board::isKingInCheck(bool isWhiteKing)
+bool Board::isKingInCheck(King* king)
 {
-    Piece* king = nullptr;
+    if (!king)
+        return false;
+
+    bool isKingAttacked = false;
+
     for (auto& piece : pieces)
     {
-        if (piece->getSymbol() == 'K' && piece->isWhite == isWhiteKing)
+        if (piece->isWhite != king->isWhite)
         {
-            king = piece.get();
-            break;
+            if (IsValidMove(piece.get(), king->row, king->col))
+            {
+                isKingAttacked = true;
+            }
         }
     }
 
-    if (!king)
-    {
-        std::cout << "Error: King not found!\n";
-        return false;
-    }
+    return isKingAttacked;
+}
 
-    for (auto& piece : pieces)
+bool Board::highlightSquares(Piece* selectedPiece, bool isWhite, int row, int col)
+{
+    if (selectedPiece->getSymbol() == 'P')
     {
-        if (piece->isWhite != isWhiteKing)
+        int direction = selectedPiece->isWhite ? -1 : 1;
+
+        // Forward movement
+        if (selectedPiece->firstMove)
         {
-            if (IsValidMove(piece.get(), king->row, king->col))
+            if (row == selectedPiece->row + 2 * direction && col == selectedPiece->col)
+            {
+                return true;
+            }
+        }
+
+        if (row == selectedPiece->row + direction && col == selectedPiece->col)
+        {
+            return true;
+        }
+
+        // Diagonal captures
+        if (row == selectedPiece->row + direction && (col == selectedPiece->col + 1 || col == selectedPiece->col - 1))
+        {
+            Piece* target = getPieceAt(row, col);
+            if (target && target->isWhite != selectedPiece->isWhite)
             {
                 return true;
             }
         }
     }
-
+    if (selectedPiece->getSymbol() == 'R')
+    {
+        if ((selectedPiece->row == row || selectedPiece->col == col) && isPathClear(selectedPiece, row, col))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getSymbol() == 'N')
+    {
+        int dx = abs(selectedPiece->row - row);
+        int dy = abs(selectedPiece->col - col);
+        if ((dx == 2 && dy == 1) || (dx == 1 && dy == 2))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getSymbol() == 'B')
+    {
+        if (abs(selectedPiece->row - row) == abs(selectedPiece->col - col) && isPathClear(selectedPiece, row, col))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getSymbol() == 'Q')
+    {
+        if (((selectedPiece->row == row || selectedPiece->col == col) || // Rook move
+             (abs(selectedPiece->row - row) == abs(selectedPiece->col - col)))
+            && // Bishop move
+            isPathClear(selectedPiece, row, col))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getSymbol() == 'K')
+    {
+        int dx = abs(selectedPiece->row - row);
+        int dy = abs(selectedPiece->col - col);
+        if (dx <= 1 && dy <= 1)
+        {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -204,32 +263,39 @@ void Board::draw()
     ImU32 highlight_color = IM_COL32(0, 255, 0, 255);
     ImU32 check_color     = IM_COL32(255, 0, 0, 255);
 
-    bool isWhiteInCheck = isKingInCheck(false);
-    bool isBlackInCheck = isKingInCheck(true);
+    // if (activePlayer->getColor() == 1)
+    // {
+    //     isWhiteInCheck = isKingInCheck(false);
+    //     // isWhiteInCheck = false;
+    //     std::cout << "Here\n";
+    // }
+    // else
+    // {
+    //     isBlackInCheck = isKingInCheck(true);
+    //     // isBlackInCheck = false;
+    // }
+    // std::cout << isKingInCheck() << "\n";
 
-    Piece* activeKing = nullptr;
-    if (activePlayer == &white)
+    std::vector<Piece*> kings;
+
+    if (kings.size() < 2)
     {
-        for (auto& piece : pieces)
-        {
-            if (piece->getSymbol() == 'K' && piece->isWhite)
-            {
-                activeKing = piece.get();
-                break;
-            }
-        }
+        kings.emplace_back(pieces[pieces.size() - 1].get());
+        kings.emplace_back(pieces[pieces.size() - 2].get());
     }
-    else
-    {
-        for (auto& piece : pieces)
-        {
-            if (piece->getSymbol() == 'K' && !piece->isWhite)
-            {
-                activeKing = piece.get();
-                break;
-            }
-        }
-    }
+    // Piece*             whiteKing = nullptr;
+    // Piece*             blackKing = nullptr;
+
+    // if (activePlayer == &white)
+    // {
+    //     whiteKing = pieces[pieces.size() - 1].get();
+    // }
+    // else
+    // {
+    //     blackKing = pieces[pieces.size() - 2].get();
+    // }
+
+    // std::cout << isKingInCheck(dynamic_cast<King*>(activeKing)) << "\n";
 
     for (int row = 0; row < 8; ++row)
     {
@@ -239,31 +305,25 @@ void Board::draw()
             ImVec2 max(min.x + tile_size, min.y + tile_size);
             draw_list->AddRectFilled(min, max, (row + col) % 2 == 0 ? lightSquare : darkSquare);
 
-            if (selectedPiece && selectedPiece->row == row && selectedPiece->col == col)
-            {
-                draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
-            }
-
-            // Highlight the king if it is in check
-            if ((isWhiteInCheck && activeKing && activeKing->row == row && activeKing->col == col) || (isBlackInCheck && activeKing && activeKing->row == row && activeKing->col == col))
-            {
-                draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f); // Highlight the king in check
-            }
-
             ImGui::SetCursorScreenPos(min);
             if (ImGui::Button(("##tile" + std::to_string(row) + std::to_string(col)).c_str(), ImVec2(tile_size, tile_size)))
             {
-                if (selectedPiece && IsValidMove(selectedPiece, row, col))
+                if (selectedPiece && IsValidMove(selectedPiece, row, col) && selectedPiece->isWhite == activePlayer->getColor())
                 {
                     Piece* targetPiece = getPieceAt(row, col);
                     if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
                     {
                         removePiece(targetPiece);
                     }
-                    selectedPiece->row = row;
-                    selectedPiece->col = col;
-                    activePlayer       = activePlayer == &white ? &black : &white;
-                    selectedPiece      = nullptr;
+                    if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
+                    {
+                        selectedPiece->row = row;
+                        selectedPiece->col = col;
+                        if (selectedPiece->getSymbol() == 'P')
+                            selectedPiece->firstMove = false;
+                        activePlayer  = activePlayer == &white ? &black : &white;
+                        selectedPiece = nullptr;
+                    }
                 }
                 else
                 {
@@ -275,6 +335,42 @@ void Board::draw()
                             break;
                         }
                     }
+                }
+            }
+            Piece* targetPiece = getPieceAt(row, col);
+
+            if (selectedPiece)
+            {
+                if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
+                {
+                    if (selectedPiece->isWhite)
+                    {
+                        if (highlightSquares(selectedPiece, true, row, col))
+                        {
+                            draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
+                        }
+                    }
+                    else
+                    {
+                        if (highlightSquares(selectedPiece, false, row, col))
+                        {
+                            draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
+                        }
+                    }
+                }
+                if (selectedPiece->row == row && selectedPiece->col == col)
+                {
+                    draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
+                }
+            }
+
+            // std::cout << kingInCheck << "\n";
+            // Highlight the king if it is in check
+            for (auto& king : kings)
+            {
+                if (isKingInCheck(dynamic_cast<King*>(king)) && king && king->row == row && king->col == col)
+                {
+                    draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f); // Highlight the king in check
                 }
             }
         }
