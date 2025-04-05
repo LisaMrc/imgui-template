@@ -9,7 +9,7 @@
 void App::init()
 {
     board.init();
-    renderEngine.loadShader();
+    // renderEngine.loadShader();
 }
 
 void App::update()
