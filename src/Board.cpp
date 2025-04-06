@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "../include/Binomial.hpp"
 #include "../include/Piece.hpp"
 #include "imgui.h"
 
@@ -360,57 +359,36 @@ void Board::promotePawn(char newSymbol)
 
 void Board::showPromotionWindow()
 {
-    std::cout << "Here\n";
-
     if (ImGui::BeginPopupModal(".", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        if (binomialResult > 0)
-        {
-            ImGui::PopFont();
-
-            ImGui::PushFont(defaultFont);
-
-            static const std::vector<std::string> quotes = {
-                "Believe in your move.",
-                "Every square matters.",
-                "Even the king started as a pawn.",
-                "Patience is power.",
-                "Think ahead. Always."
-            };
-
-            static int idx = rand() % quotes.size();
-            ImGui::Text("%s", quotes[idx].c_str());
-
-            ImGui::PopFont();
-
-            ImGui::PushFont(customFont);
-        }
+        if (binomial.result > 0)
+            binomial.printQuote(defaultFont, customFont);
 
         if (ImGui::Button("q"))
         {
             promotePawn('Q');
-            didBinomial = false;
+            binomial.done = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("r"))
         {
             promotePawn('R');
-            didBinomial = false;
+            binomial.done = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("b"))
         {
             promotePawn('B');
-            didBinomial = false;
+            binomial.done = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("h"))
         {
             promotePawn('N');
-            didBinomial = false;
+            binomial.done = false;
             ImGui::CloseCurrentPopup();
         }
 
@@ -498,10 +476,10 @@ void Board::draw()
         promotionTargetRow = promotedPawn->row;
         promotionTargetCol = promotedPawn->col;
         ImGui::OpenPopup(".");
-        if (!didBinomial)
+        if (!binomial.done)
         {
-            didBinomial    = true;
-            binomialResult = binom(engine);
+            binomial.done   = true;
+            binomial.result = binomial.dist(binomial.engine);
         }
         showPromotionWindow();
     }

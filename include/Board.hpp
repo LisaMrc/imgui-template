@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <memory>
 #include <vector>
+#include "Math.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
 
@@ -60,4 +61,6 @@ private:
     ImU32 darkSquare;
     ImU32 highlight_color;
     ImU32 check_color;
+
+    Binomial binomial;
 };
