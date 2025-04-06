@@ -17,7 +17,10 @@ Shader::~Shader()
 
 void Shader::use() const
 {
-    glUseProgram(m_programID);
+    if (m_programID != 0)
+        glUseProgram(m_programID);
+    else
+        std::cerr << "Shader non chargé : appel à use() ignoré" << std::endl;
 }
 
 GLuint Shader::getID() const
@@ -27,8 +30,15 @@ GLuint Shader::getID() const
 
 void Shader::load_shader(const std::string& vertexPath, const std::string& fragmentPath)
 {
-    GLuint vertexShader   = compile_shader(vertexPath, GL_VERTEX_SHADER);
+    GLuint vertexShader = compile_shader(vertexPath, GL_VERTEX_SHADER);
+    if (vertexShader == 0)
+        return;
     GLuint fragmentShader = compile_shader(fragmentPath, GL_FRAGMENT_SHADER);
+    if (fragmentShader == 0)
+    {
+        glDeleteShader(vertexShader);
+        return;
+    }
 
     m_programID = glCreateProgram();
     glAttachShader(m_programID, vertexShader);
@@ -106,6 +116,7 @@ GLuint Shader::compile_shader(const std::string& path, GLenum type)
         std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n"
                   << path << "\n"
                   << infoLog << std::endl;
+        return 0; // ⛔ important
     }
 
     return shader;

@@ -19,9 +19,10 @@ public:
     void   set_uniform_3fv(const std::string& name, const glm::vec3& value);
     void   set_uniform_1f(const std::string& name, float value);
     void   set_uniform_1i(const std::string& name, int value);
+    bool   is_valid() const { return m_programID != 0; }
 
 private:
-    GLuint                                 m_programID;
+    GLuint                                 m_programID = 0;
     std::unordered_map<std::string, GLint> m_uniform_cache;
     //
     GLuint               compile_shader(const std::string& path, GLenum type);

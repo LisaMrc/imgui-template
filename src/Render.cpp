@@ -9,7 +9,6 @@
 #include "../include/ShaderLoader.hpp"
 #include "glad/glad.h"
 
-
 void App::display3DObj()
 {
     static GLuint VAO         = 0;
@@ -65,8 +64,14 @@ void App::display3DObj()
     }
 
     camera.init_mat_proj();
+    // skybox.draw(skybox.shaderProgram, view, projection);
 
-    glmax::Shader* shader = manager.getShaderLoader()->getProgram();
+    if (!shader)
+    {
+        std::cerr << "Shader not set!" << std::endl;
+        return;
+    }
+
     shader->use();
     shader->set_uniform_matrix_4fv("uMVPMatrix", camera.get_MVP());
     shader->set_uniform_matrix_4fv("uMVMatrix", camera.get_MVMatrix());
