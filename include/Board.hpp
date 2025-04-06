@@ -31,6 +31,8 @@ public:
     void                                promotePawn(char newSymbol);
     bool                                checkPromotion();
     void                                showPromotionWindow();
+    ImFont*                             getFont();
+    void                                setFont(ImFont*);
 
 private:
     Piece*              selectedPiece = nullptr;
@@ -38,11 +40,13 @@ private:
     bool                whiteTurn     = true;
     std::vector<Piece*> kings;
 
-    bool    isInCheck          = false;
-    bool    isPromotionPending = false;
-    int     promotionTargetRow, promotionTargetCol;
-    Piece*  promotedPawn = nullptr;
-    ImFont* customFont   = nullptr;
+    bool   isInCheck          = false;
+    bool   isPromotionPending = false;
+    int    promotionTargetRow, promotionTargetCol;
+    Piece* promotedPawn = nullptr;
+
+    ImFont* customFont  = nullptr;
+    ImFont* defaultFont = nullptr;
 
     ImDrawList* draw_list;
     ImVec2      window_pos;

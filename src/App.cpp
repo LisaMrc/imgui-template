@@ -6,7 +6,7 @@
 
 void App::update()
 {
-    ImGui::PushFont(customFont);
+    ImGui::PushFont(board.getFont());
 
     ImGui::Begin("Chess");
     board.draw();
@@ -23,7 +23,6 @@ void App::init()
     ImGui::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO();
-    customFont  = io.Fonts->AddFontFromFileTTF("../../font/CHEQ_TT.TTF", 40.0f);
-
+    board.setFont(io.Fonts->AddFontFromFileTTF("../../font/CHEQ_TT.TTF", 40.0f));
     board.init();
 }

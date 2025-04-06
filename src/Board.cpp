@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "../include/Binomial.hpp"
 #include "../include/Piece.hpp"
 #include "imgui.h"
 
@@ -66,6 +67,9 @@ void Board::init()
         kings.emplace_back(pieces[pieces.size() - 1].get());
         kings.emplace_back(pieces[pieces.size() - 2].get());
     }
+
+    ImGuiIO& io = ImGui::GetIO();
+    defaultFont = io.Fonts->AddFontFromFileTTF("../../font/ROBOTO.ttf", 20.0f);
 }
 
 void Board::move(int row, int col)
@@ -356,29 +360,57 @@ void Board::promotePawn(char newSymbol)
 
 void Board::showPromotionWindow()
 {
+    std::cout << "Here\n";
+
     if (ImGui::BeginPopupModal(".", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
+        if (binomialResult > 0)
+        {
+            ImGui::PopFont();
+
+            ImGui::PushFont(defaultFont);
+
+            static const std::vector<std::string> quotes = {
+                "Believe in your move.",
+                "Every square matters.",
+                "Even the king started as a pawn.",
+                "Patience is power.",
+                "Think ahead. Always."
+            };
+
+            static int idx = rand() % quotes.size();
+            ImGui::Text("%s", quotes[idx].c_str());
+
+            ImGui::PopFont();
+
+            ImGui::PushFont(customFont);
+        }
+
         if (ImGui::Button("q"))
         {
             promotePawn('Q');
+            didBinomial = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("r"))
         {
             promotePawn('R');
+            didBinomial = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("b"))
         {
             promotePawn('B');
+            didBinomial = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("h"))
         {
             promotePawn('N');
+            didBinomial = false;
             ImGui::CloseCurrentPopup();
         }
 
@@ -416,6 +448,16 @@ void Board::update(int row, int col)
     {
         move(row, col);
     }
+}
+
+ImFont* Board::getFont()
+{
+    return customFont;
+}
+
+void Board::setFont(ImFont* font)
+{
+    customFont = font;
 }
 
 void Board::draw()
@@ -456,6 +498,11 @@ void Board::draw()
         promotionTargetRow = promotedPawn->row;
         promotionTargetCol = promotedPawn->col;
         ImGui::OpenPopup(".");
+        if (!didBinomial)
+        {
+            didBinomial    = true;
+            binomialResult = binom(engine);
+        }
         showPromotionWindow();
     }
 

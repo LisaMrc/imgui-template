@@ -15,6 +15,4 @@ private:
     // Player  playerWhite, playerBlack;
     // Player* whoPlays = &playerWhite;
     Board board;
-
-    ImFont* customFont = nullptr;
 };
