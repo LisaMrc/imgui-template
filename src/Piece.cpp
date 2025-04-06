@@ -15,7 +15,7 @@ bool King::canCastle(int destRow, int destCol)
     int rookCol = isKingside ? 7 : 0;
 
     Piece* rook = board->getPieceAt(row, rookCol);
-    if (!rook || rook->getSymbol() != 'R' || !rook->firstMove)
+    if (!rook || rook->getType() != 'R' || !rook->firstMove)
         return false;
 
     int direction = (isKingside) ? 1 : -1;
