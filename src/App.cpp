@@ -31,7 +31,6 @@ void App::update()
     ImGui::End();
 
     // renderEngine.render3DObj("../../Assets/Objects/Pawn.obj", 0, 0);
-    // render3DPieces();
 }
 
 void App::handleEvent()
