@@ -9,7 +9,8 @@
 void App::init()
 {
     board.init();
-    // renderEngine.loadShader();
+    renderEngine.loadShader();
+    // renderEngine.loadMeshes();
 }
 
 void App::update()
@@ -71,13 +72,11 @@ void App::displayGameOverScreen()
 
 void App::run()
 {
-    init();
-
     quick_imgui::loop(
         "Zen Chess",
         {.init = [&]() {
-             glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
-         },
+            glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
+            init(); },
          .loop = [&]() {
                 glClearColor(1, 0, 1, 1); // Principal window
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
