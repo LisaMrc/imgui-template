@@ -1,8 +1,6 @@
 #include "../include/Render.hpp"
 #include <imgui.h>
 #include <tiny_obj_loader.h>
-#include <cstdlib>
-#include <ctime>
 #include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -90,146 +88,156 @@ void RenderEngine::loadShader()
     std::cout << "Shaders : loaded" << '\n';
 }
 
-// void RenderEngine::loadMeshes()
-// {
-//     const std::string objFolder = "../Assets/Objects";
+void RenderEngine::loadMeshes()
+{
+    const std::string objFolder = "../../Assets/Objects";
 
-//     for (const auto& entry : std::filesystem::directory_iterator(objFolder))
-//     {
-//         if (entry.path().extension() != ".obj") continue;
+    if (!std::filesystem::exists(objFolder))
+    {
+        std::cerr << "Directory not found: " << objFolder << '\n';
+        return;
+    }
 
-//         tinyobj::attrib_t attrib;
-//         std::vector<tinyobj::shape_t> shapes;
-//         std::vector<tinyobj::material_t> materials;
-//         std::string warn, err;
+    for (const auto& entry : std::filesystem::directory_iterator(objFolder))
+    {
+        if (entry.path().extension() != ".obj")
+            continue;
 
-//         bool ret = tinyobj::LoadObj(
-//             &attrib, &shapes, &materials, &warn, &err,
-//             entry.path().string().c_str(), nullptr, true
-//         );
+        tinyobj::attrib_t                attrib;
+        std::vector<tinyobj::shape_t>    shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string                      warn;
+        std::string                      err;
 
-//         if (!ret)
-//         {
-//             std::cerr << "Failed to load OBJ: " << entry.path() << "\n" << err << '\n';
-//             continue;
-//         }
+        bool ret = tinyobj::LoadObj(
+            &attrib, &shapes, &materials, &warn, &err,
+            entry.path().string().c_str(), nullptr, true
+        );
 
-//         // std::vector<float> vertices;
-//         // std::vector<GLuint> indices;
-//         // GLuint indexOffset = 0;
+        if (!ret)
+        {
+            std::cerr << "Failed to load OBJ: " << entry.path() << "\n"
+                      << err << '\n';
+            continue;
+        }
 
-//         // for (const auto& shape : shapes)
-//         // {
-//         //     for (const auto& idx : shape.mesh.indices)
-//         //     {
-//         //         vertices.push_back(attrib.vertices[3 * idx.vertex_index + 0]);
-//         //         vertices.push_back(attrib.vertices[3 * idx.vertex_index + 1]);
-//         //         vertices.push_back(attrib.vertices[3 * idx.vertex_index + 2]);
-//         //         indices.push_back(indexOffset++);
-//         //     }
-//         // }
+        std::vector<float>  vertices;
+        std::vector<GLuint> indices;
+        GLuint              indexOffset = 0;
 
-//         // // Setup OpenGL buffers
-//         // VAO vao;
-//         // vao.init();
-//         // vao.bind();
+        for (const auto& shape : shapes)
+        {
+            for (const auto& idx : shape.mesh.indices)
+            {
+                vertices.push_back(attrib.vertices[3 * idx.vertex_index + 0]);
+                vertices.push_back(attrib.vertices[3 * idx.vertex_index + 1]);
+                vertices.push_back(attrib.vertices[3 * idx.vertex_index + 2]);
+                indices.push_back(indexOffset++);
+            }
+        }
 
-//         // VBO vbo;
-//         // vbo.init();
-//         // vbo.bind();
-//         // vbo.set_data(vertices.data(), vertices.size() * sizeof(float));
+        // Setup OpenGL buffers
+        VAO vao;
+        vao.init();
+        vao.bind();
 
-//         // EBO ebo;
-//         // ebo.init();
-//         // ebo.bind();
-//         // ebo.set_data(indices.data(), indices.size() * sizeof(GLuint));
+        VBO vbo;
+        vbo.init();
+        vbo.bind();
+        vbo.set_data(vertices.data(), vertices.size() * sizeof(float));
 
-//         // glEnableVertexAttribArray(0); // position only
-//         // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        EBO ebo;
+        ebo.init();
+        ebo.bind();
+        ebo.set_data(indices.data(), indices.size() * sizeof(GLuint));
 
-//         // vao.unbind();
-//         // vbo.unbind();
-//         // ebo.unbind();
+        glEnableVertexAttribArray(0); // position only
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-//         // // Store only the VAO handle — vbo/ebo could be tracked too if needed
-//         // loadedMeshes.push_back(vao.m_id); // Make sure VAO::m_id is public or add getter
-//     }
+        vao.unbind();
+        vbo.unbind();
+        ebo.unbind();
 
-//     std::cout << "Loaded meshes successfully ! :)" << std::endl;
-// }
+        // Store only the VAO handle — vbo/ebo could be tracked too if needed
+        loadedMeshes.push_back(vao.m_id); // Make sure VAO::m_id is public or add getter
+    }
 
-// glm::vec3 RenderEngine::convertTo3D(int row, int col)
-// {
-//     float squareSize = 1.0f;                      // Adjust this based on your board scale
-//     float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
-//     float z          = (row - 3.5f) * squareSize;
-//     return glm::vec3(x, 0.0f, z);
-// }
+    std::cout << "Meshes : loaded" << '\n';
+}
 
-// void RenderEngine::render3DObj(std::string const& ObjectPath, int row, int col)
-// {
-//     static GLuint VAO         = 0;
-//     static GLuint VBO         = 0;
-//     static bool   initialized = false;
-//     static size_t nb_vertex   = 0;
+glm::vec3 RenderEngine::convertTo3D(int row, int col)
+{
+    float squareSize = 1.0f;                      // Adjust this based on your board scale
+    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
+    float z          = (row - 3.5f) * squareSize;
+    return glm::vec3(x, 0.0f, z);
+}
 
-//     if (!initialized)
-//     {
-//         tinyobj::attrib_t                attrib;
-//         std::vector<tinyobj::shape_t>    shapes;
-//         std::vector<tinyobj::material_t> materials;
-//         std::string                      warn, err;
+void RenderEngine::render3DObj(std::string const& ObjectPath, int row, int col)
+{
+    static GLuint VAO         = 0;
+    static GLuint VBO         = 0;
+    static bool   initialized = false;
+    static size_t nb_vertex   = 0;
 
-//         bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, ObjectPath.c_str());
+    if (!initialized)
+    {
+        tinyobj::attrib_t                attrib;
+        std::vector<tinyobj::shape_t>    shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string                      warn;
+        std::string                      err;
 
-//         if (!ret)
-//         {
-//             std::cout << "Failed to load OBJ: " << err << '\n';
-//             return;
-//         }
+        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, ObjectPath.c_str());
 
-//         std::vector<float> vertices;
-//         for (const auto& shape : shapes)
-//         {
-//             for (const auto& index : shape.mesh.indices)
-//             {
-//                 vertices.push_back(attrib.vertices[3 * index.vertex_index + 0]); // x
-//                 vertices.push_back(attrib.vertices[3 * index.vertex_index + 1]); // y
-//                 vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]); // z
-//             }
-//         }
+        if (!ret)
+        {
+            std::cout << "Failed to load OBJ: " << err << '\n';
+            return;
+        }
 
-//         nb_vertex = vertices.size() / 3;
+        std::vector<float> vertices;
+        for (const auto& shape : shapes)
+        {
+            for (const auto& index : shape.mesh.indices)
+            {
+                vertices.push_back(attrib.vertices[3 * index.vertex_index + 0]); // x
+                vertices.push_back(attrib.vertices[3 * index.vertex_index + 1]); // y
+                vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]); // z
+            }
+        }
 
-//         glGenVertexArrays(1, &VAO);
-//         glGenBuffers(1, &VBO);
+        nb_vertex = vertices.size() / 3;
 
-//         glBindVertexArray(VAO);
-//         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
 
-//         glEnableVertexAttribArray(0);
-//         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-//         glBindBuffer(GL_ARRAY_BUFFER, 0);
-//         glBindVertexArray(0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-//         initialized = true;
-//     }
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
 
-//     // **Apply transformation before rendering**
-//     glm::mat4 model = glm::mat4(1.0f);
-//     model           = glm::translate(model, convertTo3D(row, col)); // Move piece to correct position
+        initialized = true;
+    }
 
-//     GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-//     glUseProgram(shaderProgram);
-//     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    // **Apply transformation before rendering**
+    glm::mat4 model = glm::mat4(1.0f);
+    model           = glm::translate(model, convertTo3D(row, col)); // Move piece to correct position
 
-//     // **Render the piece**
-//     glBindVertexArray(VAO);
-//     glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
-//     glBindVertexArray(0);
-// }
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    glUseProgram(shaderProgram);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    // **Render the piece**
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
+    glBindVertexArray(0);
+}
 
 // void RenderEngine::render3DPieces()
 // {
@@ -271,3 +279,83 @@ void RenderEngine::loadShader()
 //         // }
 //     }
 // }
+
+VAO::VAO()
+    : m_id(0) {};
+
+VAO::~VAO()
+{
+    glDeleteVertexArrays(1, &m_id);
+}
+
+void VAO::init()
+{
+    glGenVertexArrays(1, &m_id);
+}
+
+void VAO::bind() const
+{
+    glBindVertexArray(m_id);
+}
+
+void VAO::unbind() const
+{
+    glBindVertexArray(0);
+}
+
+VBO::VBO() {
+    // Optional: Initialize anything here, or leave empty
+}
+
+VBO::~VBO()
+{
+    glDeleteBuffers(1, &m_id);
+}
+
+void VBO::init()
+{
+    glGenBuffers(1, &m_id);
+}
+
+void VBO::bind() const
+{
+    glBindBuffer(GL_ARRAY_BUFFER, m_id);
+}
+
+void VBO::unbind() const
+{
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void VBO::set_data(const void* data, GLsizeiptr size)
+{
+    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+}
+
+EBO::EBO()
+    : m_id(0) {}
+
+EBO::~EBO()
+{
+    glDeleteBuffers(1, &m_id);
+}
+
+void EBO::init()
+{
+    glGenBuffers(1, &m_id);
+}
+
+void EBO::bind() const
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
+}
+
+void EBO::unbind() const
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void EBO::set_data(const void* data, GLsizeiptr size)
+{
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+}

@@ -10,7 +10,7 @@ void App::init()
 {
     board.init();
     renderEngine.loadShader();
-    // renderEngine.loadMeshes();
+    renderEngine.loadMeshes();
 }
 
 void App::update()
@@ -30,7 +30,7 @@ void App::update()
     displayGameOverScreen();
     ImGui::End();
 
-    // renderEngine.render3DObj("../../Assets/Objects/Pieces/Pawn.obj", 0, 0, renderEngine.shaderProgram);
+    // renderEngine.render3DObj("../../Assets/Objects/Pawn.obj", 0, 0);
     // render3DPieces();
 }
 
