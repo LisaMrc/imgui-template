@@ -326,10 +326,11 @@ void EBO::set_data(const void* data, GLsizeiptr size)
 
 glm::vec3 RenderEngine::convertTo3D(int row, int col)
 {
-    float squareSize = 1.0f;                      // Adjust this based on your board scale
-    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
-    float z          = (row - 3.5f) * squareSize;
-    return glm::vec3(x, 0.0f, z);
+    float squareSize = 1.0f;                      // Size of one board tile
+    float x = (col - 3.5f) * squareSize;          // Center board at (0,0)
+    float z = (row - 3.5f) * squareSize;
+    float y = -5.f;                              // Push down model a bit (adjust if needed)
+    return glm::vec3(x, y, z);
 }
 
 void RenderEngine::cleanUp()
