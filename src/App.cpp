@@ -11,6 +11,11 @@ void App::init()
     board.init();
     renderEngine.loadShader();
     renderEngine.loadMeshes();
+    renderEngine.create3DObj();
+
+    float aspectRatio = 1280.0f / 720.0f; // TODO: replace with actual window size later
+    projection        = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+    std::cout << "Camera : initialized" << std::endl;
 }
 
 void App::update()
@@ -30,7 +35,7 @@ void App::update()
     displayGameOverScreen();
     ImGui::End();
 
-    // renderEngine.render3DObj("../../Assets/Objects/Pawn.obj", 0, 0);
+    renderEngine.renderAll(projection);
 }
 
 void App::handleEvent()

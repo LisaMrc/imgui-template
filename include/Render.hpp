@@ -11,28 +11,29 @@
 class obj3D {
 public:
     Piece* piece{nullptr};
-    GLuint VAO{0}, VBO{0}, EBO{0};
-    void   setupBuffers();
+    GLuint meshVAO{0};
+    int row{0}, col{0};
+
+    void render(GLuint shaderProgram, const glm::mat4& view, const glm::mat4& proj);
 };
+
 
 class RenderEngine {
 public:
     GLuint              shaderProgram{};
     std::vector<GLuint> loadedMeshes;
-    std::vector<obj3D>  objects;
+    std::vector<obj3D>  gameObjects;
     glm::mat4           viewMatrix;
 
     void loadShader();
     void loadMeshes();
     void create3DObj();
-
-    void render3DObj(const std::string& ObjectPath, int row, int col);
+    // TODO(🚀) : group everything into an init function
 
     void      setViewMatrix(const glm::mat4& view);
     glm::vec3 convertTo3D(int row, int col);
-    void      render3DPieces();
-    void      render3DBoard();
-    void      renderSkybox();
+
+    void renderAll(const glm::mat4& projection);
 };
 
 class VAO {

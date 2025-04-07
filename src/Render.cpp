@@ -165,120 +165,35 @@ void RenderEngine::loadMeshes()
     std::cout << "Meshes : loaded" << '\n';
 }
 
-glm::vec3 RenderEngine::convertTo3D(int row, int col)
+void RenderEngine::create3DObj()
 {
-    float squareSize = 1.0f;                      // Adjust this based on your board scale
-    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
-    float z          = (row - 3.5f) * squareSize;
-    return glm::vec3(x, 0.0f, z);
+    obj3D whitePawn;
+    whitePawn.row = 1;
+    whitePawn.col = 0;
+    whitePawn.meshVAO = loadedMeshes[0]; // TEMP: pick first mesh
+
+    gameObjects.push_back(whitePawn);
+
+    std::cout << "3D objects : created" << '\n';
 }
 
-void RenderEngine::render3DObj(std::string const& ObjectPath, int row, int col)
+void RenderEngine::renderAll(const glm::mat4& projection)
 {
-    static GLuint VAO         = 0;
-    static GLuint VBO         = 0;
-    static bool   initialized = false;
-    static size_t nb_vertex   = 0;
-
-    if (!initialized)
-    {
-        tinyobj::attrib_t                attrib;
-        std::vector<tinyobj::shape_t>    shapes;
-        std::vector<tinyobj::material_t> materials;
-        std::string                      warn;
-        std::string                      err;
-
-        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, ObjectPath.c_str());
-
-        if (!ret)
-        {
-            std::cout << "Failed to load OBJ: " << err << '\n';
-            return;
-        }
-
-        std::vector<float> vertices;
-        for (const auto& shape : shapes)
-        {
-            for (const auto& index : shape.mesh.indices)
-            {
-                vertices.push_back(attrib.vertices[3 * index.vertex_index + 0]); // x
-                vertices.push_back(attrib.vertices[3 * index.vertex_index + 1]); // y
-                vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]); // z
-            }
-        }
-
-        nb_vertex = vertices.size() / 3;
-
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-
-        initialized = true;
-    }
-
-    // **Apply transformation before rendering**
-    glm::mat4 model = glm::mat4(1.0f);
-    model           = glm::translate(model, convertTo3D(row, col)); // Move piece to correct position
-
-    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUseProgram(shaderProgram);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-    // **Render the piece**
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
-    glBindVertexArray(0);
+    for (const auto& obj : gameObjects)
+    {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), convertTo3D(obj.row, obj.col));
+        glm::mat4 MVP = projection * viewMatrix * model;
+
+        GLint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+
+        glBindVertexArray(obj.meshVAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0); // TODO: fix with index count per mesh
+        glBindVertexArray(0);
+    }
 }
-
-// void RenderEngine::render3DPieces()
-// {
-//     const std::string directory = "../../Assets/Objects/Pieces";
-
-//     std::vector<std::string> setPaths;
-
-//     if (!fs::exists(directory) || !fs::is_directory(directory))
-//     {
-//         std::cout << "Wrong folder" << '\n';
-//         return;
-//     }
-
-//     for (const auto& entry : fs::directory_iterator(directory))
-//     {
-//         if (entry.path().extension() == ".obj")
-//         {
-//             setPaths.push_back(entry.path().string());
-//         }
-//     }
-
-//     if (setPaths.empty())
-//     {
-//         std::cout << "No objects in the folder" << '\n';
-//         return;
-//     }
-
-//     for (std::string path : setPaths)
-//     {
-//         // render3DObj(path);
-
-//         // Need to change the coordinates ?
-//         // // Render pieces
-//         // for (auto& piece : Board::pieces)
-//         // {
-//         //     ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.35f, p.y + piece->row * tile_size + tile_size * 0.35f);
-//         //     char   symbol = piece->getSymbol();
-
-//         // }
-//     }
-// }
 
 VAO::VAO()
     : m_id(0) {};
@@ -303,7 +218,8 @@ void VAO::unbind() const
     glBindVertexArray(0);
 }
 
-VBO::VBO() {
+VBO::VBO()
+{
     // Optional: Initialize anything here, or leave empty
 }
 
@@ -358,4 +274,12 @@ void EBO::unbind() const
 void EBO::set_data(const void* data, GLsizeiptr size)
 {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+}
+
+glm::vec3 RenderEngine::convertTo3D(int row, int col)
+{
+    float squareSize = 1.0f;                      // Adjust this based on your board scale
+    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
+    float z          = (row - 3.5f) * squareSize;
+    return glm::vec3(x, 0.0f, z);
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "../include/TrackballCamera.hpp"
 
-// TODO (lisam): short functions : inline ?
+// TODO (🚀): short functions : inline ?
 void TrackballCamera::moveFront(float delta)
 {
     m_fDistance += delta;
