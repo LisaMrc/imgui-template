@@ -137,9 +137,27 @@ void RenderEngine::loadMeshes()
         {
             for (const auto& idx : shape.mesh.indices)
             {
+                // Position
                 vertices.push_back(attrib.vertices[3 * idx.vertex_index + 0]);
                 vertices.push_back(attrib.vertices[3 * idx.vertex_index + 1]);
                 vertices.push_back(attrib.vertices[3 * idx.vertex_index + 2]);
+
+                // Normal
+                if (idx.normal_index >= 0)
+                {
+                    vertices.push_back(attrib.normals[3 * idx.normal_index + 0]);
+                    vertices.push_back(attrib.normals[3 * idx.normal_index + 1]);
+                    vertices.push_back(attrib.normals[3 * idx.normal_index + 2]);
+                }
+                else
+                {
+                    // Push a default normal (e.g., up)
+                    vertices.push_back(0.0f);
+                    vertices.push_back(1.0f);
+                    vertices.push_back(0.0f);
+                }
+                std::cout << "normal_index = " << idx.normal_index << '\n';
+
                 indices.push_back(indexOffset++);
             }
         }
@@ -166,8 +184,13 @@ void RenderEngine::loadMeshes()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-        glEnableVertexAttribArray(0); // position only
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        // Position
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Normal
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
 
         glBindVertexArray(0); // Unbind VAO after configuration
 
@@ -188,8 +211,10 @@ void RenderEngine::loadMeshes()
     std::cout << "Meshes : loaded" << '\n';
 }
 
-void RenderEngine::create3DObj() {
-    if (loadedMeshes.empty()) {
+void RenderEngine::create3DObj()
+{
+    if (loadedMeshes.empty())
+    {
         std::cerr << "Error: No meshes loaded.\n";
         return; // Prevent creating objects if no meshes are loaded.
     }
@@ -200,7 +225,7 @@ void RenderEngine::create3DObj() {
     whitePawn.col = 0;
 
     // Assuming you have already loaded meshes in loadedMeshes, set the first mesh as the object mesh.
-    whitePawn.meshVAO = loadedMeshes[0].vao;
+    whitePawn.meshVAO    = loadedMeshes[0].vao;
     whitePawn.indexCount = loadedMeshes[0].indexCount;
 
     // Setup the object's coordinates (initially at (0,0,0) or any other position you want)
@@ -327,9 +352,9 @@ void EBO::set_data(const void* data, GLsizeiptr size)
 glm::vec3 RenderEngine::convertTo3D(int row, int col)
 {
     float squareSize = 1.0f;                      // Size of one board tile
-    float x = (col - 3.5f) * squareSize;          // Center board at (0,0)
-    float z = (row - 3.5f) * squareSize;
-    float y = -5.f;                              // Push down model a bit (adjust if needed)
+    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
+    float z          = (row - 3.5f) * squareSize;
+    float y          = -5.f; // Push down model a bit (adjust if needed)
     return glm::vec3(x, y, z);
 }
 
@@ -348,9 +373,10 @@ void RenderEngine::cleanUp()
     eboList.clear();
 
     // Supprimer le programme de shaders
-    if (shaderProgram) {
+    if (shaderProgram)
+    {
         glDeleteProgram(shaderProgram);
-        shaderProgram = 0;  // Nullify the shader program to prevent use after deletion
+        shaderProgram = 0; // Nullify the shader program to prevent use after deletion
     }
 
     std::cout << "Cleanup: All resources deleted.\n";
