@@ -1,12 +1,7 @@
 #include "../include/Board.hpp"
-#include <GLFW/glfw3.h>
-#include <algorithm>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
-#include "../include/Piece.hpp"
-#include "imgui.h"
+#define MINIAUDIO_IMPLEMENTATION
+#define NOMINMAX
+#include "../include/miniaudio.h"
 
 void Board::init()
 {
@@ -69,6 +64,8 @@ void Board::init()
 
     ImGuiIO& io = ImGui::GetIO();
     defaultFont = io.Fonts->AddFontFromFileTTF("../../font/ROBOTO.ttf", 20.0f);
+
+    soundThread = std::thread(&Board::soundLoop, this);
 }
 
 void Board::move(int row, int col)
@@ -452,6 +449,47 @@ void Board::update(int row, int col)
     {
         exp.done = false;
     }
+}
+
+void Board::soundLoop()
+{
+    // Gamma distribution
+    while (soundLoopRunning)
+    {
+        double delay = gamma.dist(tools.rng);
+        std::this_thread::sleep_for(std::chrono::duration<double>(delay));
+
+        // Play your sound here
+        std::cout << "[Sound] played after " << delay << " seconds\n";
+
+        playSound();
+    }
+}
+
+void Board::playSound()
+{
+    ma_result result;
+    ma_engine engine;
+
+    result = ma_engine_init(NULL, &engine);
+    if (result != MA_SUCCESS)
+    {
+        std::cerr << "Failed to initialize audio engine.\n";
+        return;
+    }
+
+    result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
+    if (result != MA_SUCCESS)
+    {
+        std::cerr << "Failed to play sound.\n";
+        ma_engine_uninit(&engine);
+        return;
+    }
+
+    std::cout << "Playing sound...\n";
+    std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
+
+    ma_engine_uninit(&engine);
 }
 
 ImFont* Board::getFont()

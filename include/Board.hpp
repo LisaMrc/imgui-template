@@ -1,11 +1,20 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
 #include <imgui.h>
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <iostream>
 #include <memory>
+#include <string>
+#include <thread>
 #include <vector>
+#include "../include/Piece.hpp"
 #include "Math.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
+#include "imgui.h"
 
 class Board {
 private:
@@ -34,6 +43,10 @@ public:
     void                                showPromotionWindow();
     ImFont*                             getFont();
     void                                setFont(ImFont*);
+    void                                soundLoop();
+    void                                playSound();
+    std::atomic<bool>                   soundLoopRunning = true;
+    std::thread                         soundThread;
 
 private:
     Piece*              selectedPiece = nullptr;
@@ -65,6 +78,7 @@ private:
     Tools       tools;
     Binomial    binomial;
     Exponential exp;
+    Gamma       gamma;
 
     float moveCount = 0;
 };

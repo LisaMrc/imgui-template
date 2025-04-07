@@ -5,7 +5,6 @@
 #include "../include/App.hpp"
 #include "quick_imgui/quick_imgui.hpp"
 
-
 int main()
 {
     App app{};
@@ -19,4 +18,7 @@ int main()
         /* loop: */
         [&]() { app.update(); }
     );
+
+    app.board.soundLoopRunning = false;
+    app.board.soundThread.join();
 }

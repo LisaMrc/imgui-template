@@ -43,3 +43,9 @@ public:
     std::exponential_distribution<> dist = std::exponential_distribution<>(0.14); // 90% chance of a piece in the [0, 16] range being removed
     bool                            done = false;
 };
+
+class Gamma {
+public:
+    std::gamma_distribution<double> dist = std::gamma_distribution<double>(4.0, 7.5);
+    bool                            done = false;
+};

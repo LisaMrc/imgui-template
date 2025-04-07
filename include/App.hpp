@@ -10,9 +10,8 @@ public:
     void init();
     void update();
 
+    Board board;
+
 private:
     int RoundNbr = 0;
-    // Player  playerWhite, playerBlack;
-    // Player* whoPlays = &playerWhite;
-    Board board;
 };
