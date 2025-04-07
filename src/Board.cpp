@@ -86,6 +86,7 @@ void Board::move(int row, int col)
             selectedPiece->col = col;
             if (selectedPiece->getType() == 'P')
                 selectedPiece->firstMove = false;
+            moveCount += .5;
             activePlayer  = activePlayer == &white ? &black : &white;
             selectedPiece = nullptr;
         }
@@ -425,6 +426,31 @@ void Board::update(int row, int col)
     if (ImGui::Button(("##tile" + std::to_string(row) + std::to_string(col)).c_str(), ImVec2(tile_size, tile_size)))
     {
         move(row, col);
+    }
+
+    // Exponential distribution
+    if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
+    {
+        if (!exp.done)
+        {
+            Piece* toRemove = kings[0];
+            int    idx      = 0;
+
+            while (toRemove->getType() == 'K')
+            {
+                idx = std::round(exp.dist(tools.rng));
+                idx = std::clamp(idx, 0, static_cast<int>(pieces.size() - 1));
+
+                toRemove = pieces[idx].get();
+            }
+
+            removePiece(toRemove);
+            exp.done = true;
+        }
+    }
+    else
+    {
+        exp.done = false;
     }
 }
 

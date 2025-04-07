@@ -62,5 +62,9 @@ private:
     ImU32 highlight_color;
     ImU32 check_color;
 
-    Binomial binomial;
+    Tools       tools;
+    Binomial    binomial;
+    Exponential exp;
+
+    float moveCount = 0;
 };
