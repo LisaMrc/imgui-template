@@ -9,7 +9,6 @@
 #include <vector>
 #include "glad/glad.h"
 #include "miniaudio.h"
-namespace fs = std::filesystem;
 #include <fstream>
 
 void RenderEngine::loadShader()
@@ -85,6 +84,15 @@ void RenderEngine::loadShader()
 
     shaderProgram = program;
 
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        char infoLog[512];
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cerr << "Shader linking failed:\n"
+                  << infoLog << std::endl;
+    }
+
     std::cout << "Shaders : loaded" << '\n';
 }
 
@@ -136,61 +144,100 @@ void RenderEngine::loadMeshes()
             }
         }
 
-        // Setup OpenGL buffers
-        VAO vao;
-        vao.init();
-        vao.bind();
+        // Création de VAO, VBO, et EBO pour chaque mesh
+        GLuint vao = 0;
+        glGenVertexArrays(1, &vao);
+        vaoList.push_back(vao); // Ajouter le VAO à la liste
 
-        VBO vbo;
-        vbo.init();
-        vbo.bind();
-        vbo.set_data(vertices.data(), vertices.size() * sizeof(float));
+        GLuint vbo = 0;
+        glGenBuffers(1, &vbo);
+        vboList.push_back(vbo); // Ajouter le VBO à la liste
 
-        EBO ebo;
-        ebo.init();
-        ebo.bind();
-        ebo.set_data(indices.data(), indices.size() * sizeof(GLuint));
+        GLuint ebo = 0;
+        glGenBuffers(1, &ebo);
+        eboList.push_back(ebo); // Ajouter l'EBO à la liste
+
+        // Liaison et remplissage des buffers
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0); // position only
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-        vao.unbind();
-        vbo.unbind();
-        ebo.unbind();
+        glBindVertexArray(0); // Unbind VAO after configuration
 
-        // Store only the VAO handle — vbo/ebo could be tracked too if needed
-        loadedMeshes.push_back(vao.m_id); // Make sure VAO::m_id is public or add getter
+        // Stocker les informations du mesh
+        MeshData mesh{};
+        mesh.vao        = vao;
+        mesh.indexCount = static_cast<GLsizei>(indices.size());
+
+        if (indices.empty())
+        {
+            std::cerr << "Mesh sans indices : " << entry.path() << '\n';
+            continue;
+        }
+
+        loadedMeshes.push_back(mesh); // Ajouter le mesh chargé à la liste
     }
 
     std::cout << "Meshes : loaded" << '\n';
 }
 
+
 void RenderEngine::create3DObj()
 {
     obj3D whitePawn;
-    whitePawn.row = 1;
-    whitePawn.col = 0;
-    whitePawn.meshVAO = loadedMeshes[0]; // TEMP: pick first mesh
-
+    whitePawn.row        = 1;
+    whitePawn.col        = 0;
+    whitePawn.meshVAO    = loadedMeshes[0].vao;
+    whitePawn.indexCount = loadedMeshes[0].indexCount;
     gameObjects.push_back(whitePawn);
 
-    std::cout << "3D objects : created" << '\n';
+    std::cout << "Mesh VAO: " << loadedMeshes[0].vao
+              << " | indexCount: " << loadedMeshes[0].indexCount << '\n';
+
+    std::cout << "Object created" << '\n';
 }
 
-void RenderEngine::renderAll(const glm::mat4& projection)
+void RenderEngine::renderAll()
 {
     glUseProgram(shaderProgram);
 
+    GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
     for (const auto& obj : gameObjects)
     {
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), convertTo3D(obj.row, obj.col));
-        glm::mat4 MVP = projection * viewMatrix * model;
+        glm::mat4 model    = glm::translate(glm::mat4(1.0f), convertTo3D(obj.row, obj.col));
+        GLint     modelLoc = glGetUniformLocation(shaderProgram, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-        GLint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+        if (obj.indexCount == 0)
+        {
+            std::cerr << "Erreur : indexCount = 0\n";
+            continue;
+        }
+
+        GLint boundVAO = 0;
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &boundVAO);
+        std::cout << "VAO bound before draw: " << boundVAO << '\n';
 
         glBindVertexArray(obj.meshVAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0); // TODO: fix with index count per mesh
+        if (!glIsVertexArray(obj.meshVAO))
+        {
+            std::cerr << "Invalid VAO: " << obj.meshVAO << '\n';
+            continue; // Skip rendering this object
+        }
+
+        glDrawElements(GL_TRIANGLES, obj.indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
@@ -200,7 +247,7 @@ VAO::VAO()
 
 VAO::~VAO()
 {
-    glDeleteVertexArrays(1, &m_id);
+    // glDeleteVertexArrays(1, &m_id);
 }
 
 void VAO::init()
@@ -225,7 +272,7 @@ VBO::VBO()
 
 VBO::~VBO()
 {
-    glDeleteBuffers(1, &m_id);
+    // glDeleteBuffers(1, &m_id);
 }
 
 void VBO::init()
@@ -253,7 +300,7 @@ EBO::EBO()
 
 EBO::~EBO()
 {
-    glDeleteBuffers(1, &m_id);
+    // glDeleteBuffers(1, &m_id);
 }
 
 void EBO::init()
@@ -282,4 +329,19 @@ glm::vec3 RenderEngine::convertTo3D(int row, int col)
     float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
     float z          = (row - 3.5f) * squareSize;
     return glm::vec3(x, 0.0f, z);
+}
+
+void RenderEngine::cleanUp()
+{
+    // Supprimer tous les VAO
+    glDeleteVertexArrays(vaoList.size(), vaoList.data());
+    vaoList.clear();
+
+    // Supprimer tous les VBO
+    glDeleteBuffers(vboList.size(), vboList.data());
+    vboList.clear();
+
+    // Supprimer tous les EBO
+    glDeleteBuffers(eboList.size(), eboList.data());
+    eboList.clear();
 }

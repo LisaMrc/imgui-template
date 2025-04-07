@@ -10,20 +10,27 @@
 
 class obj3D {
 public:
-    Piece* piece{nullptr};
-    GLuint meshVAO{0};
-    int row{0}, col{0};
-
-    void render(GLuint shaderProgram, const glm::mat4& view, const glm::mat4& proj);
+    Piece*  piece{nullptr};
+    GLuint  meshVAO{0};
+    GLsizei indexCount;
+    int     row{0}, col{0};
 };
 
+struct MeshData {
+    GLuint  vao;
+    GLsizei indexCount;
+};
 
 class RenderEngine {
 public:
-    GLuint              shaderProgram{};
-    std::vector<GLuint> loadedMeshes;
-    std::vector<obj3D>  gameObjects;
-    glm::mat4           viewMatrix;
+    GLuint                shaderProgram{};
+    std::vector<MeshData> loadedMeshes;
+    std::vector<obj3D>    gameObjects;
+    glm::mat4             projectionMatrix;
+    glm::mat4             viewMatrix;
+    std::vector<GLuint>   vaoList;
+    std::vector<GLuint>   vboList;
+    std::vector<GLuint>   eboList;
 
     void loadShader();
     void loadMeshes();
@@ -33,7 +40,8 @@ public:
     void      setViewMatrix(const glm::mat4& view);
     glm::vec3 convertTo3D(int row, int col);
 
-    void renderAll(const glm::mat4& projection);
+    void renderAll();
+    void cleanUp();
 };
 
 class VAO {

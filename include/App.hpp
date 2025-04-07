@@ -20,8 +20,6 @@ public:
     void displayGameOverScreen();
     void run();
 
-    glm::mat4 projection;
-
 private:
     Board           board;
     TrackballCamera TrackBallCamera;

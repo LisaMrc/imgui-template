@@ -13,9 +13,8 @@ void App::init()
     renderEngine.loadMeshes();
     renderEngine.create3DObj();
 
-    float aspectRatio = 1280.0f / 720.0f; // TODO: replace with actual window size later
-    projection        = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
-    std::cout << "Camera : initialized" << std::endl;
+    float aspect                  = 800.0f / 600.0f; // ou récupère la taille de la fenêtre dynamiquement
+    renderEngine.projectionMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 }
 
 void App::update()
@@ -35,16 +34,22 @@ void App::update()
     displayGameOverScreen();
     ImGui::End();
 
-    renderEngine.renderAll(projection);
+    renderEngine.viewMatrix = glm::lookAt(
+        glm::vec3(4, 6, 4), // position caméra
+        glm::vec3(0, 0, 0), // point visé
+        glm::vec3(0, 1, 0)  // axe vertical
+    );
+
+    renderEngine.renderAll();
 }
 
 void App::handleEvent()
 {
-    // TODO(lisam) : enable mouse trigger for trackball camera
-    if (true)
-    {
-        TrackBallCamera.moveFront(.001);
-    }
+    // TODO(🎥) : enable mouse trigger for trackball camera
+    // if (true)
+    // {
+    //     TrackBallCamera.moveFront(.001);
+    // }
 }
 
 void App::displayGameOverScreen()
@@ -78,13 +83,16 @@ void App::run()
 {
     quick_imgui::loop(
         "Zen Chess",
-        {.init = [&]() {
+        {.init     = [&]() {
             glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
             init(); },
-         .loop = [&]() {
+         .loop     = [&]() {
                 glClearColor(1, 0, 1, 1); // Principal window
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 update(); },
+         .shutdown = [&]() {
+                renderEngine.cleanUp(); // Nettoyer les buffers à la fin
+         },
 
          .mouse_button_callback = [&](int button, int action, int mods) {
              // Handle mouse clicks if needed
