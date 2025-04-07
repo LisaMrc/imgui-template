@@ -10,10 +10,35 @@
 
 class obj3D {
 public:
-    Piece*  piece{nullptr};
-    GLuint  meshVAO{0};
+    Piece* piece{nullptr};
+    GLuint meshVAO{0};
+    GLuint meshVBO{0};
+    GLuint meshEBO{0};
     GLsizei indexCount;
-    int     row{0}, col{0};
+    int row{0}, col{0};
+
+    void setupBuffers(const std::vector<float>& vertices, const std::vector<GLuint>& indices) {
+        // Création et liaison du VAO
+        glGenVertexArrays(1, &meshVAO);
+        glBindVertexArray(meshVAO);
+
+        // Création et liaison du VBO
+        glGenBuffers(1, &meshVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, meshVBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+        // Création et liaison du EBO
+        glGenBuffers(1, &meshEBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+        // Définir le format des attributs du VBO
+        glEnableVertexAttribArray(0); // position only
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+        // Délié VAO après configuration
+        glBindVertexArray(0);
+    }
 };
 
 struct MeshData {
@@ -42,6 +67,7 @@ public:
 
     void renderAll();
     void cleanUp();
+    ~RenderEngine();
 };
 
 class VAO {

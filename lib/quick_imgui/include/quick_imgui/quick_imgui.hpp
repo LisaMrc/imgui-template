@@ -12,6 +12,7 @@ struct Callbacks {
     
     // added shutdown function
     std::function<void()> shutdown { []() {} };
+
     std::function<void(int, int, int, int)> key_callback { [](int key, int scancode, int action, int mods) {} }; // NOLINT(*-easily-swappable-parameters)
     std::function<void(int, int, int)> mouse_button_callback { [](int button, int action, int mods) {} }; // NOLINT(*-easily-swappable-parameters)
     std::function<void(double, double)> cursor_position_callback { [](double xpos, double ypos) {} }; // NOLINT(*-easily-swappable-parameters)

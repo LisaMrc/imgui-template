@@ -91,9 +91,8 @@ void App::run()
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 update(); },
          .shutdown = [&]() {
-                renderEngine.cleanUp(); // Nettoyer les buffers à la fin
+             renderEngine.cleanUp(); // Nettoyer les buffers à la fin
          },
-
          .mouse_button_callback = [&](int button, int action, int mods) {
              // Handle mouse clicks if needed
          }}

@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <tiny_obj_loader.h>
 #include <filesystem>
+#include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -9,7 +10,6 @@
 #include <vector>
 #include "glad/glad.h"
 #include "miniaudio.h"
-#include <fstream>
 
 void RenderEngine::loadShader()
 {
@@ -188,20 +188,30 @@ void RenderEngine::loadMeshes()
     std::cout << "Meshes : loaded" << '\n';
 }
 
+void RenderEngine::create3DObj() {
+    if (loadedMeshes.empty()) {
+        std::cerr << "Error: No meshes loaded.\n";
+        return; // Prevent creating objects if no meshes are loaded.
+    }
 
-void RenderEngine::create3DObj()
-{
+    // Create a new obj3D object (e.g., a white pawn)
     obj3D whitePawn;
-    whitePawn.row        = 1;
-    whitePawn.col        = 0;
-    whitePawn.meshVAO    = loadedMeshes[0].vao;
+    whitePawn.row = 1;
+    whitePawn.col = 0;
+
+    // Assuming you have already loaded meshes in loadedMeshes, set the first mesh as the object mesh.
+    whitePawn.meshVAO = loadedMeshes[0].vao;
     whitePawn.indexCount = loadedMeshes[0].indexCount;
+
+    // Setup the object's coordinates (initially at (0,0,0) or any other position you want)
+    whitePawn.row = 0;
+    whitePawn.col = 0;
+
+    // Set up the buffers (VAO, VBO, EBO) for the object
+    // We'll use the already loaded mesh for now (VAO, VBO, EBO should already be set up in loadMeshes)
     gameObjects.push_back(whitePawn);
 
-    std::cout << "Mesh VAO: " << loadedMeshes[0].vao
-              << " | indexCount: " << loadedMeshes[0].indexCount << '\n';
-
-    std::cout << "Object created" << '\n';
+    std::cout << "Object created: Pawn at (" << whitePawn.row << ", " << whitePawn.col << ")\n";
 }
 
 void RenderEngine::renderAll()
@@ -226,19 +236,10 @@ void RenderEngine::renderAll()
             continue;
         }
 
-        GLint boundVAO = 0;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &boundVAO);
-        std::cout << "VAO bound before draw: " << boundVAO << '\n';
-
-        glBindVertexArray(obj.meshVAO);
-        if (!glIsVertexArray(obj.meshVAO))
-        {
-            std::cerr << "Invalid VAO: " << obj.meshVAO << '\n';
-            continue; // Skip rendering this object
-        }
+        glBindVertexArray(obj.meshVAO); // Chaque objet a son propre VAO
 
         glDrawElements(GL_TRIANGLES, obj.indexCount, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        glBindVertexArray(0); // Unbind VAO
     }
 }
 
@@ -344,4 +345,17 @@ void RenderEngine::cleanUp()
     // Supprimer tous les EBO
     glDeleteBuffers(eboList.size(), eboList.data());
     eboList.clear();
+
+    // Supprimer le programme de shaders
+    if (shaderProgram) {
+        glDeleteProgram(shaderProgram);
+        shaderProgram = 0;  // Nullify the shader program to prevent use after deletion
+    }
+
+    std::cout << "Cleanup: All resources deleted.\n";
+}
+
+RenderEngine::~RenderEngine()
+{
+    cleanUp();
 }
