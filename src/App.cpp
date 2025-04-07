@@ -8,6 +8,7 @@ void App::init()
 {
     board.init();
     renderEngine.loadShader();
+    glEnable(GL_DEPTH_TEST);
 }
 
 void App::update()
@@ -63,20 +64,19 @@ void App::displayGameOverScreen()
 
 void App::run()
 {
-    init();
+    init(); // => dedans, tu peux mettre glEnable()
 
-    quick_imgui::loop(
-        "Zen Chess",
-        {.init = [&]() {
-             glEnable(GL_DEPTH_TEST); // Enables correct 3D rendering
-         },
-         .loop = [&]() {
-                glClearColor(1, 0, 1, 1); // Principal window
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                update(); },
-
-         .mouse_button_callback = [&](int button, int action, int mods) {
-             // Handle mouse clicks if needed
-         }}
-    );
+    quick_imgui::loop("Zen Chess", quick_imgui::Callbacks{
+        .init = [&]() {
+            glEnable(GL_DEPTH_TEST);
+        },
+        .loop = [&]() {
+            glClearColor(1, 0, 1, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            update();
+        },
+        .mouse_button_callback = [&](int button, int action, int mods) {
+            // Mouse handling
+        }
+    });
 }
