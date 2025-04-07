@@ -1,11 +1,15 @@
 #pragma once
 
+#include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
-#include "../include/Camera.hpp"
-#include "../include/ShaderLoader.hpp"
-#include "../include/Skybox.hpp"
+#include <imgui.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Board.hpp"
+#include "Render.hpp"
 #include "TrackballCamera.hpp"
+#include "glad/glad.h"
 
 class App {
 public:
@@ -13,18 +17,12 @@ public:
 
     void init();
     void update();
-    void run();
     void handleEvent();
     void displayGameOverScreen();
-    void handleInput();
-    void display3DObj();
-    void setShader(glmax::Shader* s) { shader = s; }
+    void run();
 
 private:
-    int            RoundNbr = 0;
-    Board          board;
-    Camera         camera;
-    Skybox         skybox;
-    bool           isTrackball = true;
-    glmax::Shader* shader      = nullptr;
+    Board           board;
+    TrackballCamera TrackBallCamera;
+    RenderEngine    renderEngine;
 };

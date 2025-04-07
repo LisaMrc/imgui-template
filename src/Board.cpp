@@ -1,11 +1,11 @@
 #include "../include/Board.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
-#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
+#include "../include/Math.hpp"
 #include "../include/Piece.hpp"
 #include "imgui.h"
 
@@ -141,35 +141,51 @@ void Board::removePiece(Piece* piece)
                  pieces.end());
 }
 
-// FIXME
-bool Board::wasKingRemoved()
+bool Board::wasWhiteKingRemoved()
 {
     for (const auto& piece : pieces)
     {
         if (piece->getSymbol() == 'K' && piece->isWhite)
         {
-            std::cout << "King here \n";
             return false;
         }
-        else
-        {
-            std::cout << "King out \n";
-            return true;
-        }
     }
+
+    return true;
 }
 
 void Board::debug_removeWhiteKingButton()
 {
     if (ImGui::Button("Remove white king"))
     {
-        for (const auto& piece : pieces)
+        pieces.erase(std::remove_if(pieces.begin(), pieces.end(), [](const std::unique_ptr<Piece>& piece) {
+                         return piece->getSymbol() == 'K' && piece->isWhite;
+                     }),
+                     pieces.end());
+    }
+}
+
+bool Board::wasBlackKingRemoved()
+{
+    for (const auto& piece : pieces)
+    {
+        if (piece->getSymbol() == 'K' && !piece->isWhite)
         {
-            if (piece->getSymbol() == 'K' && piece->isWhite)
-            {
-                removePiece(piece.get());
-            }
+            return false;
         }
+    }
+
+    return true;
+}
+
+void Board::debug_removeBlackKingButton()
+{
+    if (ImGui::Button("Remove black king"))
+    {
+        pieces.erase(std::remove_if(pieces.begin(), pieces.end(), [](const std::unique_ptr<Piece>& piece) {
+                         return piece->getSymbol() == 'K' && !piece->isWhite;
+                     }),
+                     pieces.end());
     }
 }
 
@@ -182,10 +198,8 @@ void Board::performCastle(King* king, int destRow, int destCol)
     if (!rook)
         return;
 
-    king->col = destCol;
-
-    rook->col = king->col - direction;
-
+    king->col       = destCol;
+    rook->col       = king->col - direction;
     king->firstMove = false;
     rook->firstMove = false;
 }
@@ -286,7 +300,7 @@ void Board::draw()
             // Highlight the king if it is in check
             if ((isWhiteInCheck && activeKing && activeKing->row == row && activeKing->col == col) || (isBlackInCheck && activeKing && activeKing->row == row && activeKing->col == col))
             {
-                draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f); // Highlight the king in check
+                draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f);
             }
 
             ImGui::SetCursorScreenPos(min);
@@ -302,7 +316,8 @@ void Board::draw()
                     selectedPiece->row = row;
                     selectedPiece->col = col;
                     activePlayer       = activePlayer == &white ? &black : &white;
-                    selectedPiece      = nullptr;
+                    SwitchPlayer(*this);
+                    selectedPiece = nullptr;
                 }
                 else
                 {

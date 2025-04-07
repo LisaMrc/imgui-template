@@ -1,14 +1,17 @@
 #pragma once
-// 
-// #include <glm/glm.hpp>
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
-// #include <GL/glew.h>
+#include <imgui.h>
+#include <tiny_obj_loader.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "glad/glad.h"
 
-
-
-// class Renderer {
-//     public:
-//         GLuint shaderProgram;
-//         void applyViewMatrix(const glm::mat4& viewMatrix, GLuint shaderProgram);
-//     };
+class RenderEngine {
+public:
+    void      loadShader();
+    glm::vec3 convertTo3D(int row, int col);
+    void      render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram);
+    void      render3DPieces();
+    void      renderSkybox();
+    GLuint    shaderProgram{};
+};

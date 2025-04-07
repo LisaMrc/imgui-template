@@ -1,15 +1,64 @@
 #include "../include/Render.hpp"
-#include <imgui.h>
 #include <tiny_obj_loader.h>
+#include <cstdlib>
+#include <ctime>
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include "../include/App.hpp"
-#include "../include/ShaderLoader.hpp"
+#include <vector>
 #include "glad/glad.h"
+#include "miniaudio.h"
+namespace fs = std::filesystem;
+#include <fstream>
 
-void App::display3DObj()
+void RenderEngine::loadShader()
+{
+    // Read shader source files
+    std::ifstream     vShaderFile("../Shaders/vertex_shader.glsl");
+    std::ifstream     fShaderFile("../Shaders/fragment_shader.glsl");
+    std::stringstream vShaderStream;
+    std::stringstream fShaderStream;
+    vShaderStream << vShaderFile.rdbuf();
+    fShaderStream << fShaderFile.rdbuf();
+    std::string vertexCode    = vShaderStream.str();
+    std::string fragmentCode  = fShaderStream.str();
+    const char* vShaderSource = vertexCode.c_str();
+    const char* fShaderSource = fragmentCode.c_str();
+
+    // Compile vertex shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vShaderSource, nullptr);
+    glCompileShader(vertexShader);
+
+    // Compile fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fShaderSource, nullptr);
+    glCompileShader(fragmentShader);
+
+    // Link shaders
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    // Cleanup
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    RenderEngine::shaderProgram = shaderProgram;
+}
+
+glm::vec3 RenderEngine::convertTo3D(int row, int col)
+{
+    float squareSize = 1.0f;                      // Adjust this based on your board scale
+    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
+    float z          = (row - 3.5f) * squareSize;
+    return glm::vec3(x, 0.0f, z);
+}
+
+void RenderEngine::render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram)
 {
     static GLuint VAO         = 0;
     static GLuint VBO         = 0;
@@ -18,18 +67,16 @@ void App::display3DObj()
 
     if (!initialized)
     {
-        std::string                      inputfile = "../../Assets/Objects/Pawn.obj";
         tinyobj::attrib_t                attrib;
         std::vector<tinyobj::shape_t>    shapes;
         std::vector<tinyobj::material_t> materials;
-        std::string                      warn;
-        std::string                      err;
+        std::string                      warn, err;
 
-        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
+        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, ObjectPath.c_str());
 
         if (!ret)
         {
-            std::cout << "Failed to load OBJ: " << err << '\n';
+            std::cerr << "Failed to load OBJ: " << err << '\n';
             return;
         }
 
@@ -38,15 +85,14 @@ void App::display3DObj()
         {
             for (const auto& index : shape.mesh.indices)
             {
-                vertices.push_back(attrib.vertices[3 * index.vertex_index + 0]); // x
-                vertices.push_back(attrib.vertices[3 * index.vertex_index + 1]); // y
-                vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]); // z
+                vertices.push_back(attrib.vertices[3 * index.vertex_index + 0]);
+                vertices.push_back(attrib.vertices[3 * index.vertex_index + 1]);
+                vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]);
             }
         }
 
-        nb_vertex = vertices.size();
+        nb_vertex = vertices.size() / 3;
 
-        // OpenGL : Création des buffers
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
 
@@ -63,34 +109,94 @@ void App::display3DObj()
         initialized = true;
     }
 
-    camera.init_mat_proj();
-    // skybox.draw(skybox.shaderProgram, view, projection);
+    // **Apply transformation before rendering**
+    glm::mat4 model = glm::mat4(1.0f);
+    model           = glm::translate(model, convertTo3D(row, col)); // Move piece to correct position
 
-    if (!shader)
-    {
-        std::cerr << "Shader not set!" << std::endl;
-        return;
-    }
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    glUseProgram(shaderProgram);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-    shader->use();
-    shader->set_uniform_matrix_4fv("uMVPMatrix", camera.get_MVP());
-    shader->set_uniform_matrix_4fv("uMVMatrix", camera.get_MVMatrix());
-    shader->set_uniform_matrix_4fv("uNormalMatrix", camera.get_NormalMatrix());
-
-    // Affichage OpenGL
+    // **Render the piece**
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, nb_vertex); // Modifier selon ton modèle
+    glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
     glBindVertexArray(0);
 }
 
-// void Renderer::applyViewMatrix(const glm::mat4& viewMatrix, GLuint shaderProgram)
+void RenderEngine::render3DPieces()
+{
+    const std::string        directory = "../../Assets/Objects/Pieces";
+    std::vector<std::string> setPaths;
+
+    if (!fs::exists(directory) || !fs::is_directory(directory))
+    {
+        std::cerr << "Wrong folder: " << directory << '\n';
+        return;
+    }
+
+    for (const auto& entry : fs::directory_iterator(directory))
+    {
+        if (entry.path().extension() == ".obj")
+        {
+            setPaths.push_back(entry.path().string());
+        }
+    }
+
+    if (setPaths.empty())
+    {
+        std::cerr << "No .obj files found in folder: " << directory << '\n';
+        return;
+    }
+
+    // Exemple de test : position (0,0)
+    for (const std::string& path : setPaths)
+    {
+        render3DObj(path, 0, 0, shaderProgram); // À adapter en fonction des positions de pièces
+    }
+}
+
+// void RenderEngine::renderSkybox()
 // {
-//     glUseProgram(shaderProgram);
-//     GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-//     if (viewLoc == -1)
-//     {
-//         std::cerr << "Uniform 'view' not found in shader!" << std::endl;
-//         return;
-//     }
-//     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+//     skybox.render(camera.getViewMatrix(), projection); // Assurez-vous que `camera` et `projection` sont bien définis dans votre contexte
 // }
+
+void RenderEngine::render3DPieces()
+{
+    const std::string directory = "../../Assets/Objects/Pieces";
+
+    std::vector<std::string> setPaths;
+
+    if (!fs::exists(directory) || !fs::is_directory(directory))
+    {
+        std::cout << "Wrong folder" << '\n';
+        return;
+    }
+
+    for (const auto& entry : fs::directory_iterator(directory))
+    {
+        if (entry.path().extension() == ".obj")
+        {
+            setPaths.push_back(entry.path().string());
+        }
+    }
+
+    if (setPaths.empty())
+    {
+        std::cout << "No objects in the folder" << '\n';
+        return;
+    }
+
+    for (std::string path : setPaths)
+    {
+        // render3DObj(path);
+
+        // Need to change the coordinates ?
+        // // Render pieces
+        // for (auto& piece : Board::pieces)
+        // {
+        //     ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.35f, p.y + piece->row * tile_size + tile_size * 0.35f);
+        //     char   symbol = piece->getSymbol();
+
+        // }
+    }
+}

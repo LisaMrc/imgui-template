@@ -69,4 +69,4 @@ FetchContent_MakeAvailable(miniaudio)
 target_link_libraries(${PROJECT_NAME} PRIVATE miniaudio)
 
 add_subdirectory(lib/glm)
-target_link_libraries(${PROJECT_NAME} PRIVATE glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE  glm)
