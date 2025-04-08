@@ -27,12 +27,12 @@ void App::update()
                              // show you the corresponding code directly in
                              // your IDE!
 
-    ImGui::Begin("Chess");
-    board.draw();
-    board.debug_removeWhiteKingButton();
-    board.debug_removeBlackKingButton();
-    displayGameOverScreen();
-    ImGui::End();
+    // ImGui::Begin("Chess");
+    // board.draw();
+    // board.debug_removeWhiteKingButton();
+    // board.debug_removeBlackKingButton();
+    // displayGameOverScreen();
+    // ImGui::End();
 
     renderEngine.viewMatrix = glm::lookAt(
         glm::vec3(4, 6, 4), // position caméra

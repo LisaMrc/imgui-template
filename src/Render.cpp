@@ -156,7 +156,6 @@ void RenderEngine::loadMeshes()
                     vertices.push_back(1.0f);
                     vertices.push_back(0.0f);
                 }
-                std::cout << "normal_index = " << idx.normal_index << '\n';
 
                 indices.push_back(indexOffset++);
             }
@@ -242,6 +241,10 @@ void RenderEngine::create3DObj()
 void RenderEngine::renderAll()
 {
     glUseProgram(shaderProgram);
+
+    // Example light direction: pointing down and toward the camera
+    GLint lightDirLoc = glGetUniformLocation(shaderProgram, "lightDir");
+    glUniform3f(lightDirLoc, 0.0f, 1.0f, 1.0f); // Feel free to tweak this
 
     GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));

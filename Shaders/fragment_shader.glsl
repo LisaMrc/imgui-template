@@ -1,12 +1,18 @@
 #version 330 core
-out vec4 FragColor;
 
 in vec3 FragNormal;
-uniform vec3 lightDir; // e.g., vec3(0, 1, 1)
+out vec4 FragColor;
+
+uniform vec3 lightDir;
 
 void main()
 {
-    float diff = max(dot(normalize(FragNormal), normalize(lightDir)), 0.0);
-    vec3 color = vec3(1.0) * diff; // basic diffuse shading
-    FragColor = vec4(color, 1.0);
+    vec3 norm = normalize(FragNormal);
+    vec3 light = normalize(lightDir);
+    float diff = max(dot(norm, light), 0.0);
+
+    vec3 baseColor = vec3(1.0, 1.0, 1.0); // white
+    vec3 shaded = baseColor * diff;
+
+    FragColor = vec4(shaded, 1.0);
 }
