@@ -10,7 +10,7 @@
 
 class obj3D {
 public:
-    Piece* piece{nullptr};
+    Piece* piece = nullptr;
     GLuint meshVAO{0};
     GLuint meshVBO{0};
     GLuint meshEBO{0};
@@ -59,7 +59,7 @@ public:
 
     void loadShader();
     void loadMeshes();
-    void create3DObj();
+    void create3DObj(Board& board);
     // TODO(🚀) : group everything into an init function
 
     void      setViewMatrix(const glm::mat4& view);

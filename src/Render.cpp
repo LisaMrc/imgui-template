@@ -8,8 +8,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <vector>
+#include "../include/Board.hpp"
 #include "glad/glad.h"
 #include "miniaudio.h"
+
 
 void RenderEngine::loadShader()
 {
@@ -210,32 +212,29 @@ void RenderEngine::loadMeshes()
     std::cout << "Meshes : loaded" << '\n';
 }
 
-void RenderEngine::create3DObj()
+void RenderEngine::create3DObj(Board& board)
 {
     if (loadedMeshes.empty())
     {
         std::cerr << "Error: No meshes loaded.\n";
-        return; // Prevent creating objects if no meshes are loaded.
+        return;
     }
 
-    // Create a new obj3D object (e.g., a white pawn)
     obj3D whitePawn;
-    whitePawn.row = 1;
+    whitePawn.row = 6;
     whitePawn.col = 0;
 
-    // Assuming you have already loaded meshes in loadedMeshes, set the first mesh as the object mesh.
     whitePawn.meshVAO    = loadedMeshes[0].vao;
     whitePawn.indexCount = loadedMeshes[0].indexCount;
 
-    // Setup the object's coordinates (initially at (0,0,0) or any other position you want)
-    whitePawn.row = 0;
-    whitePawn.col = 0;
+    // Assuming it's the first pawn in the list
+    whitePawn.piece = board.pieces[0].get();
 
-    // Set up the buffers (VAO, VBO, EBO) for the object
-    // We'll use the already loaded mesh for now (VAO, VBO, EBO should already be set up in loadMeshes)
     gameObjects.push_back(whitePawn);
 
-    std::cout << "Object created: Pawn at (" << whitePawn.row << ", " << whitePawn.col << ")\n";
+    std::cout << "Object created for piece at ("
+              << whitePawn.piece->row << ", "
+              << whitePawn.piece->col << ")\n";
 }
 
 void RenderEngine::renderAll()
