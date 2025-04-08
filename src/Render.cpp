@@ -12,7 +12,6 @@
 #include "glad/glad.h"
 #include "miniaudio.h"
 
-
 void RenderEngine::loadShader()
 {
     // Open shader files
@@ -253,8 +252,11 @@ void RenderEngine::renderAll()
 
     for (const auto& obj : gameObjects)
     {
-        glm::mat4 model    = glm::translate(glm::mat4(1.0f), convertTo3D(obj.row, obj.col));
-        GLint     modelLoc = glGetUniformLocation(shaderProgram, "model");
+        int       row   = obj.piece ? obj.piece->row : obj.row;
+        int       col   = obj.piece ? obj.piece->col : obj.col;
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), convertTo3D(row, col));
+
+        GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         if (obj.indexCount == 0)
