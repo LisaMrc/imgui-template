@@ -14,8 +14,13 @@
 #include "Math.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
+#include "Stockfish.hpp"
 #include "imgui.h"
 
+struct Position {
+    int row;
+    int col;
+};
 class Board {
 private:
     Player white;
@@ -45,8 +50,12 @@ public:
     void                                setFont(ImFont*);
     void                                soundLoop();
     void                                playSound();
+    void                                playAI();
+    std::string                         toChessNotation(int row, int col);
+    Position                            chessNotationToIndices(const std::string& notation);
     std::atomic<bool>                   soundLoopRunning = true;
     std::thread                         soundThread;
+    StockfishEngine                     stockfish;
 
 private:
     Piece*              selectedPiece = nullptr;
@@ -81,4 +90,7 @@ private:
     Gamma       gamma;
 
     float moveCount = 0;
+
+    std::vector<std::string> movesPlayed;
+    bool                     AImode = true;
 };

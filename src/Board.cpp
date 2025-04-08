@@ -1,6 +1,5 @@
 #include "../include/Board.hpp"
 #define MINIAUDIO_IMPLEMENTATION
-#define NOMINMAX
 #include "../include/miniaudio.h"
 
 void Board::init()
@@ -66,39 +65,6 @@ void Board::init()
     defaultFont = io.Fonts->AddFontFromFileTTF("../../font/ROBOTO.ttf", 20.0f);
 
     soundThread = std::thread(&Board::soundLoop, this);
-}
-
-void Board::move(int row, int col)
-{
-    if (selectedPiece && IsValidMove(selectedPiece, row, col) && selectedPiece->isWhite == activePlayer->getColor())
-    {
-        Piece* targetPiece = getPieceAt(row, col);
-        if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
-        {
-            removePiece(targetPiece);
-        }
-        if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
-        {
-            selectedPiece->row = row;
-            selectedPiece->col = col;
-            if (selectedPiece->getType() == 'P')
-                selectedPiece->firstMove = false;
-            moveCount += .5;
-            activePlayer  = activePlayer == &white ? &black : &white;
-            selectedPiece = nullptr;
-        }
-    }
-    else
-    {
-        for (auto& piece : Board::pieces)
-        {
-            if (piece->row == row && piece->col == col)
-            {
-                selectedPiece = piece.get();
-                break;
-            }
-        }
-    }
 }
 
 bool Board::IsValidMove(Piece* piece, int row, int col)
@@ -407,14 +373,220 @@ bool Board::checkPromotion()
     return false;
 }
 
-void Board::drawPieces()
+void Board::soundLoop()
 {
-    for (auto& piece : Board::pieces)
+    // Gamma distribution
+    while (soundLoopRunning)
     {
-        ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.28f, p.y + piece->row * tile_size + tile_size * 0.28f);
-        char   symbol = piece->getSymbol();
+        double delay = gamma.dist(tools.rng);
+        std::this_thread::sleep_for(std::chrono::duration<double>(delay));
 
-        draw_list->AddText(piece_pos, IM_COL32(0, 0, 0, 255), std::string(1, symbol).c_str());
+        // Play your sound here
+        // std::cout << "[Sound] played after " << delay << " seconds\n";
+
+        playSound();
+    }
+}
+
+void Board::playSound()
+{
+    // ma_result result;
+    // ma_engine engine;
+
+    // result = ma_engine_init(NULL, &engine);
+    // if (result != MA_SUCCESS)
+    // {
+    //     std::cerr << "Failed to initialize audio engine.\n";
+    //     return;
+    // }
+
+    // result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
+    // if (result != MA_SUCCESS)
+    // {
+    //     std::cerr << "Failed to play sound.\n";
+    //     ma_engine_uninit(&engine);
+    //     return;
+    // }
+
+    // std::cout << "Playing sound...\n";
+    // std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
+
+    // ma_engine_uninit(&engine);
+}
+
+ImFont* Board::getFont()
+{
+    return customFont;
+}
+
+void Board::setFont(ImFont* font)
+{
+    customFont = font;
+}
+
+void Board::playAI()
+{
+    stockfish.WriteToEngine("uci\n");
+    Sleep(500); // Let Stockfish respond
+    // Sleep(500); // Let Stockfish respond
+    // std::cout << stockfish.GetLastOutput() << "\n";
+
+    std::string allMoves = "";
+
+    for (auto& move : movesPlayed)
+    {
+        allMoves += move;
+    }
+
+    std::string command = "position startpos moves " + allMoves + "\n";
+
+    std::cout << command << "\n";
+
+    stockfish.WriteToEngine(command);
+    stockfish.WriteToEngine("go depth 1\n");
+
+    Sleep(1000); // Let Stockfish calculate
+    // std::cout << stockfish.GetLastOutput() << "\n";
+    std::string bestMove = stockfish.getBestMove();
+
+    std::cout << bestMove << "\n";
+
+    std::string from = bestMove.substr(0, 2);
+    std::string to   = bestMove.substr(2);
+
+    std::cout << chessNotationToIndices(from).row << " " << chessNotationToIndices(from).col << "\n";
+
+    Piece* pieceToMove = getPieceAt(chessNotationToIndices(from).row, chessNotationToIndices(from).col);
+
+    int row = chessNotationToIndices(to).row;
+    int col = chessNotationToIndices(to).col;
+
+    Piece* targetPiece = getPieceAt(row, col);
+    if (targetPiece && targetPiece->isWhite != pieceToMove->isWhite)
+    {
+        removePiece(targetPiece);
+    }
+
+    if (pieceToMove)
+    {
+        pieceToMove->row = row;
+        pieceToMove->col = col;
+    }
+
+    movesPlayed.push_back(bestMove + " ");
+    activePlayer = &white;
+}
+
+std::string Board::toChessNotation(int row, int col)
+{
+    char file = 'a' + col;
+    int  rank = 8 - row;
+
+    return std::string(1, file) + std::to_string(rank);
+}
+
+Position Board::chessNotationToIndices(const std::string& notation)
+{
+    // The notation is assumed to be in the format "a1", "h8", etc.
+
+    // Validate input length
+    if (notation.size() != 2)
+    {
+        throw std::invalid_argument("Invalid chess notation.");
+    }
+
+    char col = notation[0]; // Column ('a' to 'h')
+    char row = notation[1]; // Row ('1' to '8')
+
+    // Convert column from 'a'-'h' to 0-7
+    int colIndex = col - 'a';
+    if (colIndex < 0 || colIndex > 7)
+    {
+        throw std::invalid_argument("Invalid column in chess notation.");
+    }
+
+    // Convert row from '1'-'8' to 7-0
+    int rowIndex = '8' - row;
+    if (rowIndex < 0 || rowIndex > 7)
+    {
+        throw std::invalid_argument("Invalid row in chess notation.");
+    }
+
+    return {rowIndex, colIndex}; // Return row and column
+}
+
+void Board::move(int row, int col)
+{
+    if (!AImode)
+    {
+        if (selectedPiece && IsValidMove(selectedPiece, row, col) && selectedPiece->isWhite == activePlayer->getColor())
+        {
+            Piece* targetPiece = getPieceAt(row, col);
+            if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
+            {
+                removePiece(targetPiece);
+            }
+            if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
+            {
+                movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
+                selectedPiece->row = row;
+                selectedPiece->col = col;
+                if (selectedPiece->getType() == 'P')
+                    selectedPiece->firstMove = false;
+                moveCount += .5;
+                activePlayer  = activePlayer == &white ? &black : &white;
+                selectedPiece = nullptr;
+                playAI();
+            }
+        }
+        else
+        {
+            for (auto& piece : Board::pieces)
+            {
+                if (piece->row == row && piece->col == col)
+                {
+                    selectedPiece = piece.get();
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        if (activePlayer == &white)
+        {
+            if (selectedPiece && IsValidMove(selectedPiece, row, col) && selectedPiece->isWhite == activePlayer->getColor())
+            {
+                Piece* targetPiece = getPieceAt(row, col);
+                if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
+                {
+                    removePiece(targetPiece);
+                }
+                if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
+                {
+                    movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
+
+                    selectedPiece->row = row;
+                    selectedPiece->col = col;
+                    if (selectedPiece->getType() == 'P')
+                        selectedPiece->firstMove = false;
+                    moveCount += .5;
+                    activePlayer  = &black;
+                    selectedPiece = nullptr;
+                }
+            }
+            else
+            {
+                for (auto& piece : Board::pieces)
+                {
+                    if (piece->row == row && piece->col == col)
+                    {
+                        selectedPiece = piece.get();
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -423,6 +595,11 @@ void Board::update(int row, int col)
     if (ImGui::Button(("##tile" + std::to_string(row) + std::to_string(col)).c_str(), ImVec2(tile_size, tile_size)))
     {
         move(row, col);
+    }
+
+    if (activePlayer == &black)
+    {
+        playAI();
     }
 
     // Exponential distribution
@@ -451,57 +628,6 @@ void Board::update(int row, int col)
     }
 }
 
-void Board::soundLoop()
-{
-    // Gamma distribution
-    while (soundLoopRunning)
-    {
-        double delay = gamma.dist(tools.rng);
-        std::this_thread::sleep_for(std::chrono::duration<double>(delay));
-
-        // Play your sound here
-        std::cout << "[Sound] played after " << delay << " seconds\n";
-
-        playSound();
-    }
-}
-
-void Board::playSound()
-{
-    ma_result result;
-    ma_engine engine;
-
-    result = ma_engine_init(NULL, &engine);
-    if (result != MA_SUCCESS)
-    {
-        std::cerr << "Failed to initialize audio engine.\n";
-        return;
-    }
-
-    result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
-    if (result != MA_SUCCESS)
-    {
-        std::cerr << "Failed to play sound.\n";
-        ma_engine_uninit(&engine);
-        return;
-    }
-
-    std::cout << "Playing sound...\n";
-    std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
-
-    ma_engine_uninit(&engine);
-}
-
-ImFont* Board::getFont()
-{
-    return customFont;
-}
-
-void Board::setFont(ImFont* font)
-{
-    customFont = font;
-}
-
 void Board::draw()
 {
     draw_list   = ImGui::GetWindowDrawList();
@@ -513,23 +639,23 @@ void Board::draw()
     {
         for (int col = 0; col < 8; ++col)
         {
-            ImVec2 min(p.x + col * tile_size, p.y + row * tile_size);
-            ImVec2 max(min.x + tile_size, min.y + tile_size);
-            draw_list->AddRectFilled(min, max, (row + col) % 2 == 0 ? lightSquare : darkSquare);
+            ImVec2 minimum(p.x + col * tile_size, p.y + row * tile_size);
+            ImVec2 maximum(minimum.x + tile_size, minimum.y + tile_size);
+            draw_list->AddRectFilled(minimum, maximum, (row + col) % 2 == 0 ? lightSquare : darkSquare);
 
-            ImGui::SetCursorScreenPos(min);
+            ImGui::SetCursorScreenPos(minimum);
             update(row, col);
 
             if (selectedPiece)
             {
-                highlightSquares(min, max, row, col);
+                highlightSquares(minimum, maximum, row, col);
             }
 
             for (auto& king : kings)
             {
                 if (isKingInCheck(dynamic_cast<King*>(king)) && king && king->row == row && king->col == col)
                 {
-                    draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f);
+                    draw_list->AddRect(minimum, maximum, check_color, 0.0f, 0, 3.0f);
                 }
             }
         }
@@ -549,4 +675,15 @@ void Board::draw()
     }
 
     drawPieces();
+}
+
+void Board::drawPieces()
+{
+    for (auto& piece : Board::pieces)
+    {
+        ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.28f, p.y + piece->row * tile_size + tile_size * 0.28f);
+        char   symbol = piece->getSymbol();
+
+        draw_list->AddText(piece_pos, IM_COL32(0, 0, 0, 255), std::string(1, symbol).c_str());
+    }
 }
