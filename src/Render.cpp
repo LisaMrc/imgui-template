@@ -14,6 +14,11 @@ void RenderEngine::loadShader()
     shader.load_shader("basic.vert", "basic.frag");
 }
 
+void RenderEngine::setViewMatrix(const glm::mat4& view)
+{
+    viewMatrix = view;
+}
+
 glm::vec3 RenderEngine::convertTo3D(int row, int col)
 {
     float squareSize = 1.0f;
@@ -69,6 +74,9 @@ void RenderEngine::render3DObj(const std::string& ObjectPath, int row, int col)
     shader.use();
     glm::mat4 model = glm::translate(glm::mat4(1.0f), convertTo3D(row, col));
     shader.set_uniform_matrix_4fv("model", model);
+
+    shader.set_uniform_matrix_4fv("model", model);
+    shader.set_uniform_matrix_4fv("view", viewMatrix);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, nb_vertex);

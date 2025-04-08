@@ -9,12 +9,13 @@ void TrackballCamera::moveFront(float delta)
 
 void TrackballCamera::rotateLeft(float degrees)
 {
-    m_fDistance += degrees;
+    m_fAngleY += degrees;
 }
 
 void TrackballCamera::rotateUp(float degrees)
 {
-    m_fDistance += degrees;
+    m_fAngleX += degrees;
+    m_fAngleX = glm::clamp(m_fAngleX, -89.0f, 89.0f);
 }
 
 glm::mat4 TrackballCamera::getViewMatrix() const
@@ -37,6 +38,6 @@ glm::mat4 TrackballCamera::getViewMatrix() const
 void TrackballCamera::handleMouseMotion(float deltaX, float deltaY)
 {
     float sensitivity = 0.2f;
-    m_fAngleY += deltaX * sensitivity; // Rotate left/right
-    m_fAngleX += deltaY * sensitivity; // Rotate up/down
+    m_fAngleY += deltaX * sensitivity; // Rotation gauche/droite
+    m_fAngleX += deltaY * sensitivity; // Rotation haut/bas
 }

@@ -1,38 +1,66 @@
 #include "../include/App.hpp"
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include "../include/Board.hpp"
 #include "../include/Render.hpp"
 #include "glad/glad.h"
 #include "quick_imgui/quick_imgui.hpp"
 
+static bool togglePressed = false;
+
 void App::init()
 {
     board.init();
+    skybox.init();
     renderEngine.loadShader();
     glEnable(GL_DEPTH_TEST);
 }
 
 void App::update()
 {
-    ImGui::ShowDemoWindow();
-
     ImGui::Begin("Chess");
-    board.draw();
-    board.debug_removeWhiteKingButton();
-    board.debug_removeBlackKingButton();
-    displayGameOverScreen();
-    ImGui::End();
 
-    // renderEngine.render3DObj("../../Assets/Objects/Pieces/Pawn.obj", 0, 0, renderEngine.shaderProgram);
-    // render3DPieces();
+    glm::mat4 view = camera.getViewMatrix();
+    renderEngine.setViewMatrix(view);
+
+    board.draw();
+    displayGameOverScreen();
+
+    ImGui::End();
 }
 
 void App::handleEvent()
 {
-    // TODO(lisam) : enable mouse trigger for trackball camera
-    if (true)
+    GLFWwindow* window = glfwGetCurrentContext();
+    if (!window)
+        return;
+
+    // Changer de caméra avec la touche C
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
     {
-        TrackBallCamera.moveFront(.001);
+        if (!togglePressed)
+        {
+            CameraMode newMode = (camera.getMode() == CameraMode::Trackball)
+                                     ? CameraMode::Freefly
+                                     : CameraMode::Trackball;
+            camera.setMode(newMode);
+            togglePressed = true;
+        }
     }
+    else
+    {
+        togglePressed = false;
+    }
+
+    // Contrôles communs à tous les modes (ZQSD)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.rotateUp(-1.0f);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.rotateUp(1.0f);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.rotateLeft(1.0f);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.rotateLeft(-1.0f);
 }
 
 void App::displayGameOverScreen()
@@ -66,17 +94,11 @@ void App::run()
 {
     init(); // => dedans, tu peux mettre glEnable()
 
-    quick_imgui::loop("Zen Chess", quick_imgui::Callbacks{
-        .init = [&]() {
-            glEnable(GL_DEPTH_TEST);
-        },
-        .loop = [&]() {
+    quick_imgui::loop("Zen Chess", quick_imgui::Callbacks{.init = [&]() { glEnable(GL_DEPTH_TEST); }, .loop = [&]() {
             glClearColor(1, 0, 1, 1);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            update();
-        },
-        .mouse_button_callback = [&](int button, int action, int mods) {
-            // Mouse handling
-        }
-    });
+            handleEvent();
+            update(); }, .mouse_button_callback = [&](int button, int action, int mods) {
+                                                              // Mouse handling
+                                                          }});
 }
