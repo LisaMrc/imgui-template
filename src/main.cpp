@@ -1,12 +1,11 @@
-#include <thread>
-#pragma once
-
 #include <cstdlib>
 #include <ctime>
+#include <thread>
 #include "../include/App.hpp"
 #include "../include/Math.hpp"
 
-int main() {
+int main()
+{
     App app;
 
     std::jthread audioThread([](std::stop_token st) {
@@ -15,8 +14,9 @@ int main() {
 
     app.run();
 
-    return 0;
-    std::srand(static_cast<unsigned>(time(0)));
+    std::srand(static_cast<unsigned>(time(nullptr)));
     app.board.soundLoopRunning = false;
     app.board.soundThread.join();
+
+    return 0;
 }
