@@ -1,5 +1,7 @@
 # Welcome to Zen Chess 🍃
-♟️ *This game is currently in progress. Hopefully will be finished by may !* ♟️
+♟️ *This game is currently in progress. Hopefully will be finished by april 11th !* ♟️
+
+You are currently on Lisa's branch :) 
 
 ## 1 | General Info
 🧑‍💻 **Developers** : Anass Doublal, Jean Le Chaudelec, Lisa Muracciole
