@@ -20,6 +20,8 @@ public:
     void displayGameOverScreen();
     void run();
 
+    Board board;
+
 private:
     Board           board;
     TrackballCamera TrackBallCamera;

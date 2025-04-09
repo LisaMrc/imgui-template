@@ -1,4 +1,6 @@
 #include "../include/Board.hpp"
+#define MINIAUDIO_IMPLEMENTATION
+#include "../include/miniaudio.h"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <iostream>
@@ -11,6 +13,14 @@
 
 void Board::init()
 {
+    board_size = 800.0f;
+    tile_size  = board_size / 8.0f;
+
+    lightSquare     = IM_COL32(255, 206, 158, 255);
+    darkSquare      = IM_COL32(209, 139, 71, 255);
+    highlight_color = IM_COL32(0, 255, 0, 255);
+    check_color     = IM_COL32(255, 0, 0, 255);
+
     pieces.emplace_back(std::make_unique<Pawn>(6, 0, true));
     pieces.emplace_back(std::make_unique<Pawn>(6, 1, true));
     pieces.emplace_back(std::make_unique<Pawn>(6, 2, true));
@@ -53,20 +63,32 @@ void Board::init()
     {
         piece->board = this;
     }
+
+    if (kings.size() < 2)
+    {
+        kings.emplace_back(pieces[pieces.size() - 1].get());
+        kings.emplace_back(pieces[pieces.size() - 2].get());
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    defaultFont = io.Fonts->AddFontFromFileTTF("../../font/ROBOTO.ttf", 20.0f);
+
+    soundThread = std::thread(&Board::soundLoop, this);
 }
 
 bool Board::IsValidMove(Piece* piece, int row, int col)
 {
-    if (!piece || piece->isWhite != activePlayer->getColor())
+    if (!piece)
         return false;
 
     Piece* targetPiece = getPieceAt(row, col);
 
-    if (targetPiece != nullptr && targetPiece->isWhite == activePlayer->getColor())
+    if (!isPathClear(piece, row, col) && piece->getType() != 'N')
     {
         return false;
     }
 
+    if (piece->getType() == 'P')
     if (!isPathClear(piece, row, col) && piece->getSymbol() != 'N')
     {
         // std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
@@ -76,7 +98,7 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     if (piece->getSymbol() == 'P')
         piece->isCapture = (targetPiece && targetPiece->isWhite != piece->isWhite);
 
-    if (piece->getSymbol() == 'K')
+    if (piece->getType() == 'K')
     {
         King* king = dynamic_cast<King*>(piece);
         if (king && king->canCastle(row, col))
@@ -204,93 +226,491 @@ void Board::performCastle(King* king, int destRow, int destCol)
     rook->firstMove = false;
 }
 
-bool Board::isKingInCheck(bool isWhiteKing)
+bool Board::isKingInCheck(King* king)
 {
-    Piece* king = nullptr;
+    if (!king)
+        return false;
+
+    bool isKingAttacked = false;
+
     for (auto& piece : pieces)
     {
-        if (piece->getSymbol() == 'K' && piece->isWhite == isWhiteKing)
+        if (piece->isWhite != king->isWhite)
         {
-            king = piece.get();
-            break;
+            if (IsValidMove(piece.get(), king->row, king->col))
+            {
+                isKingAttacked = true;
+            }
         }
     }
 
-    if (!king)
+    return isKingAttacked;
+}
+
+bool Board::canHighlightSquares(Piece* selectedPiece, bool isWhite, int row, int col)
+{
+    if (selectedPiece->getType() == 'P')
     {
         // std::cout << "Error: King not found!\n";
         return false;
-    }
+        int direction = selectedPiece->isWhite ? -1 : 1;
 
-    for (auto& piece : pieces)
-    {
-        if (piece->isWhite != isWhiteKing)
+        // Forward movement
+        if (selectedPiece->firstMove)
         {
-            if (IsValidMove(piece.get(), king->row, king->col))
+            if (row == selectedPiece->row + 2 * direction && col == selectedPiece->col)
+            {
+                return true;
+            }
+        }
+
+        if (row == selectedPiece->row + direction && col == selectedPiece->col)
+        {
+            return true;
+        }
+
+        // Diagonal captures
+        if (row == selectedPiece->row + direction && (col == selectedPiece->col + 1 || col == selectedPiece->col - 1))
+        {
+            Piece* target = getPieceAt(row, col);
+            if (target && target->isWhite != selectedPiece->isWhite)
             {
                 return true;
             }
         }
     }
-
+    if (selectedPiece->getType() == 'R')
+    {
+        if ((selectedPiece->row == row || selectedPiece->col == col) && isPathClear(selectedPiece, row, col))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getType() == 'N')
+    {
+        int dx = abs(selectedPiece->row - row);
+        int dy = abs(selectedPiece->col - col);
+        if ((dx == 2 && dy == 1) || (dx == 1 && dy == 2))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getType() == 'B')
+    {
+        if (abs(selectedPiece->row - row) == abs(selectedPiece->col - col) && isPathClear(selectedPiece, row, col))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getType() == 'Q')
+    {
+        if (((selectedPiece->row == row || selectedPiece->col == col) || // Rook move
+             (abs(selectedPiece->row - row) == abs(selectedPiece->col - col)))
+            && // Bishop move
+            isPathClear(selectedPiece, row, col))
+        {
+            return true;
+        }
+    }
+    if (selectedPiece->getType() == 'K')
+    {
+        int dx = abs(selectedPiece->row - row);
+        int dy = abs(selectedPiece->col - col);
+        if (dx <= 1 && dy <= 1)
+        {
+            return true;
+        }
+    }
     return false;
 }
 
-void Board::draw()
+void Board::highlightSquares(ImVec2 min, ImVec2 max, int row, int col)
 {
-    ImDrawList* draw_list   = ImGui::GetWindowDrawList();
-    ImVec2      window_pos  = ImGui::GetWindowPos();
-    ImVec2      window_size = ImGui::GetWindowSize();
+    Piece* targetPiece = getPieceAt(row, col);
 
-    float  board_size = 800.0f;
-    float  tile_size  = board_size / 8.0f;
-    ImVec2 p(window_pos.x + (window_size.x - board_size) * 0.5f, window_pos.y + (window_size.y - board_size) * 0.5f);
-
-    ImU32 lightSquare     = IM_COL32(255, 206, 158, 255);
-    ImU32 darkSquare      = IM_COL32(209, 139, 71, 255);
-    ImU32 highlight_color = IM_COL32(0, 255, 0, 255);
-    ImU32 check_color     = IM_COL32(255, 0, 0, 255);
-
-    bool isWhiteInCheck = isKingInCheck(false);
-    bool isBlackInCheck = isKingInCheck(true);
-
-    Piece* activeKing = nullptr;
-    if (activePlayer == &white)
+    if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
     {
-        for (auto& piece : pieces)
+        if (selectedPiece->isWhite)
         {
-            if (piece->getSymbol() == 'K' && piece->isWhite)
+            if (canHighlightSquares(selectedPiece, true, row, col))
             {
-                activeKing = piece.get();
-                break;
+                draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
+            }
+        }
+        else
+        {
+            if (canHighlightSquares(selectedPiece, false, row, col))
+            {
+                draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
+            }
+        }
+    }
+    if (selectedPiece->row == row && selectedPiece->col == col)
+    {
+        draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
+    }
+}
+
+void Board::promotePawn(char newSymbol)
+{
+    if (!promotedPawn)
+        return;
+
+    // Add the new piece
+    switch (newSymbol)
+    {
+    case 'Q':
+        pieces.emplace_back(std::make_unique<Queen>(promotionTargetRow, promotionTargetCol, promotedPawn->isWhite));
+        break;
+    case 'R':
+        pieces.emplace_back(std::make_unique<Rook>(promotionTargetRow, promotionTargetCol, promotedPawn->isWhite));
+        break;
+    case 'B':
+        pieces.emplace_back(std::make_unique<Bishop>(promotionTargetRow, promotionTargetCol, promotedPawn->isWhite));
+        break;
+    case 'N':
+        pieces.emplace_back(std::make_unique<Knight>(promotionTargetRow, promotionTargetCol, promotedPawn->isWhite));
+        break;
+    }
+
+    for (auto& piece : pieces)
+    {
+        piece->board = this;
+    }
+
+    // Reset promotion state
+    removePiece(promotedPawn);
+
+    promotedPawn       = nullptr;
+    isPromotionPending = false;
+}
+
+void Board::showPromotionWindow()
+{
+    if (ImGui::BeginPopupModal(".", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        if (binomial.result > 0)
+            binomial.printQuote(defaultFont, customFont);
+
+        if (ImGui::Button("q"))
+        {
+            promotePawn('Q');
+            binomial.done = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("r"))
+        {
+            promotePawn('R');
+            binomial.done = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("b"))
+        {
+            promotePawn('B');
+            binomial.done = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("h"))
+        {
+            promotePawn('N');
+            binomial.done = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+}
+
+bool Board::checkPromotion()
+{
+    for (auto& piece : pieces)
+    {
+        if (piece.get()->getType() == 'P' && ((piece->isWhite && piece->row == 0) || (!piece->isWhite && piece->row == 7)))
+        {
+            promotedPawn = piece.get();
+            return true;
+        }
+    }
+    return false;
+}
+
+void Board::soundLoop()
+{
+    // Gamma distribution
+    while (soundLoopRunning)
+    {
+        double delay = gamma.dist(tools.rng);
+        std::this_thread::sleep_for(std::chrono::duration<double>(delay));
+
+        // Play your sound here
+        // std::cout << "[Sound] played after " << delay << " seconds\n";
+
+        playSound();
+    }
+}
+
+void Board::playSound()
+{
+    // ma_result result;
+    // ma_engine engine;
+
+    // result = ma_engine_init(NULL, &engine);
+    // if (result != MA_SUCCESS)
+    // {
+    //     std::cerr << "Failed to initialize audio engine.\n";
+    //     return;
+    // }
+
+    // result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
+    // if (result != MA_SUCCESS)
+    // {
+    //     std::cerr << "Failed to play sound.\n";
+    //     ma_engine_uninit(&engine);
+    //     return;
+    // }
+
+    // std::cout << "Playing sound...\n";
+    // std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
+
+    // ma_engine_uninit(&engine);
+}
+
+ImFont* Board::getFont()
+{
+    return customFont;
+}
+
+void Board::setFont(ImFont* font)
+{
+    customFont = font;
+}
+
+void Board::playAI()
+{
+    stockfish.WriteToEngine("uci\n");
+    Sleep(500); // Let Stockfish respond
+    // Sleep(500); // Let Stockfish respond
+    // std::cout << stockfish.GetLastOutput() << "\n";
+
+    std::string allMoves = "";
+
+    for (auto& move : movesPlayed)
+    {
+        allMoves += move;
+    }
+
+    std::string command = "position startpos moves " + allMoves + "\n";
+
+    std::cout << command << "\n";
+
+    stockfish.WriteToEngine(command);
+    stockfish.WriteToEngine("go depth 1\n");
+
+    Sleep(1000); // Let Stockfish calculate
+    // std::cout << stockfish.GetLastOutput() << "\n";
+    std::string bestMove = stockfish.getBestMove();
+
+    std::cout << bestMove << "\n";
+
+    std::string from = bestMove.substr(0, 2);
+    std::string to   = bestMove.substr(2);
+
+    std::cout << chessNotationToIndices(from).row << " " << chessNotationToIndices(from).col << "\n";
+
+    Piece* pieceToMove = getPieceAt(chessNotationToIndices(from).row, chessNotationToIndices(from).col);
+
+    int row = chessNotationToIndices(to).row;
+    int col = chessNotationToIndices(to).col;
+
+    Piece* targetPiece = getPieceAt(row, col);
+    if (targetPiece && targetPiece->isWhite != pieceToMove->isWhite)
+    {
+        removePiece(targetPiece);
+    }
+
+    if (pieceToMove)
+    {
+        pieceToMove->row = row;
+        pieceToMove->col = col;
+    }
+
+    movesPlayed.push_back(bestMove + " ");
+    activePlayer = &white;
+}
+
+std::string Board::toChessNotation(int row, int col)
+{
+    char file = 'a' + col;
+    int  rank = 8 - row;
+
+    return std::string(1, file) + std::to_string(rank);
+}
+
+Position Board::chessNotationToIndices(const std::string& notation)
+{
+    // The notation is assumed to be in the format "a1", "h8", etc.
+
+    // Validate input length
+    if (notation.size() != 2)
+    {
+        throw std::invalid_argument("Invalid chess notation.");
+    }
+
+    char col = notation[0]; // Column ('a' to 'h')
+    char row = notation[1]; // Row ('1' to '8')
+
+    // Convert column from 'a'-'h' to 0-7
+    int colIndex = col - 'a';
+    if (colIndex < 0 || colIndex > 7)
+    {
+        throw std::invalid_argument("Invalid column in chess notation.");
+    }
+
+    // Convert row from '1'-'8' to 7-0
+    int rowIndex = '8' - row;
+    if (rowIndex < 0 || rowIndex > 7)
+    {
+        throw std::invalid_argument("Invalid row in chess notation.");
+    }
+
+    return {rowIndex, colIndex}; // Return row and column
+}
+
+void Board::move(int row, int col)
+{
+    if (!AImode)
+    {
+        if (selectedPiece && IsValidMove(selectedPiece, row, col) && selectedPiece->isWhite == activePlayer->getColor())
+        {
+            Piece* targetPiece = getPieceAt(row, col);
+            if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
+            {
+                removePiece(targetPiece);
+            }
+            if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
+            {
+                movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
+                selectedPiece->row = row;
+                selectedPiece->col = col;
+                if (selectedPiece->getType() == 'P')
+                    selectedPiece->firstMove = false;
+                moveCount += .5;
+                activePlayer  = activePlayer == &white ? &black : &white;
+                selectedPiece = nullptr;
+                playAI();
+            }
+        }
+        else
+        {
+            for (auto& piece : Board::pieces)
+            {
+                if (piece->row == row && piece->col == col)
+                {
+                    selectedPiece = piece.get();
+                    break;
+                }
             }
         }
     }
     else
     {
-        for (auto& piece : pieces)
+        if (activePlayer == &white)
         {
-            if (piece->getSymbol() == 'K' && !piece->isWhite)
+            if (selectedPiece && IsValidMove(selectedPiece, row, col) && selectedPiece->isWhite == activePlayer->getColor())
             {
-                activeKing = piece.get();
-                break;
+                Piece* targetPiece = getPieceAt(row, col);
+                if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
+                {
+                    removePiece(targetPiece);
+                }
+                if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
+                {
+                    movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
+
+                    selectedPiece->row = row;
+                    selectedPiece->col = col;
+                    if (selectedPiece->getType() == 'P')
+                        selectedPiece->firstMove = false;
+                    moveCount += .5;
+                    activePlayer  = &black;
+                    selectedPiece = nullptr;
+                }
+            }
+            else
+            {
+                for (auto& piece : Board::pieces)
+                {
+                    if (piece->row == row && piece->col == col)
+                    {
+                        selectedPiece = piece.get();
+                        break;
+                    }
+                }
             }
         }
     }
+}
+
+void Board::update(int row, int col)
+{
+    if (ImGui::Button(("##tile" + std::to_string(row) + std::to_string(col)).c_str(), ImVec2(tile_size, tile_size)))
+    {
+        move(row, col);
+    }
+
+    if (activePlayer == &black)
+    {
+        playAI();
+    }
+
+    // Exponential distribution
+    if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
+    {
+        if (!exp.done)
+        {
+            Piece* toRemove = kings[0];
+            int    idx      = 0;
+
+            while (toRemove->getType() == 'K')
+            {
+                idx = std::round(exp.dist(tools.rng));
+                idx = std::clamp(idx, 0, static_cast<int>(pieces.size() - 1));
+
+                toRemove = pieces[idx].get();
+            }
+
+            removePiece(toRemove);
+            exp.done = true;
+        }
+    }
+    else
+    {
+        exp.done = false;
+    }
+}
+
+void Board::draw()
+{
+    draw_list   = ImGui::GetWindowDrawList();
+    window_pos  = ImGui::GetWindowPos();
+    window_size = ImGui::GetWindowSize();
+    p           = {window_pos.x + (window_size.x - board_size) * 0.5f, window_pos.y + (window_size.y - board_size) * 0.5f};
 
     for (int row = 0; row < 8; ++row)
     {
         for (int col = 0; col < 8; ++col)
         {
-            ImVec2 min(p.x + col * tile_size, p.y + row * tile_size);
-            ImVec2 max(min.x + tile_size, min.y + tile_size);
-            draw_list->AddRectFilled(min, max, (row + col) % 2 == 0 ? lightSquare : darkSquare);
+            ImVec2 minimum(p.x + col * tile_size, p.y + row * tile_size);
+            ImVec2 maximum(minimum.x + tile_size, minimum.y + tile_size);
+            draw_list->AddRectFilled(minimum, maximum, (row + col) % 2 == 0 ? lightSquare : darkSquare);
 
-            if (selectedPiece && selectedPiece->row == row && selectedPiece->col == col)
-            {
-                draw_list->AddRect(min, max, highlight_color, 0.0f, 0, 3.0f);
-            }
+            ImGui::SetCursorScreenPos(minimum);
+            update(row, col);
 
+            if (selectedPiece)
             // Deselect piece with right mouse button
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
             {
@@ -301,12 +721,12 @@ void Board::draw()
             if ((isWhiteInCheck && activeKing && activeKing->row == row && activeKing->col == col) || (isBlackInCheck && activeKing && activeKing->row == row && activeKing->col == col))
             {
                 draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f);
+                highlightSquares(minimum, maximum, row, col);
             }
 
-            ImGui::SetCursorScreenPos(min);
-            if (ImGui::Button(("##tile" + std::to_string(row) + std::to_string(col)).c_str(), ImVec2(tile_size, tile_size)))
+            for (auto& king : kings)
             {
-                if (selectedPiece && IsValidMove(selectedPiece, row, col))
+                if (isKingInCheck(dynamic_cast<King*>(king)) && king && king->row == row && king->col == col)
                 {
                     Piece* targetPiece = getPieceAt(row, col);
                     if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
@@ -318,29 +738,34 @@ void Board::draw()
                     activePlayer       = activePlayer == &white ? &black : &white;
                     SwitchPlayer(*this);
                     selectedPiece = nullptr;
-                }
-                else
-                {
-                    for (auto& piece : Board::pieces)
-                    {
-                        if (piece->row == row && piece->col == col)
-                        {
-                            selectedPiece = piece.get();
-                            break;
-                        }
-                    }
+                    draw_list->AddRect(minimum, maximum, check_color, 0.0f, 0, 3.0f);
                 }
             }
         }
     }
+    if (checkPromotion())
+    {
+        isPromotionPending = true;
+        promotionTargetRow = promotedPawn->row;
+        promotionTargetCol = promotedPawn->col;
+        ImGui::OpenPopup(".");
+        if (!binomial.done)
+        {
+            binomial.done   = true;
+            binomial.result = binomial.dist(binomial.engine);
+        }
+        showPromotionWindow();
+    }
 
-    // Draw pieces
+    drawPieces();
+}
+
+void Board::drawPieces()
+{
     for (auto& piece : Board::pieces)
     {
-        ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.35f, p.y + piece->row * tile_size + tile_size * 0.35f);
+        ImVec2 piece_pos(p.x + piece->col * tile_size + tile_size * 0.28f, p.y + piece->row * tile_size + tile_size * 0.28f);
         char   symbol = piece->getSymbol();
-        if (!piece->isWhite)
-            symbol = tolower(symbol);
 
         draw_list->AddText(piece_pos, IM_COL32(0, 0, 0, 255), std::string(1, symbol).c_str());
     }

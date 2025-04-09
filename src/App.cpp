@@ -20,13 +20,7 @@ void App::init()
 
 void App::update()
 {
-    ImGui::ShowDemoWindow(); // This opens a window which shows tons of
-                             // examples of what you can do with ImGui. You
-                             // should check it out! Also, you can use the
-                             // "Item Picker" in the top menu of that demo
-                             // window: then click on any widget and it will
-                             // show you the corresponding code directly in
-                             // your IDE!
+    ImGui::PushFont(board.getFont());
 
     ImGui::Begin("Chess");
     board.draw();
@@ -42,10 +36,16 @@ void App::update()
     );
 
     renderEngine.renderAll();
+
+    ImGui::PopFont();
 }
 
 void App::handleEvent()
 {
+    // playerWhite.setColor(true);
+    // playerBlack.setColor(false);
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
     // TODO(🎥) : enable mouse trigger for trackball camera
     // if (true)
     // {
@@ -53,6 +53,9 @@ void App::handleEvent()
     // }
 }
 
+    ImGuiIO& io = ImGui::GetIO();
+    board.setFont(io.Fonts->AddFontFromFileTTF("../../font/CHEQ_TT.TTF", 40.0f));
+    board.init();
 void App::displayGameOverScreen()
 {
     if (board.wasWhiteKingRemoved())
