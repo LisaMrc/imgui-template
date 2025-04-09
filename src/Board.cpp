@@ -82,6 +82,15 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     if (piece->getType() == 'P')
         piece->isCapture = (targetPiece && targetPiece->isWhite != piece->isWhite);
 
+    // En passant capture condition
+    if (piece->getType() == 'P')
+    {
+        if (enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second && abs(piece->col - col) == 1 && ((piece->isWhite && row == piece->row - 1) || (!piece->isWhite && row == piece->row + 1)))
+        {
+            return true;
+        }
+    }
+
     if (piece->getType() == 'K')
     {
         King* king = dynamic_cast<King*>(piece);
@@ -497,6 +506,31 @@ void Board::playAI()
         rook->firstMove = false;
     }
 
+    if (enPassantTarget.has_value())
+    {
+        std::cout << enPassantTarget->first << " "
+                  << enPassantTarget->second << "\n";
+
+        std::cout << row << " "
+                  << col << "\n\n";
+    }
+
+    if (pieceToMove->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
+    {
+        int capturedRow = row - 1;
+        removePiece(getPieceAt(capturedRow, col));
+    }
+
+    // Example: inside makeMove(selectedPiece, toRow, toCol)
+    if (pieceToMove->getType() == 'P' && abs(row - pieceToMove->row) == 2)
+    {
+        enPassantTarget = {(pieceToMove->row + row) / 2, pieceToMove->col};
+    }
+    else
+    {
+        enPassantTarget.reset(); // Reset if not a double step
+    }
+
     if (pieceToMove)
     {
         pieceToMove->row = row;
@@ -560,11 +594,37 @@ void Board::move(int row, int col)
             {
                 movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
 
+                // if (enPassantTarget.has_value())
+                // {
+                //     std::cout << enPassantTarget->first << " "
+                //               << enPassantTarget->second << "\n";
+
+                //     std::cout << row << " "
+                //               << col << "\n\n";
+                // }
+
+                if (selectedPiece->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
+                {
+                    int capturedRow = selectedPiece->isWhite ? row + 1 : row - 1;
+                    removePiece(getPieceAt(capturedRow, col));
+                }
+
+                // Example: inside makeMove(selectedPiece, toRow, toCol)
+                if (selectedPiece->getType() == 'P' && abs(row - selectedPiece->row) == 2)
+                {
+                    enPassantTarget = {(selectedPiece->row + row) / 2, selectedPiece->col};
+                }
+                else
+                {
+                    enPassantTarget.reset(); // Reset if not a double step
+                }
+
                 selectedPiece->row = row;
                 selectedPiece->col = col;
 
                 if (selectedPiece->getType() == 'P')
                     selectedPiece->firstMove = false;
+
                 moveCount += .5;
                 activePlayer  = activePlayer == &white ? &black : &white;
                 selectedPiece = nullptr;
@@ -598,6 +658,31 @@ void Board::move(int row, int col)
                 if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
                 {
                     movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
+
+                    // if (enPassantTarget.has_value())
+                    // {
+                    //     std::cout << enPassantTarget->first << " "
+                    //               << enPassantTarget->second << "\n";
+
+                    //     std::cout << row << " "
+                    //               << col << "\n\n";
+                    // }
+
+                    if (selectedPiece->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
+                    {
+                        int capturedRow = selectedPiece->isWhite ? row + 1 : row - 1;
+                        removePiece(getPieceAt(capturedRow, col));
+                    }
+
+                    // Example: inside makeMove(selectedPiece, toRow, toCol)
+                    if (selectedPiece->getType() == 'P' && abs(row - selectedPiece->row) == 2)
+                    {
+                        enPassantTarget = {(selectedPiece->row + row) / 2, selectedPiece->col};
+                    }
+                    else
+                    {
+                        enPassantTarget.reset(); // Reset if not a double step
+                    }
 
                     selectedPiece->row = row;
                     selectedPiece->col = col;

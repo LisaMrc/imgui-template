@@ -100,4 +100,6 @@ private:
     const float waitDuration   = 0.1f;
 
     bool isCastle = false;
+
+    std::optional<std::pair<int, int>> enPassantTarget; // Holds the square that can be captured via en passant
 };
