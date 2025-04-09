@@ -1,14 +1,12 @@
 #pragma once
-#include <thread>
-#include "../include/Board.hpp"
 
-void playRandomSong(std::stop_token stopToken);
-
-bool shouldSwitchPlayer(double probability);
-void SwitchPlayer(Board &board);
+#include "Board.hpp"
 #include <imgui.h>
 #include <ctime>
 #include <random>
+
+bool shouldSwitchPlayer(double probability);
+void SwitchPlayer(Board &board);
 
 class Tools {
 public:

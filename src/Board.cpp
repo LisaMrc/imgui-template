@@ -454,28 +454,28 @@ void Board::soundLoop()
 
 void Board::playSound()
 {
-    // ma_result result;
-    // ma_engine engine;
+    ma_result result;
+    ma_engine engine;
 
-    // result = ma_engine_init(NULL, &engine);
-    // if (result != MA_SUCCESS)
-    // {
-    //     std::cerr << "Failed to initialize audio engine.\n";
-    //     return;
-    // }
+    result = ma_engine_init(NULL, &engine);
+    if (result != MA_SUCCESS)
+    {
+        std::cerr << "Failed to initialize audio engine.\n";
+        return;
+    }
 
-    // result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
-    // if (result != MA_SUCCESS)
-    // {
-    //     std::cerr << "Failed to play sound.\n";
-    //     ma_engine_uninit(&engine);
-    //     return;
-    // }
+    result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
+    if (result != MA_SUCCESS)
+    {
+        std::cerr << "Failed to play sound.\n";
+        ma_engine_uninit(&engine);
+        return;
+    }
 
-    // std::cout << "Playing sound...\n";
-    // std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
+    std::cout << "Playing sound...\n";
+    std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
 
-    // ma_engine_uninit(&engine);
+    ma_engine_uninit(&engine);
 }
 
 ImFont* Board::getFont()

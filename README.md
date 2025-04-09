@@ -44,7 +44,7 @@ Functions that are used for **debugging** are named debug_functionName
 ## 6 | Probability laws
 1️⃣ Random Background Music (Uniform law) 🎵
 2️⃣ Player Switch in the Middle of the Game (Bernoulli law) 🔄
-3️⃣ Random Zen Sounds (Geometric law) 🌿
+3️⃣ Random Zen Sounds (Binomial law) 🌿
 4️⃣ Scene Setting (Multinomial law) 🌤️
 5️⃣ Leaf Falls on the Board (Poisson law) 🍃
 6️⃣ Drifting Breeze (Hyper geometric law) 🎐

@@ -10,7 +10,6 @@
 #include <vector>
 #include "../include/Board.hpp"
 #include "glad/glad.h"
-#include "miniaudio.h"
 
 void RenderEngine::loadShader()
 {

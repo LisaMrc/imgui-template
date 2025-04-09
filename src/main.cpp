@@ -1,22 +1,27 @@
-#include <cstdlib>
-#include <ctime>
 #include <thread>
 #include "../include/App.hpp"
-#include "../include/Math.hpp"
+#include "../include/Audio.hpp"
 
 int main()
 {
     App app;
+    AudioEngine audioEngine;
 
-    std::jthread audioThread([](std::stop_token st) {
-        playRandomSong(st);
+    std::jthread audioThread([&](std::stop_token st) {
+        audioEngine.playRandomSong(st);
     });
 
-    app.run();
+    std::jthread soundThread([&](std::stop_token st) {
+        audioEngine.playRandomSound(st);
+    });
 
-    std::srand(static_cast<unsigned>(time(nullptr)));
-    app.board.soundLoopRunning = false;
-    app.board.soundThread.join();
+    app.run(); // blocks until app is closed
+
+    // Clean shutdown of both threads
+    audioThread.request_stop();
+    soundThread.request_stop();
+    audioThread.join();
+    soundThread.join();
 
     return 0;
 }

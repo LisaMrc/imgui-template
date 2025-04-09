@@ -10,7 +10,6 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include "../include/Piece.hpp"
 #include "Math.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
@@ -21,6 +20,7 @@ struct Position {
     int row;
     int col;
 };
+
 class Board {
 private:
 public:
