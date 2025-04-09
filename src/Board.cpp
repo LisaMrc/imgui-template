@@ -87,6 +87,7 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
         King* king = dynamic_cast<King*>(piece);
         if (king && king->canCastle(row, col))
         {
+            isCastle = true;
             performCastle(king, row, col);
             return true;
         }
@@ -149,6 +150,18 @@ void Board::removePiece(Piece* piece)
 
 void Board::performCastle(King* king, int destRow, int destCol)
 {
+    isCastle = false;
+
+    std::cout << toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(destRow, destCol) + " \n";
+    movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(destRow, destCol) + " ");
+
+    moveCount += .5;
+
+    stateStartTime = currentTime;
+    whitePlayed    = true;
+
+    activePlayer = activePlayer == &white ? &black : &white;
+
     int    direction = (destCol > king->col) ? 1 : -1;
     int    rookCol   = (direction == 1) ? 7 : 0;
     Piece* rook      = getPieceAt(king->row, rookCol);
@@ -162,6 +175,8 @@ void Board::performCastle(King* king, int destRow, int destCol)
 
     king->firstMove = false;
     rook->firstMove = false;
+
+    std::cout << "Castled\n";
 }
 
 bool Board::isKingInCheck(King* king)
@@ -390,28 +405,28 @@ void Board::soundLoop()
 
 void Board::playSound()
 {
-    // ma_result result;
-    // ma_engine engine;
+    ma_result result;
+    ma_engine engine;
 
-    // result = ma_engine_init(NULL, &engine);
-    // if (result != MA_SUCCESS)
-    // {
-    //     std::cerr << "Failed to initialize audio engine.\n";
-    //     return;
-    // }
+    result = ma_engine_init(NULL, &engine);
+    if (result != MA_SUCCESS)
+    {
+        std::cerr << "Failed to initialize audio engine.\n";
+        return;
+    }
 
-    // result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
-    // if (result != MA_SUCCESS)
-    // {
-    //     std::cerr << "Failed to play sound.\n";
-    //     ma_engine_uninit(&engine);
-    //     return;
-    // }
+    result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
+    if (result != MA_SUCCESS)
+    {
+        std::cerr << "Failed to play sound.\n";
+        ma_engine_uninit(&engine);
+        return;
+    }
 
-    // std::cout << "Playing sound...\n";
-    // std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
+    std::cout << "Playing sound...\n";
+    std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
 
-    // ma_engine_uninit(&engine);
+    ma_engine_uninit(&engine);
 }
 
 ImFont* Board::getFont()
@@ -465,6 +480,21 @@ void Board::playAI()
     if (targetPiece && targetPiece->isWhite != pieceToMove->isWhite)
     {
         removePiece(targetPiece);
+    }
+
+    std::cout << abs(pieceToMove->col - col) << " amount\n";
+
+    if (pieceToMove->getType() == 'K' && abs(pieceToMove->col - col) > 1)
+    {
+        int    direction = (col > pieceToMove->col) ? -1 : 1;
+        int    rookCol   = (direction == -1) ? 7 : 0;
+        Piece* rook      = getPieceAt(pieceToMove->row, rookCol);
+
+        if (!rook)
+            return;
+
+        rook->col       = pieceToMove->col - direction;
+        rook->firstMove = false;
     }
 
     if (pieceToMove)
@@ -529,14 +559,17 @@ void Board::move(int row, int col)
             if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
             {
                 movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
+
                 selectedPiece->row = row;
                 selectedPiece->col = col;
+
                 if (selectedPiece->getType() == 'P')
                     selectedPiece->firstMove = false;
                 moveCount += .5;
                 activePlayer  = activePlayer == &white ? &black : &white;
                 selectedPiece = nullptr;
-                playAI();
+
+                // playAI();
             }
         }
         else
@@ -568,11 +601,19 @@ void Board::move(int row, int col)
 
                     selectedPiece->row = row;
                     selectedPiece->col = col;
+
                     if (selectedPiece->getType() == 'P')
                         selectedPiece->firstMove = false;
                     moveCount += .5;
-                    activePlayer  = &black;
                     selectedPiece = nullptr;
+
+                    std::cout << "Here\n";
+
+                    stateStartTime = currentTime;
+                    whitePlayed    = true;
+
+                    // activePlayer = &black;
+                    // playAI();
                 }
             }
             else
@@ -597,9 +638,22 @@ void Board::update(int row, int col)
         move(row, col);
     }
 
-    if (activePlayer == &black)
+    // if (activePlayer == &black && AImode)
+    // {
+    //     playAI();
+    // }
+
+    currentTime = glfwGetTime();
+
+    if (whitePlayed)
     {
-        playAI();
+        if (currentTime - stateStartTime > waitDuration)
+        {
+            std::cout << "Here\n";
+            whitePlayed  = false;
+            activePlayer = &black;
+            playAI();
+        }
     }
 
     // Exponential distribution

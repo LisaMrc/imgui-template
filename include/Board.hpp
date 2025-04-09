@@ -93,4 +93,11 @@ private:
 
     std::vector<std::string> movesPlayed;
     bool                     AImode = true;
+
+    bool        whitePlayed = false;
+    float       currentTime;
+    float       stateStartTime = 0.0f;
+    const float waitDuration   = 0.1f;
+
+    bool isCastle = false;
 };

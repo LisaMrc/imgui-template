@@ -46,6 +46,6 @@ public:
 
 class Gamma {
 public:
-    std::gamma_distribution<double> dist = std::gamma_distribution<double>(4.0, 7.5);
+    std::gamma_distribution<double> dist = std::gamma_distribution<double>(4, 7.5);
     bool                            done = false;
 };
