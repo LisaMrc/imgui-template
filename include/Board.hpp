@@ -47,13 +47,9 @@ public:
     void                                showPromotionWindow();
     ImFont*                             getFont();
     void                                setFont(ImFont*);
-    void                                soundLoop();
-    void                                playSound();
     void                                playAI();
     std::string                         toChessNotation(int row, int col);
     Position                            chessNotationToIndices(const std::string& notation);
-    std::atomic<bool>                   soundLoopRunning = true;
-    std::thread                         soundThread;
     StockfishEngine                     stockfish;
 
 private:
@@ -87,9 +83,23 @@ private:
     Binomial    binomial;
     Exponential exp;
     Gamma       gamma;
+    Bernoulli   bernoulli;  // Add Bernoulli as a member
 
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
     bool                     AImode = true;
+
+
+    void SwitchPlayer(double probability)
+    {
+        if (bernoulli.flip(probability)) // Calls the flip method from Bernoulli class
+        {
+            activePlayer = (activePlayer->getColor()) ? &black : &white;
+
+            std::cout << "⚡ Player SWITCHED! Now it's "
+                      << (activePlayer->getColor() ? "White" : "Black")
+                      << "'s turn!" << '\n';
+        }
+    }
 };

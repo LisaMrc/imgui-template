@@ -1,12 +1,8 @@
 #pragma once
 
-#include "Board.hpp"
 #include <imgui.h>
 #include <ctime>
 #include <random>
-
-bool shouldSwitchPlayer(double probability);
-void SwitchPlayer(Board &board);
 
 class Tools {
 public:
@@ -54,4 +50,27 @@ class Gamma {
 public:
     std::gamma_distribution<double> dist = std::gamma_distribution<double>(4.0, 7.5);
     bool                            done = false;
+};
+
+class Bernoulli {
+public:
+    std::default_random_engine engine;      // Random engine
+    std::bernoulli_distribution<> dist;     // Bernoulli distribution
+
+    bool done = false;
+    bool result = false;
+
+    Bernoulli() : engine(static_cast<unsigned int>(time(0))) {}  // Initialize engine in the constructor
+
+    // Method to perform the Bernoulli trial and return the result
+    bool flip(double probability)
+    {
+        dist = std::bernoulli_distribution(probability);  // Set the probability for each trial
+        result = dist(engine);  // Perform the trial and store result
+        return result;
+    }
+
+    bool getResult() const {
+        return result;
+    }
 };
