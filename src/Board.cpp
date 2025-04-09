@@ -69,7 +69,7 @@ void Board::init()
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    defaultFont = io.Fonts->AddFontFromFileTTF("../../font/ROBOTO.ttf", 20.0f);
+    defaultFont = io.Fonts->AddFontFromFileTTF("../../Assets/Fonts/ROBOTO.ttf", 20.0f);
 }
 
 bool Board::IsValidMove(Piece* piece, int row, int col)

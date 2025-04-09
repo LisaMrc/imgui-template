@@ -13,7 +13,7 @@ void App::init()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    board.setFont(io.Fonts->AddFontFromFileTTF("../../font/CHEQ_TT.TTF", 40.0f));
+    board.setFont(io.Fonts->AddFontFromFileTTF("../../Assets/Fonts/CHEQ_TT.TTF", 40.0f));
 
     renderEngine.loadShader();
     renderEngine.loadMeshes();
