@@ -9,12 +9,19 @@
 void App::init()
 {
     board.init();
+    
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    board.setFont(io.Fonts->AddFontFromFileTTF("../../font/CHEQ_TT.TTF", 40.0f));
 
     renderEngine.loadShader();
     renderEngine.loadMeshes();
     renderEngine.create3DObj(board);
 
-    float aspect                  = 800.0f / 600.0f; // ou récupère la taille de la fenêtre dynamiquement
+    float aspect = 800.0f / 600.0f;
+    // TODO (🪟) : get window dimensions dynamically
+
     renderEngine.projectionMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 }
 
@@ -42,10 +49,6 @@ void App::update()
 
 void App::handleEvent()
 {
-    // playerWhite.setColor(true);
-    // playerBlack.setColor(false);
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
     // TODO(🎥) : enable mouse trigger for trackball camera
     // if (true)
     // {
@@ -53,9 +56,6 @@ void App::handleEvent()
     // }
 }
 
-    ImGuiIO& io = ImGui::GetIO();
-    board.setFont(io.Fonts->AddFontFromFileTTF("../../font/CHEQ_TT.TTF", 40.0f));
-    board.init();
 void App::displayGameOverScreen()
 {
     if (board.wasWhiteKingRemoved())

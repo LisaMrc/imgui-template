@@ -2,19 +2,14 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include <algorithm>
-#include <atomic>
-#include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <thread>
 #include <vector>
 #include "Math.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
 #include "Stockfish.hpp"
-#include "imgui.h"
 
 struct Position {
     int row;
@@ -51,6 +46,10 @@ public:
     std::string                         toChessNotation(int row, int col);
     Position                            chessNotationToIndices(const std::string& notation);
     StockfishEngine                     stockfish;
+    bool                                wasWhiteKingRemoved();
+    bool                                wasBlackKingRemoved();
+    void                                debug_removeWhiteKingButton();
+    void                                debug_removeBlackKingButton();
 
 private:
     Piece*              selectedPiece = nullptr;
@@ -83,23 +82,12 @@ private:
     Binomial    binomial;
     Exponential exp;
     Gamma       gamma;
-    Bernoulli   bernoulli;  // Add Bernoulli as a member
+    Bernoulli   bernoulli;
 
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
     bool                     AImode = true;
 
-
-    void SwitchPlayer(double probability)
-    {
-        if (bernoulli.flip(probability)) // Calls the flip method from Bernoulli class
-        {
-            activePlayer = (activePlayer->getColor()) ? &black : &white;
-
-            std::cout << "⚡ Player SWITCHED! Now it's "
-                      << (activePlayer->getColor() ? "White" : "Black")
-                      << "'s turn!" << '\n';
-        }
-    }
+    void SwitchPlayer(double probability);
 };

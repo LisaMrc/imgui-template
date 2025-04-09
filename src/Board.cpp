@@ -1,6 +1,4 @@
 #include "../include/Board.hpp"
-#define MINIAUDIO_IMPLEMENTATION
-#include "../include/miniaudio.h"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <iostream>
@@ -72,8 +70,6 @@ void Board::init()
 
     ImGuiIO& io = ImGui::GetIO();
     defaultFont = io.Fonts->AddFontFromFileTTF("../../font/ROBOTO.ttf", 20.0f);
-
-    soundThread = std::thread(&Board::soundLoop, this);
 }
 
 bool Board::IsValidMove(Piece* piece, int row, int col)
@@ -89,11 +85,11 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     }
 
     if (piece->getType() == 'P')
-    if (!isPathClear(piece, row, col) && piece->getSymbol() != 'N')
-    {
-        // std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
-        return false;
-    }
+        if (!isPathClear(piece, row, col) && piece->getSymbol() != 'N')
+        {
+            // std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
+            return false;
+        }
 
     if (piece->getSymbol() == 'P')
         piece->isCapture = (targetPiece && targetPiece->isWhite != piece->isWhite);
@@ -437,47 +433,6 @@ bool Board::checkPromotion()
     return false;
 }
 
-void Board::soundLoop()
-{
-    // Gamma distribution
-    while (soundLoopRunning)
-    {
-        double delay = gamma.dist(tools.rng);
-        std::this_thread::sleep_for(std::chrono::duration<double>(delay));
-
-        // Play your sound here
-        // std::cout << "[Sound] played after " << delay << " seconds\n";
-
-        playSound();
-    }
-}
-
-void Board::playSound()
-{
-    ma_result result;
-    ma_engine engine;
-
-    result = ma_engine_init(NULL, &engine);
-    if (result != MA_SUCCESS)
-    {
-        std::cerr << "Failed to initialize audio engine.\n";
-        return;
-    }
-
-    result = ma_engine_play_sound(&engine, "../../Sounds/koto.mp3", NULL);
-    if (result != MA_SUCCESS)
-    {
-        std::cerr << "Failed to play sound.\n";
-        ma_engine_uninit(&engine);
-        return;
-    }
-
-    std::cout << "Playing sound...\n";
-    std::this_thread::sleep_for(std::chrono::seconds(4)); // Let it play
-
-    ma_engine_uninit(&engine);
-}
-
 ImFont* Board::getFont()
 {
     return customFont;
@@ -692,6 +647,18 @@ void Board::update(int row, int col)
     }
 }
 
+void Board::SwitchPlayer(double probability)
+{
+    if (bernoulli.flip(probability))
+    {
+        activePlayer = (activePlayer->getColor()) ? &black : &white;
+
+        std::cout << "⚡ Player SWITCHED! Now it's "
+                  << (activePlayer->getColor() ? "White" : "Black")
+                  << "'s turn!" << '\n';
+    }
+}
+
 void Board::draw()
 {
     draw_list   = ImGui::GetWindowDrawList();
@@ -711,18 +678,11 @@ void Board::draw()
             update(row, col);
 
             if (selectedPiece)
-            // Deselect piece with right mouse button
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-            {
-                selectedPiece = nullptr;
-            }
-
-            // Highlight the king if it is in check
-            if ((isWhiteInCheck && activeKing && activeKing->row == row && activeKing->col == col) || (isBlackInCheck && activeKing && activeKing->row == row && activeKing->col == col))
-            {
-                draw_list->AddRect(min, max, check_color, 0.0f, 0, 3.0f);
-                highlightSquares(minimum, maximum, row, col);
-            }
+                // Deselect piece with right mouse button
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                {
+                    selectedPiece = nullptr;
+                }
 
             for (auto& king : kings)
             {
@@ -736,7 +696,7 @@ void Board::draw()
                     selectedPiece->row = row;
                     selectedPiece->col = col;
                     activePlayer       = activePlayer == &white ? &black : &white;
-                    SwitchPlayer(*this);
+                    SwitchPlayer(.1);
                     selectedPiece = nullptr;
                     draw_list->AddRect(minimum, maximum, check_color, 0.0f, 0, 3.0f);
                 }

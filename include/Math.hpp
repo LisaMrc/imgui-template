@@ -55,18 +55,18 @@ public:
 class Bernoulli {
 public:
     std::default_random_engine engine;      // Random engine
-    std::bernoulli_distribution<> dist;     // Bernoulli distribution
+    std::bernoulli_distribution dist;     // Bernoulli distribution
 
     bool done = false;
     bool result = false;
 
-    Bernoulli() : engine(static_cast<unsigned int>(time(0))) {}  // Initialize engine in the constructor
+    Bernoulli() : engine(static_cast<unsigned int>(time(0))) {}
 
     // Method to perform the Bernoulli trial and return the result
     bool flip(double probability)
     {
-        dist = std::bernoulli_distribution(probability);  // Set the probability for each trial
-        result = dist(engine);  // Perform the trial and store result
+        dist = std::bernoulli_distribution(probability);
+        result = dist(engine);
         return result;
     }
 
