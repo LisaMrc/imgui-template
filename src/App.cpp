@@ -32,7 +32,6 @@ void App::init()
 void App::update()
 {
     ImGui::PushFont(board.getFont(0));
-    ImGui::PushFont(board.getFont());
     // ImGui::ShowDemoWindow(); // This opens a window which shows tons of
     // examples of what you can do with ImGui. You
     // should check it out! Also, you can use the

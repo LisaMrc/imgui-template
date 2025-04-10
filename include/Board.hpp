@@ -3,12 +3,10 @@
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <algorithm>
-#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <thread>
 #include <vector>
 #include "../include/Piece.hpp"
 #include "Math.hpp"
@@ -22,7 +20,6 @@ struct Position {
 };
 
 class Board {
-private:
 public:
     Player white;
     Player black;
@@ -45,7 +42,7 @@ public:
     void                                promotePawn(char newSymbol);
     bool                                checkPromotion();
     void                                showPromotionWindow();
-    ImFont*                             getFont(int);
+    ImFont*                             getFont(int what);
     void                                setFont(ImFont*);
     void                                soundLoop();
     void                                playSound();
@@ -63,6 +60,18 @@ public:
     Exponential exp;
     Gamma       gamma;
     Bernoulli   bernoulli;
+
+    void blockSquare(int row, int col) {
+        blocked[row][col] = true;
+    }
+
+    void unblockSquare(int row, int col) {
+        blocked[row][col] = false;
+    }
+
+    bool isBlocked(int row, int col) {
+        return blocked[row][col];
+    }
 
 private:
     Piece*              selectedPiece = nullptr;
@@ -106,4 +115,6 @@ private:
     std::optional<std::pair<int, int>> enPassantTarget; // Holds the square that can be captured via en passant
 
     void SwitchPlayer(double probability);
+
+    bool blocked[8][8] = {{false}};
 };
