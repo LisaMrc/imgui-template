@@ -282,20 +282,20 @@ void RenderEngine::linkMeshesTo3DObjects()
             continue;
         }
 
-        char symbol = obj.piece->getSymbol();
+        char        symbol = obj.piece->getType();
         std::string key;
 
         switch (symbol)
         {
-            case 'P': key = "Pawn";   break;
-            case 'R': key = "Rook";   break;
-            case 'N': key = "Knight"; break;
-            case 'B': key = "Bishop"; break;
-            case 'Q': key = "Queen";  break;
-            case 'K': key = "King";   break;
-            default:
-                std::cerr << "Unknown symbol: " << symbol << "\n";
-                continue;
+        case 'P': key = "Pawn"; break;
+        case 'R': key = "Rook"; break;
+        case 'N': key = "Knight"; break;
+        case 'B': key = "Bishop"; break;
+        case 'Q': key = "Queen"; break;
+        case 'K': key = "King"; break;
+        default:
+            std::cerr << "Unknown symbol: " << symbol << "\n";
+            continue;
         }
 
         if (meshMap.find(key) != meshMap.end())
@@ -335,16 +335,23 @@ void RenderEngine::renderAll()
         GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
+        // Set color: white for white pieces, black for black pieces
+        glm::vec3 color = glm::vec3(1.0f);    // Default: white
+        if (obj.piece && !obj.piece->isWhite) // <- Make sure Board::Piece has isBlack()
+            color = glm::vec3(0.0f);          // Black color
+
+        GLint colorLoc = glGetUniformLocation(shaderProgram, "objectColor");
+        glUniform3fv(colorLoc, 1, glm::value_ptr(color));
+
         if (obj.indexCount == 0)
         {
             std::cerr << "Erreur : indexCount = 0\n";
             continue;
         }
 
-        glBindVertexArray(obj.meshVAO); // Chaque objet a son propre VAO
-
+        glBindVertexArray(obj.meshVAO);
         glDrawElements(GL_TRIANGLES, obj.indexCount, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0); // Unbind VAO
+        glBindVertexArray(0);
     }
 }
 
