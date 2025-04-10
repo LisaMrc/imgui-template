@@ -742,28 +742,31 @@ void Board::update(int row, int col)
     }
 
     // Exponential distribution
-    if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
+    if (!AImode)
     {
-        if (!exp.done)
+        if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
         {
-            Piece* toRemove = kings[0];
-            int    idx      = 0;
-
-            while (toRemove->getType() == 'K')
+            if (!exp.done)
             {
-                idx = std::round(exp.dist(tools.rng));
-                idx = std::clamp(idx, 0, static_cast<int>(pieces.size() - 1));
+                Piece* toRemove = kings[0];
+                int    idx      = 0;
 
-                toRemove = pieces[idx].get();
+                while (toRemove->getType() == 'K')
+                {
+                    idx = std::round(exp.dist(tools.rng));
+                    idx = std::clamp(idx, 0, static_cast<int>(pieces.size() - 1));
+
+                    toRemove = pieces[idx].get();
+                }
+
+                removePiece(toRemove);
+                exp.done = true;
             }
-
-            removePiece(toRemove);
-            exp.done = true;
         }
-    }
-    else
-    {
-        exp.done = false;
+        else
+        {
+            exp.done = false;
+        }
     }
 }
 

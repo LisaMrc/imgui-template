@@ -92,7 +92,7 @@ private:
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
-    bool                     AImode = true;
+    bool                     AImode = false;
 
     bool        whitePlayed = false;
     float       currentTime;
