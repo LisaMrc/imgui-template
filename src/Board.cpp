@@ -212,6 +212,18 @@ void Board::debug_removeBlackKingButton()
 
 void Board::performCastle(King* king, int destRow, int destCol)
 {
+    isCastle = false;
+
+    std::cout << toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(destRow, destCol) + " \n";
+    movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(destRow, destCol) + " ");
+
+    moveCount += .5;
+
+    stateStartTime = currentTime;
+    whitePlayed    = true;
+
+    activePlayer = activePlayer == &white ? &black : &white;
+
     int    direction = (destCol > king->col) ? 1 : -1;
     int    rookCol   = (direction == 1) ? 7 : 0;
     Piece* rook      = getPieceAt(king->row, rookCol);
@@ -219,10 +231,14 @@ void Board::performCastle(King* king, int destRow, int destCol)
     if (!rook)
         return;
 
-    king->col       = destCol;
-    rook->col       = king->col - direction;
+    king->col = destCol;
+
+    rook->col = king->col - direction;
+
     king->firstMove = false;
     rook->firstMove = false;
+
+    std::cout << "Castled\n";
 }
 
 bool Board::isKingInCheck(King* king)
@@ -485,6 +501,46 @@ void Board::playAI()
     if (targetPiece && targetPiece->isWhite != pieceToMove->isWhite)
     {
         removePiece(targetPiece);
+    }
+
+    std::cout << abs(pieceToMove->col - col) << " amount\n";
+
+    if (pieceToMove->getType() == 'K' && abs(pieceToMove->col - col) > 1)
+    {
+        int    direction = (col > pieceToMove->col) ? -1 : 1;
+        int    rookCol   = (direction == -1) ? 7 : 0;
+        Piece* rook      = getPieceAt(pieceToMove->row, rookCol);
+
+        if (!rook)
+            return;
+
+        rook->col       = pieceToMove->col - direction;
+        rook->firstMove = false;
+    }
+
+    if (enPassantTarget.has_value())
+    {
+        std::cout << enPassantTarget->first << " "
+                  << enPassantTarget->second << "\n";
+
+        std::cout << row << " "
+                  << col << "\n\n";
+    }
+
+    if (pieceToMove->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
+    {
+        int capturedRow = row - 1;
+        removePiece(getPieceAt(capturedRow, col));
+    }
+
+    // Example: inside makeMove(selectedPiece, toRow, toCol)
+    if (pieceToMove->getType() == 'P' && abs(row - pieceToMove->row) == 2)
+    {
+        enPassantTarget = {(pieceToMove->row + row) / 2, pieceToMove->col};
+    }
+    else
+    {
+        enPassantTarget.reset(); // Reset if not a double step
     }
 
     if (pieceToMove)
