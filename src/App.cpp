@@ -21,6 +21,8 @@ void App::init()
     renderEngine.link3DObjectsToPieces(board);
     renderEngine.linkMeshesTo3DObjects();
 
+    renderEngine.setSceneLighting(renderEngine.getSceneTimeOfDay());
+
     float aspect = 800.0f / 600.0f;
     // TODO (🪟) : get window dimensions dynamically
 
@@ -32,12 +34,12 @@ void App::update()
     ImGui::PushFont(board.getFont(0));
     ImGui::PushFont(board.getFont());
     // ImGui::ShowDemoWindow(); // This opens a window which shows tons of
-                             // examples of what you can do with ImGui. You
-                             // should check it out! Also, you can use the
-                             // "Item Picker" in the top menu of that demo
-                             // window: then click on any widget and it will
-                             // show you the corresponding code directly in
-                             // your IDE!
+    // examples of what you can do with ImGui. You
+    // should check it out! Also, you can use the
+    // "Item Picker" in the top menu of that demo
+    // window: then click on any widget and it will
+    // show you the corresponding code directly in
+    // your IDE!
 
     ImGui::Begin("Chess");
 

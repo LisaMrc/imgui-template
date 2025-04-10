@@ -9,6 +9,17 @@
 #include "../include/Piece.hpp"
 #include "glad/glad.h"
 
+enum class TimeOfDay {
+    Day,
+    Night,
+    Twilight
+};
+
+struct MeshData {
+    GLuint  vao;
+    GLsizei indexCount;
+};
+
 class obj3D {
 public:
     Piece*  piece = nullptr;
@@ -38,26 +49,28 @@ public:
         glEnableVertexAttribArray(0); // position only
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-        // Délié VAO après configuration
+        // Délier VAO après configuration
         glBindVertexArray(0);
     }
 };
 
-struct MeshData {
-    GLuint  vao;
-    GLsizei indexCount;
+struct Color {
+    float r, g, b;
 };
 
 class RenderEngine {
-public:
+private:
     GLuint                                    shaderProgram{};
     std::unordered_map<std::string, MeshData> meshMap;
     std::vector<obj3D>                        gameObjects;
-    glm::mat4                                 projectionMatrix;
-    glm::mat4                                 viewMatrix;
     std::vector<GLuint>                       vaoList;
     std::vector<GLuint>                       vboList;
     std::vector<GLuint>                       eboList;
+    GLuint                                    lightColorLocation;
+
+public:
+    glm::mat4                                 projectionMatrix;
+    glm::mat4                                 viewMatrix;
 
     void loadShader();
     void loadMeshes();
@@ -65,10 +78,12 @@ public:
     void link3DObjectsToPieces(Board& board);
     void linkMeshesTo3DObjects();
 
-    void      setViewMatrix(const glm::mat4& view);
+    void      renderAll();
     glm::vec3 convertTo3D(int row, int col);
 
-    void renderAll();
+    TimeOfDay getSceneTimeOfDay();
+    void      setSceneLighting(TimeOfDay timeOfDay);
+
     void cleanUp();
     ~RenderEngine();
 };

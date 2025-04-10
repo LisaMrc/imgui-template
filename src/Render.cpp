@@ -1,6 +1,7 @@
 #include "../include/Render.hpp"
 #include <imgui.h>
 #include <tiny_obj_loader.h>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <glm/glm.hpp>
@@ -93,9 +94,10 @@ void RenderEngine::loadShader()
                   << infoLog << std::endl;
     }
 
-    std::cout << "Shaders : loaded" << '\n';
-}
+    lightColorLocation = glGetUniformLocation(shaderProgram, "lightColor");
 
+    std::cout << "Shaders: loaded" << '\n';
+}
 void RenderEngine::loadMeshes()
 {
     const std::string objFolder = "../../Assets/Objects";
@@ -355,6 +357,70 @@ void RenderEngine::renderAll()
     }
 }
 
+glm::vec3 RenderEngine::convertTo3D(int row, int col)
+{
+    float squareSize = 1.0f;                      // Size of one board tile
+    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
+    float z          = (row - 3.5f) * squareSize;
+    float y          = -5.f; // Push down model a bit (adjust if needed)
+    return glm::vec3(x, y, z);
+}
+
+TimeOfDay RenderEngine::getSceneTimeOfDay()
+{
+    std::time_t now       = std::time(nullptr);
+    std::tm*    localTime = std::localtime(&now);
+
+    int hour = localTime->tm_hour;
+
+    std::vector<double> probabilities;
+
+    if (hour >= 6 && hour < 18)
+    {
+        probabilities = {0.8, 0.1, 0.1}; // Day
+    }
+    else if ((hour >= 5 && hour < 6) || (hour >= 18 && hour < 20))
+    {
+        probabilities = {0.2, 0.2, 0.6}; // Twilight
+    }
+    else
+    {
+        probabilities = {0.1, 0.8, 0.1}; // Night
+    }
+
+    Multinomial timeOfDay(probabilities);
+    int         result = timeOfDay.roll();
+
+    switch (result)
+    {
+    case 0: return TimeOfDay::Day;
+    case 1: return TimeOfDay::Night;
+    case 2: return TimeOfDay::Twilight;
+    default: return TimeOfDay::Day; // fallback
+    }
+}
+
+void RenderEngine::setSceneLighting(TimeOfDay timeOfDay)
+{
+    glm::vec3 lightColor;
+
+    switch (timeOfDay)
+    {
+        case TimeOfDay::Day:
+            lightColor = glm::vec3(1.0f, 1.0f, 0.9f); // bright warm white
+            break;
+        case TimeOfDay::Night:
+            lightColor = glm::vec3(0.1f, 0.1f, 0.3f); // dark blueish
+            break;
+        case TimeOfDay::Twilight:
+            lightColor = glm::vec3(0.9f, 0.5f, 0.3f); // orange-pink glow
+            break;
+    }
+
+    glUseProgram(shaderProgram);  // Ensure the shader program is active
+    glUniform3fv(lightColorLocation, 1, glm::value_ptr(lightColor)); // Update lightColor uniform
+}
+
 VAO::VAO()
     : m_id(0) {};
 
@@ -434,15 +500,6 @@ void EBO::unbind() const
 void EBO::set_data(const void* data, GLsizeiptr size)
 {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-}
-
-glm::vec3 RenderEngine::convertTo3D(int row, int col)
-{
-    float squareSize = 1.0f;                      // Size of one board tile
-    float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
-    float z          = (row - 3.5f) * squareSize;
-    float y          = -5.f; // Push down model a bit (adjust if needed)
-    return glm::vec3(x, y, z);
 }
 
 void RenderEngine::cleanUp()

@@ -681,7 +681,7 @@ void Board::update(int row, int col)
         }
     }
 
-    // Exponential distribution
+    // Exponential distribution to simulate an event happening after a set amount of time
     if (!AImode)
     {
         if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
@@ -706,6 +706,24 @@ void Board::update(int row, int col)
         else
         {
             exp.done = false;
+        }
+    }
+
+    // Poisson distribution to simulate a leaf falling on the board
+    if (moveCount > 1 && static_cast<int>(moveCount) % 10 == 0)  // Trigger every 10 moves, you can adjust
+    {
+        Poisson leafFall(2.0);  // Lambda = 2, for on average 2 leaves falling per event
+        int leavesFallen = leafFall.draw();  // Get number of leaves
+
+        for (int i = 0; i < leavesFallen; ++i)
+        {
+            // Randomly pick a tile to block
+            int randomRow = std::rand() % 8;  // Assuming an 8x8 board
+            int randomCol = std::rand() % 8;
+
+            std::cout << "Leaf falls on tile: (" << randomRow << ", " << randomCol << ")\n";
+
+            pieces[randomRow * 8 + randomCol].get()->setBlocked(true);  // Mark piece as blocked
         }
     }
 }

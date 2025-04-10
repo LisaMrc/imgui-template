@@ -76,3 +76,47 @@ public:
         return result;
     }
 };
+
+class Multinomial {
+public:
+    std::default_random_engine engine;
+    std::discrete_distribution<int> dist;
+    int result = -1;
+    bool done = false;
+
+    Multinomial(const std::vector<double>& probabilities)
+        : engine(static_cast<unsigned int>(time(0))),
+          dist(probabilities.begin(), probabilities.end()) {}
+
+    int roll() {
+        result = dist(engine);
+        done = true;
+        return result;
+    }
+
+    int getResult() const {
+        return result;
+    }
+};
+
+class Poisson {
+public:
+    std::default_random_engine engine;
+    std::poisson_distribution<int> dist;
+    int result = -1;
+    bool done = false;
+
+    explicit Poisson(double lambda)
+        : engine(static_cast<unsigned int>(time(0))),
+          dist(lambda) {}
+
+    int draw() {
+        result = dist(engine);
+        done = true;
+        return result;
+    }
+
+    int getResult() const {
+        return result;
+    }
+};
