@@ -15,7 +15,7 @@ void App::init()
     renderEngine.loadMeshes();
     renderEngine.create3DObjects();
     renderEngine.link3DObjectsToPieces(board);
-    renderEngine.linkMeshesToPieces();
+    renderEngine.linkMeshesTo3DObjects();
 
     float aspect                  = 800.0f / 600.0f; // ou récupère la taille de la fenêtre dynamiquement
     renderEngine.projectionMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
@@ -23,7 +23,7 @@ void App::init()
 
 void App::update()
 {
-    ImGui::ShowDemoWindow(); // This opens a window which shows tons of
+    // ImGui::ShowDemoWindow(); // This opens a window which shows tons of
                              // examples of what you can do with ImGui. You
                              // should check it out! Also, you can use the
                              // "Item Picker" in the top menu of that demo
@@ -31,12 +31,12 @@ void App::update()
                              // show you the corresponding code directly in
                              // your IDE!
 
-    ImGui::Begin("Chess");
-    board.draw();
-    board.debug_removeWhiteKingButton();
-    board.debug_removeBlackKingButton();
-    displayGameOverScreen();
-    ImGui::End();
+    // ImGui::Begin("Chess");
+    // board.draw();
+    // board.debug_removeWhiteKingButton();
+    // board.debug_removeBlackKingButton();
+    // displayGameOverScreen();
+    // ImGui::End();
 
     renderEngine.viewMatrix = glm::lookAt(
         glm::vec3(4, 6, 4), // position caméra

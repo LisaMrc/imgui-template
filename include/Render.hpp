@@ -11,14 +11,15 @@
 
 class obj3D {
 public:
-    Piece* piece = nullptr;
-    GLuint meshVAO{0};
-    GLuint meshVBO{0};
-    GLuint meshEBO{0};
+    Piece*  piece = nullptr;
+    GLuint  meshVAO{0};
+    GLuint  meshVBO{0};
+    GLuint  meshEBO{0};
     GLsizei indexCount;
-    int row{0}, col{0};
+    int     row{0}, col{0};
 
-    void setupBuffers(const std::vector<float>& vertices, const std::vector<GLuint>& indices) {
+    void setupBuffers(const std::vector<float>& vertices, const std::vector<GLuint>& indices)
+    {
         // Création et liaison du VAO
         glGenVertexArrays(1, &meshVAO);
         glBindVertexArray(meshVAO);
@@ -49,20 +50,20 @@ struct MeshData {
 
 class RenderEngine {
 public:
-    GLuint                shaderProgram{};
+    GLuint                                    shaderProgram{};
     std::unordered_map<std::string, MeshData> meshMap;
-    std::vector<obj3D>    gameObjects;
-    glm::mat4             projectionMatrix;
-    glm::mat4             viewMatrix;
-    std::vector<GLuint>   vaoList;
-    std::vector<GLuint>   vboList;
-    std::vector<GLuint>   eboList;
+    std::vector<obj3D>                        gameObjects;
+    glm::mat4                                 projectionMatrix;
+    glm::mat4                                 viewMatrix;
+    std::vector<GLuint>                       vaoList;
+    std::vector<GLuint>                       vboList;
+    std::vector<GLuint>                       eboList;
 
     void loadShader();
     void loadMeshes();
     void create3DObjects();
     void link3DObjectsToPieces(Board& board);
-    void linkMeshesToPieces();
+    void linkMeshesTo3DObjects();
 
     void      setViewMatrix(const glm::mat4& view);
     glm::vec3 convertTo3D(int row, int col);

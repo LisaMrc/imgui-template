@@ -125,7 +125,8 @@ void RenderEngine::loadMeshes()
 
         if (!ret)
         {
-            std::cerr << "Failed to load OBJ: " << entry.path() << "\n" << err << '\n';
+            std::cerr << "Failed to load OBJ: " << entry.path() << "\n"
+                      << err << '\n';
             continue;
         }
 
@@ -164,10 +165,15 @@ void RenderEngine::loadMeshes()
             continue;
         }
 
-        GLuint vao = 0, vbo = 0, ebo = 0;
-        glGenVertexArrays(1, &vao); vaoList.push_back(vao);
-        glGenBuffers(1, &vbo); vboList.push_back(vbo);
-        glGenBuffers(1, &ebo); eboList.push_back(ebo);
+        GLuint vao = 0;
+        GLuint vbo = 0;
+        GLuint ebo = 0;
+        glGenVertexArrays(1, &vao);
+        vaoList.push_back(vao);
+        glGenBuffers(1, &vbo);
+        vboList.push_back(vbo);
+        glGenBuffers(1, &ebo);
+        eboList.push_back(ebo);
 
         glBindVertexArray(vao);
 
@@ -189,7 +195,7 @@ void RenderEngine::loadMeshes()
         mesh.vao        = vao;
         mesh.indexCount = static_cast<GLsizei>(indices.size());
 
-        std::string meshName = entry.path().stem().string(); // e.g. "Pawn" from "Pawn.obj"
+        std::string meshName = entry.path().stem().string();
 
         if (meshMap.contains(meshName))
         {
@@ -200,7 +206,7 @@ void RenderEngine::loadMeshes()
         meshMap[meshName] = mesh;
     }
 
-    std::cout << "Meshes: loaded (" << meshMap.size() << " in total)\n";
+    std::cout << "Meshes: " << meshMap.size() << " loaded\n";
 }
 
 void RenderEngine::create3DObjects()
@@ -208,21 +214,21 @@ void RenderEngine::create3DObjects()
     gameObjects.clear();
 
     obj3D boardObj;
-    boardObj.row = 0;
-    boardObj.col = 0;
+    boardObj.row   = 0;
+    boardObj.col   = 0;
     boardObj.piece = nullptr;
     gameObjects.push_back(boardObj);
 
     for (int i = 0; i < 32; ++i)
     {
         obj3D obj;
-        obj.row = 0;
-        obj.col = 0;
+        obj.row   = 0;
+        obj.col   = 0;
         obj.piece = nullptr;
         gameObjects.push_back(obj);
     }
 
-    std::cout << "Created " << gameObjects.size() << " objects (1 board + 32 pieces)\n";
+    std::cout << "Objects : " << gameObjects.size() << " created\n";
 }
 
 void RenderEngine::link3DObjectsToPieces(Board& board)
@@ -247,7 +253,7 @@ void RenderEngine::link3DObjectsToPieces(Board& board)
     std::cout << "Linked 32 3D objects to their respective pieces.\n";
 }
 
-void RenderEngine::linkMeshesToPieces()
+void RenderEngine::linkMeshesTo3DObjects()
 {
     if (gameObjects.size() < 33)
     {
@@ -255,7 +261,19 @@ void RenderEngine::linkMeshesToPieces()
         return;
     }
 
-    for (size_t i = 1; i < gameObjects.size(); ++i) // skip index 0 (the board)
+    // Assign the board mesh to the first object (index 0)
+    if (meshMap.find("Chessboard") != meshMap.end())
+    {
+        gameObjects[0].meshVAO    = meshMap["Chessboard"].vao;
+        gameObjects[0].indexCount = meshMap["Chessboard"].indexCount;
+    }
+    else
+    {
+        std::cerr << "Mesh not found for: Chessboard\n";
+    }
+
+    // Assign piece meshes to the rest of the objects
+    for (size_t i = 1; i < gameObjects.size(); ++i)
     {
         obj3D& obj = gameObjects[i];
 
@@ -265,7 +283,7 @@ void RenderEngine::linkMeshesToPieces()
             continue;
         }
 
-        char symbol = obj.piece->getSymbol(); // Example: 'P', 'K', 'N', etc.
+        char symbol = obj.piece->getSymbol();
         std::string key;
 
         switch (symbol)
@@ -292,7 +310,7 @@ void RenderEngine::linkMeshesToPieces()
         }
     }
 
-    std::cout << "Assigned meshes to all 3D pieces.\n";
+    std::cout << "Meshes : assigned .\n";
 }
 
 void RenderEngine::renderAll()
