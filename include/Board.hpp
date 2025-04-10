@@ -2,14 +2,20 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
+#include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
+#include "../include/Piece.hpp"
 #include "Math.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
 #include "Stockfish.hpp"
+#include "imgui.h"
 
 struct Position {
     int row;
@@ -87,7 +93,16 @@ private:
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
-    bool                     AImode = true;
+    bool                     AImode = false;
+
+    bool        whitePlayed = false;
+    float       currentTime;
+    float       stateStartTime = 0.0f;
+    const float waitDuration   = 0.1f;
+
+    bool isCastle = false;
+
+    std::optional<std::pair<int, int>> enPassantTarget; // Holds the square that can be captured via en passant
 
     void SwitchPlayer(double probability);
 };

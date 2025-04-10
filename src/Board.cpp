@@ -85,20 +85,23 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     }
 
     if (piece->getType() == 'P')
-        if (!isPathClear(piece, row, col) && piece->getSymbol() != 'N')
-        {
-            // std::cout << piece->getSymbol() << " move blocked at (" << row << ", " << col << ")\n";
-            return false;
-        }
-
-    if (piece->getSymbol() == 'P')
         piece->isCapture = (targetPiece && targetPiece->isWhite != piece->isWhite);
+
+    // En passant capture condition
+    if (piece->getType() == 'P')
+    {
+        if (enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second && abs(piece->col - col) == 1 && ((piece->isWhite && row == piece->row - 1) || (!piece->isWhite && row == piece->row + 1)))
+        {
+            return true;
+        }
+    }
 
     if (piece->getType() == 'K')
     {
         King* king = dynamic_cast<King*>(piece);
         if (king && king->canCastle(row, col))
         {
+            isCastle = true;
             performCastle(king, row, col);
             return true;
         }
@@ -247,8 +250,6 @@ bool Board::canHighlightSquares(Piece* selectedPiece, bool isWhite, int row, int
 {
     if (selectedPiece->getType() == 'P')
     {
-        // std::cout << "Error: King not found!\n";
-        return false;
         int direction = selectedPiece->isWhite ? -1 : 1;
 
         // Forward movement
@@ -548,14 +549,43 @@ void Board::move(int row, int col)
             if (!targetPiece || targetPiece->isWhite != selectedPiece->isWhite)
             {
                 movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
+
+                // if (enPassantTarget.has_value())
+                // {
+                //     std::cout << enPassantTarget->first << " "
+                //               << enPassantTarget->second << "\n";
+
+                //     std::cout << row << " "
+                //               << col << "\n\n";
+                // }
+
+                if (selectedPiece->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
+                {
+                    int capturedRow = selectedPiece->isWhite ? row + 1 : row - 1;
+                    removePiece(getPieceAt(capturedRow, col));
+                }
+
+                // Example: inside makeMove(selectedPiece, toRow, toCol)
+                if (selectedPiece->getType() == 'P' && abs(row - selectedPiece->row) == 2)
+                {
+                    enPassantTarget = {(selectedPiece->row + row) / 2, selectedPiece->col};
+                }
+                else
+                {
+                    enPassantTarget.reset(); // Reset if not a double step
+                }
+
                 selectedPiece->row = row;
                 selectedPiece->col = col;
+
                 if (selectedPiece->getType() == 'P')
                     selectedPiece->firstMove = false;
+
                 moveCount += .5;
                 activePlayer  = activePlayer == &white ? &black : &white;
                 selectedPiece = nullptr;
-                playAI();
+
+                // playAI();
             }
         }
         else
@@ -585,13 +615,46 @@ void Board::move(int row, int col)
                 {
                     movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
 
+                    // if (enPassantTarget.has_value())
+                    // {
+                    //     std::cout << enPassantTarget->first << " "
+                    //               << enPassantTarget->second << "\n";
+
+                    //     std::cout << row << " "
+                    //               << col << "\n\n";
+                    // }
+
+                    if (selectedPiece->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
+                    {
+                        int capturedRow = selectedPiece->isWhite ? row + 1 : row - 1;
+                        removePiece(getPieceAt(capturedRow, col));
+                    }
+
+                    // Example: inside makeMove(selectedPiece, toRow, toCol)
+                    if (selectedPiece->getType() == 'P' && abs(row - selectedPiece->row) == 2)
+                    {
+                        enPassantTarget = {(selectedPiece->row + row) / 2, selectedPiece->col};
+                    }
+                    else
+                    {
+                        enPassantTarget.reset(); // Reset if not a double step
+                    }
+
                     selectedPiece->row = row;
                     selectedPiece->col = col;
+
                     if (selectedPiece->getType() == 'P')
                         selectedPiece->firstMove = false;
                     moveCount += .5;
-                    activePlayer  = &black;
                     selectedPiece = nullptr;
+
+                    std::cout << "Here\n";
+
+                    stateStartTime = currentTime;
+                    whitePlayed    = true;
+
+                    // activePlayer = &black;
+                    // playAI();
                 }
             }
             else
@@ -616,34 +679,50 @@ void Board::update(int row, int col)
         move(row, col);
     }
 
-    if (activePlayer == &black)
+    // if (activePlayer == &black && AImode)
+    // {
+    //     playAI();
+    // }
+
+    currentTime = glfwGetTime();
+
+    if (whitePlayed)
     {
-        playAI();
+        if (currentTime - stateStartTime > waitDuration)
+        {
+            std::cout << "Here\n";
+            whitePlayed  = false;
+            activePlayer = &black;
+            playAI();
+        }
     }
 
     // Exponential distribution
-    if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
+    if (!AImode)
     {
-        if (!exp.done)
+        if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
         {
-            Piece* toRemove = kings[0];
-            int    idx      = 0;
-
-            while (toRemove->getType() == 'K')
+            if (!exp.done)
             {
-                idx = std::round(exp.dist(tools.rng));
-                idx = std::clamp(idx, 0, static_cast<int>(pieces.size() - 1));
+                Piece* toRemove = kings[0];
+                int    idx      = 0;
 
-                toRemove = pieces[idx].get();
+                while (toRemove->getType() == 'K')
+                {
+                    idx = std::round(exp.dist(tools.rng));
+                    idx = std::clamp(idx, 0, static_cast<int>(pieces.size() - 1));
+
+                    toRemove = pieces[idx].get();
+                }
+
+                removePiece(toRemove);
+                exp.done = true;
             }
-
-            removePiece(toRemove);
-            exp.done = true;
         }
-    }
-    else
-    {
-        exp.done = false;
+        else
+        {
+            exp.done = false;
+        }
     }
 }
 
@@ -684,20 +763,15 @@ void Board::draw()
                     selectedPiece = nullptr;
                 }
 
+            if (selectedPiece)
+            {
+                highlightSquares(minimum, maximum, row, col);
+            }
+
             for (auto& king : kings)
             {
                 if (isKingInCheck(dynamic_cast<King*>(king)) && king && king->row == row && king->col == col)
                 {
-                    Piece* targetPiece = getPieceAt(row, col);
-                    if (targetPiece && targetPiece->isWhite != selectedPiece->isWhite)
-                    {
-                        removePiece(targetPiece);
-                    }
-                    selectedPiece->row = row;
-                    selectedPiece->col = col;
-                    activePlayer       = activePlayer == &white ? &black : &white;
-                    SwitchPlayer(.1);
-                    selectedPiece = nullptr;
                     draw_list->AddRect(minimum, maximum, check_color, 0.0f, 0, 3.0f);
                 }
             }
