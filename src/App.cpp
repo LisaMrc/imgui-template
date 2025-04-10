@@ -17,7 +17,9 @@ void App::init()
 
     renderEngine.loadShader();
     renderEngine.loadMeshes();
-    renderEngine.create3DObj(board);
+    renderEngine.create3DObjects();
+    renderEngine.link3DObjectsToPieces(board);
+    renderEngine.linkMeshesTo3DObjects();
 
     float aspect = 800.0f / 600.0f;
     // TODO (🪟) : get window dimensions dynamically
