@@ -48,6 +48,8 @@ public:
     void                                showPromotionWindow();
     ImFont*                             getFont();
     void                                setFont(ImFont*);
+    void                                soundLoop();
+    void                                playSound();
     void                                playAI();
     std::string                         toChessNotation(int row, int col);
     Position                            chessNotationToIndices(const std::string& notation);
@@ -93,7 +95,7 @@ private:
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
-    bool                     AImode = false;
+    bool                     AImode = true;
 
     bool        whitePlayed = false;
     float       currentTime;
