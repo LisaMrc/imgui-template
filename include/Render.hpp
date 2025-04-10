@@ -4,18 +4,22 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
+#include "../include/Piece.hpp"
+#include "ShaderLoader.hpp"
 #include "glad/glad.h"
 
 class obj3D {
 public:
-    Piece* piece = nullptr;
-    GLuint meshVAO{0};
-    GLuint meshVBO{0};
-    GLuint meshEBO{0};
+    Piece*  piece = nullptr;
+    GLuint  meshVAO{0};
+    GLuint  meshVBO{0};
+    GLuint  meshEBO{0};
     GLsizei indexCount;
-    int row{0}, col{0};
+    int     row{0}, col{0};
 
-    void setupBuffers(const std::vector<float>& vertices, const std::vector<GLuint>& indices) {
+    void setupBuffers(const std::vector<float>& vertices, const std::vector<GLuint>& indices)
+    {
         // Création et liaison du VAO
         glGenVertexArrays(1, &meshVAO);
         glBindVertexArray(meshVAO);
@@ -62,8 +66,47 @@ public:
 
     void      setViewMatrix(const glm::mat4& view);
     glm::vec3 convertTo3D(int row, int col);
-    void      render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram);
-    void      render3DPieces();
+    void      render3DPieces(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
     void      renderSkybox();
-    GLuint    shaderProgram{};
+    void      render3DObj(const std::string& ObjectPath, int row, int col, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    // glm::mat4 getViewMatrix() const;
+    void renderAll();
+    void cleanUp();
+    ~RenderEngine();
+
+private:
+    glmax::Shader shader;
+    // glm::mat4     viewMatrix = glm::mat4(1.0f);
+};
+
+class VAO {
+public:
+    explicit VAO();
+    ~VAO();
+    void   init();
+    void   bind() const;
+    void   unbind() const;
+    GLuint m_id{};
+};
+
+class VBO {
+public:
+    explicit VBO();
+    ~VBO();
+    void   init();
+    void   bind() const;
+    void   unbind() const;
+    void   set_data(const void* data, GLsizeiptr size);
+    GLuint m_id{};
+};
+
+class EBO {
+public:
+    explicit EBO();
+    ~EBO();
+    void   init();
+    void   bind() const;
+    void   unbind() const;
+    void   set_data(const void* data, GLsizeiptr size);
+    GLuint m_id{};
 };
