@@ -11,10 +11,11 @@ class RenderEngine {
 public:
     void      loadShader();
     glm::vec3 convertTo3D(int row, int col);
-    void      render3DPieces();
+    void      render3DPieces(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
     void      renderSkybox();
-    void      render3DObj(const std::string& ObjectPath, int row, int col);
+    void      render3DObj(const std::string& ObjectPath, int row, int col, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
     void      setViewMatrix(const glm::mat4& view);
+    // glm::mat4 getViewMatrix() const;
 
 private:
     glmax::Shader shader;

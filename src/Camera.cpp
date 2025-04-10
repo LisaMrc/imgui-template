@@ -30,6 +30,7 @@ glm::mat4 Camera::getViewMatrix() const
 
 void Camera::moveFront(float t)
 {
+    std::cout << "move front camera Trackball" << std::endl;
     if (m_Mode == CameraMode::Trackball)
         m_Trackball.moveFront(t);
     else
@@ -58,4 +59,11 @@ void Camera::handleMouseMotion(float deltaX, float deltaY)
         m_Trackball.handleMouseMotion(deltaX, deltaY);
     else
         m_Freefly.rotateLeft(deltaX * 0.1f); // Sensibilité ajustée
+}
+
+void Camera::updateMatrices()
+{
+    MVMatrix     = glm::mat4(1.f) * getViewMatrix();
+    NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
+    MVP          = ProjMatrix * MVMatrix;
 }

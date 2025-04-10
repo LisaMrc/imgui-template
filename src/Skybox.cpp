@@ -1,28 +1,32 @@
 #include "../include/Skybox.hpp"
 #include <glad/glad.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <glad/stb_image.h>
 #include <iostream>
 
-GLuint Skybox::loadCubemapFake()
+GLuint Skybox::loadCubemap(const std::vector<std::string>& faces)
 {
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-    const int size = 1;
-    unsigned char red[]   = { 255, 0, 0 };
-    unsigned char green[] = { 0, 255, 0 };
-    unsigned char blue[]  = { 0, 0, 255 };
-    unsigned char white[] = { 255, 255, 255 };
-    unsigned char gray[]  = { 127, 127, 127 };
-    unsigned char black[] = { 0, 0, 0 };
-
-    unsigned char* colors[6] = {
-        red, green, blue, white, gray, black
-    };
-
-    for (GLuint i = 0; i < 6; i++) {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                     0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, colors[i]);
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cerr << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -34,53 +38,54 @@ GLuint Skybox::loadCubemapFake()
     return textureID;
 }
 
-void Skybox::init()
+void Skybox::init(const std::vector<std::string>& faces)
 {
-    textureID = loadCubemapFake();
+    textureID = loadCubemap(faces);
+    skyboxShader.load_shader("skybox.vert", "skybox.frag");
 
     float skyboxVertices[] = {
         // positions
-        -1.0f,  1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
 
-        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, 1.0f,
         -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
 
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
 
-        -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,
 
         -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f
+        -1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f
     };
 
     glGenVertexArrays(1, &VAO);
@@ -92,21 +97,23 @@ void Skybox::init()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-
-
 // extern Shader skyboxShader; // à initialiser quelque part dans App::init()
 
-// void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
-// {
-//     glDepthMask(GL_FALSE);
-//     skyboxShader.use();
-//     skyboxShader.setMat4("view", view);
-//     skyboxShader.setMat4("projection", projection);
+void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
+{
+    glDepthFunc(GL_LEQUAL); // Pour s'assurer que la skybox est derrière tout le reste
 
-//     glBindVertexArray(VAO);
-//     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-//     glDrawArrays(GL_TRIANGLES, 0, 36);
-//     glBindVertexArray(0);
-//     glDepthMask(GL_TRUE);
-// }
+    skyboxShader.use();
 
+    // Supprime la translation de la vue (pour que la skybox ne bouge pas avec la caméra)
+    glm::mat4 viewNoTranslation = glm::mat4(glm::mat3(view));
+    skyboxShader.set_uniform_matrix_4fv("view", viewNoTranslation);
+    skyboxShader.set_uniform_matrix_4fv("projection", projection);
+
+    glBindVertexArray(VAO);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+
+    glDepthFunc(GL_LESS); // Réinitialise la profondeur
+}

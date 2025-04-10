@@ -53,10 +53,14 @@ void Shader::load_shader(const std::string& vertexPath, const std::string& fragm
         glGetProgramInfoLog(m_programID, 512, nullptr, infoLog);
         std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
                   << infoLog << std::endl;
+                  glDeleteProgram(m_programID);
+                  m_programID = 0;
+                  return;
     }
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    
 }
 
 void Shader::set_uniform_matrix_4fv(const std::string& name, const glm::mat4& value)
@@ -135,6 +139,7 @@ std::string Shader::read_file(const std::string& path)
     }
 
     buffer << file.rdbuf();
+    std::cout << "[Shader] Fichier lu avec succes : " << path << "\n";
     return buffer.str();
 }
 

@@ -49,6 +49,7 @@ void FreeflyCamera::rotateUp(float degrees)
 {
     float radians = glm::radians(degrees);
     m_fTheta += radians;
+    // Il n'y a pas de restriction ici car on veut pouvoir tourner librement
     computeDirectionVectors();
 }
 

@@ -1,19 +1,16 @@
 #include <thread>
 #include "../include/App.hpp"
 #include "../include/Math.hpp"
+#include <GLFW/glfw3.h>
 
 int main()
 {
-    // glmax::Shader myShader;
-    // myShader.load_shader("../bin/src/shaders/basic.vert", "../bin/src/shaders/basic.frag");
-    // if (!myShader.is_valid())
-    // {
-    //     std::cerr << "Erreur fatale : le shader n'a pas pu être compilé." << std::endl;
-    //     return -1;
-    // }
+    if (!glfwInit()) {
+        std::cerr << "Erreur fatale : impossible d'initialiser GLFW." << std::endl;
+        return -1;
+    }
 
     App app;
-    // app.setShader(&myShader);
 
     std::jthread audioThread([](std::stop_token st) {
         playRandomSong(st);
@@ -21,5 +18,6 @@ int main()
 
     app.run();
 
+    glfwTerminate(); // Nettoyage GLFW
     return 0;
 }
