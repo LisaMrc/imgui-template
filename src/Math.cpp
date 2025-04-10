@@ -7,7 +7,7 @@
 #include <random>
 #include <thread>
 #include <vector>
-#include "miniaudio.h"
+#include <miniaudio.h>
 namespace fs = std::filesystem;
 
 // TODO(🚀) : make audio manager class and optimize loading

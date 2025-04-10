@@ -1,7 +1,6 @@
 # Welcome to Zen Chess 🍃
-♟️ *This game is currently in progress. Hopefully will be finished by april 11th !* ♟️
+♟️ *This game is currently in progress. Hopefully will be finished by April 11th !* ♟️
 
-You are currently on Lisa's branch :) 
 
 ## 1 | General Info
 🧑‍💻 **Developers** : Anass Doublal, Jean Le Chaudelec, Lisa Muracciole
@@ -12,17 +11,12 @@ You are currently on Lisa's branch :)
 ## 2 | Files Organisation
 All **.cpp** files are into the "src" folder. All **.hpp** files are into the "include" folder.
 
-#### App related / core  files
-**main** : basic file who renders the game and launch the app. Almost not modified
+**main** : basic file that launches the app. Almost not modified
 **App** : the main hub of all other files. Helps the game launch and update
 **Math** : holds math-related and random functions
-
-#### User related files
 **Player** : holds player info and data
-**Settings** : holds the settings manageable by the user
-
-#### Pieces related files
-**Board** : manages (draws) the board
+**Render** : holds renderEngine and everything 3D
+**Board** : manages the board
 **Pieces** : defines the pieces of the game and their settings
 
 ## 3 | Github Lexicon

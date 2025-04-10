@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <unordered_map>
 #include <vector>
 #include "../include/Piece.hpp"
 #include "glad/glad.h"
@@ -49,7 +50,7 @@ struct MeshData {
 class RenderEngine {
 public:
     GLuint                shaderProgram{};
-    std::vector<MeshData> loadedMeshes;
+    std::unordered_map<std::string, MeshData> meshMap;
     std::vector<obj3D>    gameObjects;
     glm::mat4             projectionMatrix;
     glm::mat4             viewMatrix;
@@ -59,8 +60,9 @@ public:
 
     void loadShader();
     void loadMeshes();
-    void create3DObj(Board& board);
-    // TODO(🚀) : group everything into an init function
+    void create3DObjects();
+    void link3DObjectsToPieces(Board& board);
+    void linkMeshesToPieces();
 
     void      setViewMatrix(const glm::mat4& view);
     glm::vec3 convertTo3D(int row, int col);

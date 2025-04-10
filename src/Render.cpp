@@ -107,9 +107,9 @@ void RenderEngine::loadMeshes()
         return;
     }
 
-    for (const auto& entry : std::filesystem::directory_iterator(objFolder))
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(objFolder))
     {
-        if (entry.path().extension() != ".obj")
+        if (!entry.is_regular_file() || entry.path().extension() != ".obj")
             continue;
 
         tinyobj::attrib_t                attrib;
@@ -125,8 +125,7 @@ void RenderEngine::loadMeshes()
 
         if (!ret)
         {
-            std::cerr << "Failed to load OBJ: " << entry.path() << "\n"
-                      << err << '\n';
+            std::cerr << "Failed to load OBJ: " << entry.path() << "\n" << err << '\n';
             continue;
         }
 
@@ -138,12 +137,10 @@ void RenderEngine::loadMeshes()
         {
             for (const auto& idx : shape.mesh.indices)
             {
-                // Position
                 vertices.push_back(attrib.vertices[3 * idx.vertex_index + 0]);
                 vertices.push_back(attrib.vertices[3 * idx.vertex_index + 1]);
                 vertices.push_back(attrib.vertices[3 * idx.vertex_index + 2]);
 
-                // Normal
                 if (idx.normal_index >= 0)
                 {
                     vertices.push_back(attrib.normals[3 * idx.normal_index + 0]);
@@ -152,7 +149,6 @@ void RenderEngine::loadMeshes()
                 }
                 else
                 {
-                    // Push a default normal (e.g., up)
                     vertices.push_back(0.0f);
                     vertices.push_back(1.0f);
                     vertices.push_back(0.0f);
@@ -162,20 +158,17 @@ void RenderEngine::loadMeshes()
             }
         }
 
-        // Création de VAO, VBO, et EBO pour chaque mesh
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        vaoList.push_back(vao); // Ajouter le VAO à la liste
+        if (indices.empty())
+        {
+            std::cerr << "Mesh without indices: " << entry.path() << '\n';
+            continue;
+        }
 
-        GLuint vbo = 0;
-        glGenBuffers(1, &vbo);
-        vboList.push_back(vbo); // Ajouter le VBO à la liste
+        GLuint vao = 0, vbo = 0, ebo = 0;
+        glGenVertexArrays(1, &vao); vaoList.push_back(vao);
+        glGenBuffers(1, &vbo); vboList.push_back(vbo);
+        glGenBuffers(1, &ebo); eboList.push_back(ebo);
 
-        GLuint ebo = 0;
-        glGenBuffers(1, &ebo);
-        eboList.push_back(ebo); // Ajouter l'EBO à la liste
-
-        // Liaison et remplissage des buffers
         glBindVertexArray(vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -184,56 +177,122 @@ void RenderEngine::loadMeshes()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-        // Position
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Normal
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
-        glBindVertexArray(0); // Unbind VAO after configuration
+        glBindVertexArray(0);
 
-        // Stocker les informations du mesh
         MeshData mesh{};
         mesh.vao        = vao;
         mesh.indexCount = static_cast<GLsizei>(indices.size());
 
-        if (indices.empty())
+        std::string meshName = entry.path().stem().string(); // e.g. "Pawn" from "Pawn.obj"
+
+        if (meshMap.contains(meshName))
         {
-            std::cerr << "Mesh sans indices : " << entry.path() << '\n';
+            std::cerr << "Duplicate mesh name detected: " << meshName << '\n';
             continue;
         }
 
-        loadedMeshes.push_back(mesh); // Ajouter le mesh chargé à la liste
+        meshMap[meshName] = mesh;
     }
 
-    std::cout << "Meshes : loaded" << '\n';
+    std::cout << "Meshes: loaded (" << meshMap.size() << " in total)\n";
 }
 
-void RenderEngine::create3DObj(Board& board)
+void RenderEngine::create3DObjects()
 {
-    if (loadedMeshes.empty())
+    gameObjects.clear();
+
+    obj3D boardObj;
+    boardObj.row = 0;
+    boardObj.col = 0;
+    boardObj.piece = nullptr;
+    gameObjects.push_back(boardObj);
+
+    for (int i = 0; i < 32; ++i)
     {
-        std::cerr << "Error: No meshes loaded.\n";
+        obj3D obj;
+        obj.row = 0;
+        obj.col = 0;
+        obj.piece = nullptr;
+        gameObjects.push_back(obj);
+    }
+
+    std::cout << "Created " << gameObjects.size() << " objects (1 board + 32 pieces)\n";
+}
+
+void RenderEngine::link3DObjectsToPieces(Board& board)
+{
+    if (gameObjects.size() < 33)
+    {
+        std::cerr << "Error: expected at least 33 gameObjects (1 board + 32 pieces)\n";
         return;
     }
 
-    obj3D whitePawn;
-    whitePawn.row = 6;
-    whitePawn.col = 0;
+    if (board.pieces.size() != 32)
+    {
+        std::cerr << "Error: expected 32 pieces in board\n";
+        return;
+    }
 
-    whitePawn.meshVAO    = loadedMeshes[0].vao;
-    whitePawn.indexCount = loadedMeshes[0].indexCount;
+    for (size_t i = 0; i < 32; ++i)
+    {
+        gameObjects[i + 1].piece = board.pieces[i].get(); // +1 to skip board object
+    }
 
-    // Assuming it's the first pawn in the list
-    whitePawn.piece = board.pieces[0].get();
+    std::cout << "Linked 32 3D objects to their respective pieces.\n";
+}
 
-    gameObjects.push_back(whitePawn);
+void RenderEngine::linkMeshesToPieces()
+{
+    if (gameObjects.size() < 33)
+    {
+        std::cerr << "Error: not enough objects to assign meshes\n";
+        return;
+    }
 
-    std::cout << "Object created for piece at ("
-              << whitePawn.piece->row << ", "
-              << whitePawn.piece->col << ")\n";
+    for (size_t i = 1; i < gameObjects.size(); ++i) // skip index 0 (the board)
+    {
+        obj3D& obj = gameObjects[i];
+
+        if (!obj.piece)
+        {
+            std::cerr << "Warning: obj3D at index " << i << " has no linked piece.\n";
+            continue;
+        }
+
+        char symbol = obj.piece->getSymbol(); // Example: 'P', 'K', 'N', etc.
+        std::string key;
+
+        switch (symbol)
+        {
+            case 'P': key = "Pawn";   break;
+            case 'R': key = "Rook";   break;
+            case 'N': key = "Knight"; break;
+            case 'B': key = "Bishop"; break;
+            case 'Q': key = "Queen";  break;
+            case 'K': key = "King";   break;
+            default:
+                std::cerr << "Unknown symbol: " << symbol << "\n";
+                continue;
+        }
+
+        if (meshMap.find(key) != meshMap.end())
+        {
+            obj.meshVAO    = meshMap[key].vao;
+            obj.indexCount = meshMap[key].indexCount;
+        }
+        else
+        {
+            std::cerr << "Mesh not found for: " << key << "\n";
+        }
+    }
+
+    std::cout << "Assigned meshes to all 3D pieces.\n";
 }
 
 void RenderEngine::renderAll()

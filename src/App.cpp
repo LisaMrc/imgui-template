@@ -10,9 +10,12 @@ void App::init()
 {
     board.init();
 
+    // TODO(🚀) : group everything into an init function
     renderEngine.loadShader();
     renderEngine.loadMeshes();
-    renderEngine.create3DObj(board);
+    renderEngine.create3DObjects();
+    renderEngine.link3DObjectsToPieces(board);
+    renderEngine.linkMeshesToPieces();
 
     float aspect                  = 800.0f / 600.0f; // ou récupère la taille de la fenêtre dynamiquement
     renderEngine.projectionMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
