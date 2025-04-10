@@ -12,6 +12,7 @@ void App::init()
 {
     board.init();
 
+
     std::vector<std::string> skyboxFaces = {
         "right.jpg",
         "left.jpg",
@@ -31,20 +32,47 @@ void App::init()
     glfwGetFramebufferSize(window, &width, &height);
     float aspect = static_cast<float>(width) / static_cast<float>(height);
     projection   = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+    
+
+        IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    board.setFont(io.Fonts->AddFontFromFileTTF("../../Assets/Fonts/CHEQ_TT.TTF", 40.0f));
+
+    renderEngine.loadShader();
+    renderEngine.loadMeshes();
+    renderEngine.create3DObj(board);
+
+    // float aspect = 800.0f / 600.0f;
+    // TODO (🪟) : get window dimensions dynamically
+
+    renderEngine.projectionMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+
 }
 
 void App::update()
 {
+    ImGui::PushFont(board.getFont());
+
     ImGui::Begin("Chess");
 
     glm::mat4 view = camera.getViewMatrix();
-    renderEngine.render3DObj("assets/pawn.obj", 1, 0, view, projection);
+    // renderEngine.render3DObj("assets/pawn.obj", 1, 0, view, projection);
     renderEngine.setViewMatrix(view);
     skybox.draw(view, projection);
     camera.updateMatrices();
     board.draw();
     displayGameOverScreen();
 
+    // renderEngine.viewMatrix = glm::lookAt(
+    //     glm::vec3(4, 6, 4), // position caméra
+    //     glm::vec3(0, 0, 0), // point visé
+    //     glm::vec3(0, 1, 0)  // axe vertical
+    // );
+
+    renderEngine.renderAll();
+
+    ImGui::PopFont();
     ImGui::End();
 }
 

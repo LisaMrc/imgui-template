@@ -4,20 +4,66 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "ShaderLoader.hpp"
 #include "glad/glad.h"
+
+class obj3D {
+public:
+    Piece* piece = nullptr;
+    GLuint meshVAO{0};
+    GLuint meshVBO{0};
+    GLuint meshEBO{0};
+    GLsizei indexCount;
+    int row{0}, col{0};
+
+    void setupBuffers(const std::vector<float>& vertices, const std::vector<GLuint>& indices) {
+        // Création et liaison du VAO
+        glGenVertexArrays(1, &meshVAO);
+        glBindVertexArray(meshVAO);
+
+        // Création et liaison du VBO
+        glGenBuffers(1, &meshVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, meshVBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+        // Création et liaison du EBO
+        glGenBuffers(1, &meshEBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+        // Définir le format des attributs du VBO
+        glEnableVertexAttribArray(0); // position only
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+        // Délié VAO après configuration
+        glBindVertexArray(0);
+    }
+};
+
+struct MeshData {
+    GLuint  vao;
+    GLsizei indexCount;
+};
 
 class RenderEngine {
 public:
-    void      loadShader();
-    glm::vec3 convertTo3D(int row, int col);
-    void      render3DPieces(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
-    void      renderSkybox();
-    void      render3DObj(const std::string& ObjectPath, int row, int col, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
-    void      setViewMatrix(const glm::mat4& view);
-    // glm::mat4 getViewMatrix() const;
+    GLuint                shaderProgram{};
+    std::vector<MeshData> loadedMeshes;
+    std::vector<obj3D>    gameObjects;
+    glm::mat4             projectionMatrix;
+    glm::mat4             viewMatrix;
+    std::vector<GLuint>   vaoList;
+    std::vector<GLuint>   vboList;
+    std::vector<GLuint>   eboList;
 
-private:
-    glmax::Shader shader;
-    glm::mat4     viewMatrix = glm::mat4(1.0f);
+    void loadShader();
+    void loadMeshes();
+    void create3DObj(Board& board);
+    // TODO(🚀) : group everything into an init function
+
+    void      setViewMatrix(const glm::mat4& view);
+    glm::vec3 convertTo3D(int row, int col);
+    void      render3DObj(std::string const& ObjectPath, int row, int col, GLuint shaderProgram);
+    void      render3DPieces();
+    void      renderSkybox();
+    GLuint    shaderProgram{};
 };

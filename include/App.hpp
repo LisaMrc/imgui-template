@@ -1,17 +1,13 @@
 #pragma once
 
-// #include <GLFW/glfw3.h>
 #include <backends/imgui_impl_glfw.h>
+#include <glad/glad.h>
 #include <imgui.h>
-// #include <glm/glm.hpp>
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
 #include "Board.hpp"
 #include "Camera.hpp"
 #include "Render.hpp"
 #include "Skybox.hpp"
 
-// #include "glad/glad.h"
 
 class App {
 public:
@@ -28,8 +24,10 @@ public:
     double lastMouseY      = 0.0;
     bool   firstMouseInput = true;
 
+    Board board;
+
 private:
-    Board        board;
+    // Board        board;
     Camera       camera;
     RenderEngine renderEngine;
     Skybox       skybox;

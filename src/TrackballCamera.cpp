@@ -24,6 +24,8 @@ void TrackballCamera::moveFront(float delta)
 
     if (m_fDistance < 1.0f)
         m_fDistance = 1.0f;
+    if (m_fDistance > 20.0f)
+        m_fDistance = 20.0f;
 }
 
 void TrackballCamera::rotateLeft(float degrees)
