@@ -9,6 +9,11 @@
 void App::init()
 {
     board.init();
+    
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    board.setFont(io.Fonts->AddFontFromFileTTF("../../Assets/Fonts/CHEQ_TT.TTF", 40.0f));
 
     // TODO(🚀) : group everything into an init function
     renderEngine.loadShader();
@@ -17,12 +22,15 @@ void App::init()
     renderEngine.link3DObjectsToPieces(board);
     renderEngine.linkMeshesTo3DObjects();
 
-    float aspect                  = 800.0f / 600.0f; // ou récupère la taille de la fenêtre dynamiquement
+    float aspect = 800.0f / 600.0f;
+    // TODO (🪟) : get window dimensions dynamically
+
     renderEngine.projectionMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 }
 
 void App::update()
 {
+    ImGui::PushFont(board.getFont());
     // ImGui::ShowDemoWindow(); // This opens a window which shows tons of
                              // examples of what you can do with ImGui. You
                              // should check it out! Also, you can use the
@@ -45,6 +53,8 @@ void App::update()
     );
 
     renderEngine.renderAll();
+
+    ImGui::PopFont();
 }
 
 void App::handleEvent()

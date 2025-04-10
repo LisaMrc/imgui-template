@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <backends/imgui_impl_glfw.h>
 #include <imgui.h>
 #include <glm/glm.hpp>
@@ -8,7 +10,6 @@
 #include "Board.hpp"
 #include "Render.hpp"
 #include "TrackballCamera.hpp"
-#include "glad/glad.h"
 
 class App {
 public:
@@ -20,8 +21,9 @@ public:
     void displayGameOverScreen();
     void run();
 
+    Board board;
+
 private:
-    Board           board;
     TrackballCamera TrackBallCamera;
     RenderEngine    renderEngine;
 };

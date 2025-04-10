@@ -13,6 +13,7 @@ public:
     Board* board;
 
     virtual char getSymbol() const { return '_'; }
+    virtual char getType() const { return '_'; }
     virtual bool canMove(int row, int col) { return false; }
     Piece(int r, int c, bool isW)
         : row(r), col(c), isWhite(isW) {}
@@ -25,7 +26,14 @@ public:
 
     Pawn(int r, int c, bool isW)
         : Piece(r, c, isW) {}
-    char getSymbol() const override { return 'P'; }
+    char getSymbol() const override
+    {
+        return isWhite ? 'p' : 'o';
+    }
+    char getType() const override
+    {
+        return 'P';
+    }
     bool canMove(int sRow, int sCol) override
     {
         if (isWhite)
@@ -105,7 +113,11 @@ class Rook : public Piece {
 public:
     Rook(int r, int c, bool isW)
         : Piece(r, c, isW) {}
-    char getSymbol() const override { return 'R'; }
+    char getSymbol() const override { return isWhite ? 'r' : 't'; }
+    char getType() const override
+    {
+        return 'R';
+    }
     bool canMove(int sRow, int sCol) override { return row == sRow || col == sCol; }
 };
 
@@ -113,7 +125,11 @@ class Knight : public Piece {
 public:
     Knight(int r, int c, bool isW)
         : Piece(r, c, isW) {}
-    char getSymbol() const override { return 'N'; }
+    char getSymbol() const override { return isWhite ? 'h' : 'j'; }
+    char getType() const override
+    {
+        return 'N';
+    }
     bool canMove(int sRow, int sCol) override { return (abs(row - sRow) == 2 && abs(col - sCol) == 1) || (abs(row - sRow) == 1 && abs(col - sCol) == 2); }
 };
 
@@ -121,7 +137,11 @@ class Bishop : public Piece {
 public:
     Bishop(int r, int c, bool isW)
         : Piece(r, c, isW) {}
-    char getSymbol() const override { return 'B'; }
+    char getSymbol() const override { return isWhite ? 'b' : 'n'; }
+    char getType() const override
+    {
+        return 'B';
+    }
     bool canMove(int sRow, int sCol) override { return abs(row - sRow) == abs(col - sCol); }
 };
 
@@ -129,7 +149,11 @@ class Queen : public Piece {
 public:
     Queen(int r, int c, bool isW)
         : Piece(r, c, isW) {}
-    char getSymbol() const override { return 'Q'; }
+    char getSymbol() const override { return isWhite ? 'q' : 'w'; }
+    char getType() const override
+    {
+        return 'Q';
+    }
     bool canMove(int sRow, int sCol) override { return row == sRow || col == sCol || abs(row - sRow) == abs(col - sCol); }
 };
 
@@ -137,7 +161,11 @@ class King : public Piece {
 public:
     King(int r, int c, bool isW)
         : Piece(r, c, isW) {}
-    char getSymbol() const override { return 'K'; }
+    char getSymbol() const override { return isWhite ? 'k' : 'l'; }
+    char getType() const override
+    {
+        return 'K';
+    }
     bool canMove(int sRow, int sCol) override { return abs(row - sRow) <= 1 && abs(col - sCol) <= 1; }
     bool canCastle(int destRow, int destCol);
 };
