@@ -15,7 +15,6 @@
 #include "Piece.hpp"
 #include "Player.hpp"
 #include "Stockfish.hpp"
-#include "imgui.h"
 
 struct Position {
     int row;

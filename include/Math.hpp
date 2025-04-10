@@ -96,3 +96,25 @@ public:
         return result;
     }
 };
+
+class Poisson {
+public:
+    std::default_random_engine engine;
+    std::poisson_distribution<int> dist;
+    int result = -1;
+    bool done = false;
+
+    explicit Poisson(double lambda)
+        : engine(static_cast<unsigned int>(time(0))),
+          dist(lambda) {}
+
+    int draw() {
+        result = dist(engine);
+        done = true;
+        return result;
+    }
+
+    int getResult() const {
+        return result;
+    }
+};

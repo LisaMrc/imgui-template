@@ -1,7 +1,6 @@
 #include "../include/Render.hpp"
 #include <imgui.h>
 #include <tiny_obj_loader.h>
-#include <chrono>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
