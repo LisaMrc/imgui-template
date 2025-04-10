@@ -54,23 +54,25 @@ public:
 
 class Bernoulli {
 public:
-    std::default_random_engine engine;      // Random engine
-    std::bernoulli_distribution dist;     // Bernoulli distribution
+    std::default_random_engine  engine; // Random engine
+    std::bernoulli_distribution dist;   // Bernoulli distribution
 
-    bool done = false;
+    bool done   = false;
     bool result = false;
 
-    Bernoulli() : engine(static_cast<unsigned int>(time(0))) {}
+    Bernoulli()
+        : engine(static_cast<unsigned int>(time(0))) {}
 
     // Method to perform the Bernoulli trial and return the result
     bool flip(double probability)
     {
-        dist = std::bernoulli_distribution(probability);
+        dist   = std::bernoulli_distribution(probability);
         result = dist(engine);
         return result;
     }
 
-    bool getResult() const {
+    bool getResult() const
+    {
         return result;
     }
 };

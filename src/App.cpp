@@ -9,7 +9,7 @@
 void App::init()
 {
     board.init();
-    
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -27,12 +27,14 @@ void App::init()
 
 void App::update()
 {
-    ImGui::PushFont(board.getFont());
+    ImGui::PushFont(board.getFont(0));
 
     ImGui::Begin("Chess");
+
+    ImGui::PopFont();
+    ImGui::PushFont(board.getFont(1));
+
     board.draw();
-    board.debug_removeWhiteKingButton();
-    board.debug_removeBlackKingButton();
     displayGameOverScreen();
     ImGui::End();
 
@@ -47,40 +49,22 @@ void App::update()
     ImGui::PopFont();
 }
 
-void App::handleEvent()
-{
-    // TODO(🎥) : enable mouse trigger for trackball camera
-    // if (true)
-    // {
-    //     TrackBallCamera.moveFront(.001);
-    // }
-}
-
 void App::displayGameOverScreen()
 {
-    if (board.wasWhiteKingRemoved())
+    ImGui::PopFont();
+    ImGui::PushFont(board.getFont(0));
+    if (board.gameOver)
     {
         ImGui::SetNextWindowPos(ImVec2(400, 300), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(300, 150));
-        ImGui::Begin("Game Over", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Game Over", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-        ImGui::Text("Game Over!");
-        ImGui::Text("White king has been captured. Black wins !");
-
-        ImGui::End();
-    }
-
-    if (board.wasBlackKingRemoved())
-    {
-        ImGui::SetNextWindowPos(ImVec2(400, 300), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(300, 150));
-        ImGui::Begin("Game Over", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-
-        ImGui::Text("Game Over!");
-        ImGui::Text("Black king has been captured. White wins !");
+        ImGui::Text("The king has been captured!");
 
         ImGui::End();
     }
+    ImGui::PopFont();
+    ImGui::PushFont(board.getFont(1));
 }
 
 void App::run()

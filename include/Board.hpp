@@ -46,7 +46,7 @@ public:
     void                                promotePawn(char newSymbol);
     bool                                checkPromotion();
     void                                showPromotionWindow();
-    ImFont*                             getFont();
+    ImFont*                             getFont(int);
     void                                setFont(ImFont*);
     void                                soundLoop();
     void                                playSound();
@@ -54,10 +54,16 @@ public:
     std::string                         toChessNotation(int row, int col);
     Position                            chessNotationToIndices(const std::string& notation);
     StockfishEngine                     stockfish;
-    bool                                wasWhiteKingRemoved();
-    bool                                wasBlackKingRemoved();
-    void                                debug_removeWhiteKingButton();
-    void                                debug_removeBlackKingButton();
+    // bool                                wasWhiteKingRemoved();
+    // bool                                wasBlackKingRemoved();
+    // void                                debug_removeWhiteKingButton();
+    // void                                debug_removeBlackKingButton();
+    bool        gameOver = false;
+    Tools       tools;
+    Binomial    binomial;
+    Exponential exp;
+    Gamma       gamma;
+    Bernoulli   bernoulli;
 
 private:
     Piece*              selectedPiece = nullptr;
@@ -86,16 +92,10 @@ private:
     ImU32 highlight_color;
     ImU32 check_color;
 
-    Tools       tools;
-    Binomial    binomial;
-    Exponential exp;
-    Gamma       gamma;
-    Bernoulli   bernoulli;
-
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
-    bool                     AImode = true;
+    bool                     AImode = false;
 
     bool        whitePlayed = false;
     float       currentTime;

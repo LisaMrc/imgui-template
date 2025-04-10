@@ -156,58 +156,16 @@ void Board::removePiece(Piece* piece)
     if (!piece)
         return;
 
+    if (piece->getType() == 'K')
+    {
+        kings.erase(!piece->isWhite ? kings.begin() : kings.begin() + 1);
+        gameOver = true;
+    }
+
     pieces.erase(std::remove_if(pieces.begin(), pieces.end(), [piece](const std::unique_ptr<Piece>& p) {
                      return p.get() == piece;
                  }),
                  pieces.end());
-}
-
-bool Board::wasWhiteKingRemoved()
-{
-    for (const auto& piece : pieces)
-    {
-        if (piece->getSymbol() == 'K' && piece->isWhite)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void Board::debug_removeWhiteKingButton()
-{
-    if (ImGui::Button("Remove white king"))
-    {
-        pieces.erase(std::remove_if(pieces.begin(), pieces.end(), [](const std::unique_ptr<Piece>& piece) {
-                         return piece->getSymbol() == 'K' && piece->isWhite;
-                     }),
-                     pieces.end());
-    }
-}
-
-bool Board::wasBlackKingRemoved()
-{
-    for (const auto& piece : pieces)
-    {
-        if (piece->getSymbol() == 'K' && !piece->isWhite)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void Board::debug_removeBlackKingButton()
-{
-    if (ImGui::Button("Remove black king"))
-    {
-        pieces.erase(std::remove_if(pieces.begin(), pieces.end(), [](const std::unique_ptr<Piece>& piece) {
-                         return piece->getSymbol() == 'K' && !piece->isWhite;
-                     }),
-                     pieces.end());
-    }
 }
 
 void Board::performCastle(King* king, int destRow, int destCol)
@@ -450,9 +408,9 @@ bool Board::checkPromotion()
     return false;
 }
 
-ImFont* Board::getFont()
+ImFont* Board::getFont(int what)
 {
-    return customFont;
+    return what == 1 ? customFont : defaultFont;
 }
 
 void Board::setFont(ImFont* font)
@@ -482,7 +440,6 @@ void Board::playAI()
     stockfish.WriteToEngine("go depth 1\n");
 
     Sleep(1000); // Let Stockfish calculate
-    // std::cout << stockfish.GetLastOutput() << "\n";
     std::string bestMove = stockfish.getBestMove();
 
     std::cout << bestMove << "\n";
@@ -533,7 +490,6 @@ void Board::playAI()
         removePiece(getPieceAt(capturedRow, col));
     }
 
-    // Example: inside makeMove(selectedPiece, toRow, toCol)
     if (pieceToMove->getType() == 'P' && abs(row - pieceToMove->row) == 2)
     {
         enPassantTarget = {(pieceToMove->row + row) / 2, pieceToMove->col};
@@ -606,15 +562,6 @@ void Board::move(int row, int col)
             {
                 movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
 
-                // if (enPassantTarget.has_value())
-                // {
-                //     std::cout << enPassantTarget->first << " "
-                //               << enPassantTarget->second << "\n";
-
-                //     std::cout << row << " "
-                //               << col << "\n\n";
-                // }
-
                 if (selectedPiece->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
                 {
                     int capturedRow = selectedPiece->isWhite ? row + 1 : row - 1;
@@ -640,8 +587,6 @@ void Board::move(int row, int col)
                 moveCount += .5;
                 activePlayer  = activePlayer == &white ? &black : &white;
                 selectedPiece = nullptr;
-
-                // playAI();
             }
         }
         else
@@ -671,15 +616,6 @@ void Board::move(int row, int col)
                 {
                     movesPlayed.push_back(toChessNotation(selectedPiece->row, selectedPiece->col) + toChessNotation(row, col) + " ");
 
-                    // if (enPassantTarget.has_value())
-                    // {
-                    //     std::cout << enPassantTarget->first << " "
-                    //               << enPassantTarget->second << "\n";
-
-                    //     std::cout << row << " "
-                    //               << col << "\n\n";
-                    // }
-
                     if (selectedPiece->getType() == 'P' && enPassantTarget.has_value() && row == enPassantTarget->first && col == enPassantTarget->second)
                     {
                         int capturedRow = selectedPiece->isWhite ? row + 1 : row - 1;
@@ -708,9 +644,6 @@ void Board::move(int row, int col)
 
                     stateStartTime = currentTime;
                     whitePlayed    = true;
-
-                    // activePlayer = &black;
-                    // playAI();
                 }
             }
             else
@@ -734,11 +667,6 @@ void Board::update(int row, int col)
     {
         move(row, col);
     }
-
-    // if (activePlayer == &black && AImode)
-    // {
-    //     playAI();
-    // }
 
     currentTime = glfwGetTime();
 

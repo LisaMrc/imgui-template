@@ -4,7 +4,7 @@
 
 int main()
 {
-    App app;
+    App         app;
     AudioEngine audioEngine;
 
     std::jthread audioThread([&](std::stop_token st) {
@@ -12,7 +12,7 @@ int main()
     });
 
     std::jthread soundThread([&](std::stop_token st) {
-        audioEngine.playRandomSound(st);
+        audioEngine.playRandomSound(st, app.board);
     });
 
     app.run(); // blocks until app is closed

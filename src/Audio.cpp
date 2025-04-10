@@ -1,18 +1,10 @@
 #include "../include/Audio.hpp"
-#include <chrono>
-#include <cstdlib>
-#include <ctime>
-#include <filesystem>
-#include <iostream>
-#include <random>
-#include <thread>
-#include <vector>
-#include "miniaudio.h"
+
 namespace fs = std::filesystem;
 
 void AudioEngine::playRandomSong(std::stop_token stopToken)
 {
-    const std::string directory = "../../Assets/Music";
+    const std::string        directory = "../../Assets/Music";
     std::vector<std::string> songs;
 
     if (!fs::exists(directory) || !fs::is_directory(directory))
@@ -44,11 +36,12 @@ void AudioEngine::playRandomSong(std::stop_token stopToken)
     while (!stopToken.stop_requested())
     {
         int songIndex = 0;
-        do {
+        do
+        {
             songIndex = std::rand() % songs.size();
         } while (songs.size() > 1 && songIndex == lastIndex); // avoid repeat
 
-        lastIndex = songIndex;
+        lastIndex                       = songIndex;
         const std::string& selectedSong = songs[songIndex];
 
         std::cout << "Playing: " << selectedSong << '\n';
@@ -72,7 +65,7 @@ void AudioEngine::playRandomSong(std::stop_token stopToken)
     std::cout << "Music stopped.\n";
 }
 
-void AudioEngine::playRandomSound(std::stop_token stopToken)
+void AudioEngine::playRandomSound(std::stop_token stopToken, Board& board)
 {
     ma_engine engine;
     if (ma_engine_init(nullptr, &engine) != MA_SUCCESS)
@@ -82,7 +75,7 @@ void AudioEngine::playRandomSound(std::stop_token stopToken)
     }
 
     std::vector<std::string> soundFiles;
-    const std::string directory = "../../Assets/Sounds";
+    const std::string        directory = "../../Assets/Sounds";
 
     for (const auto& entry : std::filesystem::directory_iterator(directory))
     {
@@ -96,15 +89,12 @@ void AudioEngine::playRandomSound(std::stop_token stopToken)
         return;
     }
 
-    std::binomial_distribution<int> dist(/*trials=*/10, /*probability=*/0.3);
-    std::default_random_engine rng(static_cast<unsigned>(std::time(nullptr)));
-
     while (!stopToken.stop_requested())
     {
-        double delay = dist(rng);
+        double delay = board.gamma.dist(board.tools.rng);
         std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(delay)));
 
-        int soundIndex = std::rand() % soundFiles.size();
+        int                soundIndex    = std::rand() % soundFiles.size();
         const std::string& selectedSound = soundFiles[soundIndex];
 
         std::cout << "🔊 Random sound: " << selectedSound << " (after " << delay << "s)\n";
