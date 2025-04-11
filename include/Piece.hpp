@@ -73,40 +73,6 @@ public:
 
         return false;
     }
-
-    // bool canCatch(int sRow, int sCol, const std::vector<std::unique_ptr<Piece>>& pieces) override
-    // {
-    //     if (isWhite)
-    //     {
-    //         // Capture en diagonale
-    //         if ((sCol == col - 1 || sCol == col + 1) && sRow == row - 1)
-    //         {
-    //             for (const auto& piece : pieces)
-    //             {
-    //                 if (piece->row == sRow && piece->col == sCol && !piece->isWhite)
-    //                 {
-    //                     return true; // Capture possible
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         // Capture en diagonale
-    //         if ((sCol == col - 1 || sCol == col + 1) && sRow == row + 1)
-    //         {
-    //             for (const auto& piece : pieces)
-    //             {
-    //                 if (piece->row == sRow && piece->col == sCol && piece->isWhite)
-    //                 {
-    //                     return true; // Capture possible
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return false;
-    // }
 };
 
 class Rook : public Piece {

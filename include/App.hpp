@@ -9,7 +9,6 @@
 #include "Render.hpp"
 #include "Skybox.hpp"
 
-
 class App {
 public:
     App() = default;
@@ -28,14 +27,9 @@ public:
     Board board = Board(this->renderEngine);
 
 private:
-    // Board        board;
     Camera       camera;
     RenderEngine renderEngine;
     Skybox       skybox;
     glm::mat4    projection;
-    bool         m_UseTrackballCamera = true; // true = trackball, false = freefly
+    bool         m_UseTrackballCamera = true;
 };
-
-// enum class CameraMode { Freefly,
-//                         Trackball };
-// extern CameraMode currentCameraMode = CameraMode::Trackball;

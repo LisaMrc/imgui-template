@@ -111,7 +111,6 @@ public:
     void      render3DPieces(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
     void      renderSkybox();
     void      render3DObj(const std::string& ObjectPath, int row, int col, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
-    // glm::mat4 getViewMatrix() const;
     void renderAll(Board&);
 
     TimeOfDay getSceneTimeOfDay();
@@ -123,7 +122,6 @@ public:
 
 private:
     glmax::Shader shader;
-    // glm::mat4     viewMatrix = glm::mat4(1.0f);
 };
 
 class VAO {

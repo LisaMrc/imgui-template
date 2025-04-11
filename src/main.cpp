@@ -15,7 +15,7 @@ int main()
         audioEngine.playRandomSound(st, app.board);
     });
 
-    app.run(); // blocks until app is closed
+    app.run();
 
     // Clean shutdown of both threads
     audioThread.request_stop();
@@ -23,6 +23,6 @@ int main()
     audioThread.join();
     soundThread.join();
 
-    glfwTerminate(); // Nettoyage GLFW
+    glfwTerminate();
     return 0;
 }

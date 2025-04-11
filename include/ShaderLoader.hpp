@@ -24,7 +24,6 @@ public:
 private:
     GLuint                                 m_programID = 0;
     std::unordered_map<std::string, GLint> m_uniform_cache;
-    //
     GLuint               compile_shader(const std::string& path, GLenum type);
     std::string          read_file(const std::string& path);
     std::optional<GLint> get_uniform_location(const std::string& name);

@@ -4,17 +4,6 @@
 #include <cmath>
 #include <iostream>
 
-// void TrackballCamera::computeDirectionVectors()
-// {
-//     float radX = glm::radians(m_fAngleX);
-//     float radY = glm::radians(m_fAngleY);
-
-//     glm::vec3 front;
-//     front.x = cos(radX) * sin(radY);
-//     front.y = sin(radX);
-//     front.z = cos(radX) * cos(radY);
-// }
-
 TrackballCamera::TrackballCamera()
     : m_fAngleX(45.0f), m_fAngleY(0.0f), m_fDistance(5.0f), m_Target(glm::vec3(0.0f, 0.0f, 0.0f)) {}
 

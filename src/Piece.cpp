@@ -27,10 +27,5 @@ bool King::canCastle(int destRow, int destCol)
         checkCol += direction;
     }
 
-    // if (board->isSquareAttacked(row, col, !isWhite) || board->isSquareAttacked(row, col + direction, !isWhite) || board->isSquareAttacked(row, col + 2 * direction, !isWhite))
-    // {
-    //     return false;
-    // }
-
     return true;
 }

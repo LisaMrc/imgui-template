@@ -97,8 +97,6 @@ void Skybox::init(const std::vector<std::string>& faces)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-// extern Shader skyboxShader; // à initialiser quelque part dans App::init()
-
 void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
 {
     glDepthFunc(GL_LEQUAL); // Pour s'assurer que la skybox est derrière tout le reste

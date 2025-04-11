@@ -25,18 +25,7 @@ void FreeflyCamera::attachToPiece(glm::vec3 piecePosition)
 {
     m_PiecePosition = piecePosition;
     m_Position      = piecePosition + glm::vec3(0.0f, 1.5f, 0.0f); // Caméra au sommet de la pièce
-    // m_Mode = CameraMode::PieceView;
 }
-
-// void FreeflyCamera::moveLeft(float t)
-// {
-//     m_Position += t * m_LeftVector;
-// }
-
-// void FreeflyCamera::moveFront(float t)
-// {
-//     m_Position += t * m_FrontVector;
-// }
 
 void FreeflyCamera::rotateLeft(float degrees)
 {

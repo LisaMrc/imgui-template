@@ -25,7 +25,7 @@ GLuint RenderEngine::loadTexture(const std::string& path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // Flip image vertically if needed
+    stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 
     if (data)
@@ -45,7 +45,6 @@ GLuint RenderEngine::loadTexture(const std::string& path)
 
 void RenderEngine::loadShader()
 {
-    // Open shader files
     std::ifstream vShaderFile("../../Shaders/vertex_shader.glsl");
     std::ifstream fShaderFile("../../Shaders/fragment_shader.glsl");
 
@@ -55,7 +54,6 @@ void RenderEngine::loadShader()
         return;
     }
 
-    // Read file content
     std::stringstream vShaderStream;
     std::stringstream fShaderStream;
     vShaderStream << vShaderFile.rdbuf();
@@ -65,7 +63,6 @@ void RenderEngine::loadShader()
     const char* vShaderSource = vertexCode.c_str();
     const char* fShaderSource = fragmentCode.c_str();
 
-    // Compile vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vShaderSource, nullptr);
     glCompileShader(vertexShader);
@@ -81,7 +78,6 @@ void RenderEngine::loadShader()
         return;
     }
 
-    // Compile fragment shader
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fShaderSource, nullptr);
     glCompileShader(fragmentShader);
@@ -95,7 +91,6 @@ void RenderEngine::loadShader()
         return;
     }
 
-    // Link shaders into program
     GLuint program = glCreateProgram();
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
@@ -110,7 +105,6 @@ void RenderEngine::loadShader()
         return;
     }
 
-    // Cleanup
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
@@ -184,7 +178,6 @@ void RenderEngine::loadMeshes()
             continue;
         }
 
-        // Special multi-material support for Chessboard
         if (meshName == "Chessboard")
         {
             chessboardGroups.clear();
@@ -485,20 +478,16 @@ void RenderEngine::renderAll(Board& board)
 {
     glUseProgram(shaderProgram);
 
-    // Set light direction
     GLint lightDirLoc = glGetUniformLocation(shaderProgram, "lightDir");
     glUniform3f(lightDirLoc, 0.0f, -0.5f, 0.0f);
 
-    // Light and material
     glUniform3f(glGetUniformLocation(shaderProgram, "lightDir"), 0.0f, -0.5f, 0.0f);
     glUniform3f(glGetUniformLocation(shaderProgram, "lightColor"), 1.0f, 1.0f, 1.0f);
     glUniform3f(glGetUniformLocation(shaderProgram, "objectColor"), 1.0f, 0.7f, 0.5f);    
 
-    // Set projection matrix
     GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-    // Set view matrix
     GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
@@ -508,7 +497,6 @@ void RenderEngine::renderAll(Board& board)
         int       col   = obj.piece ? obj.piece->col : obj.col;
         glm::mat4 model = glm::translate(glm::mat4(1.0f), convertTo3D(row, col));
 
-        // Set model matrix
         GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -540,36 +528,22 @@ void RenderEngine::renderAll(Board& board)
         glBindVertexArray(obj.meshVAO);
         if (obj.piece->getType() == 'N' && obj.piece->isWhite)
         {
-            // Define rotation angle in degrees
-            float angle = glm::radians(180.0f); // convert to radians
+            float angle = glm::radians(180.0f);
 
-            // Create model matrix
             glm::mat4 model = glm::mat4(1.0f);
 
             glm::vec3 objectPosition = glm::vec3(5.0f, 0.0f, 0.0f);
 
-            // Translate to position
             model = glm::translate(model, convertTo3D(obj.piece->row, obj.piece->col));
 
-            // Rotate around local Y-axis
             model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
 
-            // Pass to shader
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         }
         glDrawElements(GL_TRIANGLES, obj.indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
-
-// glm::vec3 RenderEngine::convertTo3D(int row, int col)
-// {
-//     float squareSize = 1.0f;                      // Size of one board tile
-//     float x          = (col - 3.5f) * squareSize; // Center board at (0,0)
-//     float z          = (row - 3.5f) * squareSize;
-//     float y          = -5.f; // Push down model a bit (adjust if needed)
-//     return glm::vec3(x, y, z);
-// }
 
 TimeOfDay RenderEngine::getSceneTimeOfDay()
 {
@@ -623,7 +597,7 @@ void RenderEngine::setSceneLighting(TimeOfDay timeOfDay)
     }
 
     glUseProgram(shaderProgram);  // Ensure the shader program is active
-    glUniform3fv(lightColorLocation, 1, glm::value_ptr(lightColor)); // Update lightColor uniform
+    glUniform3fv(lightColorLocation, 1, glm::value_ptr(lightColor));
 }
 
 VAO::VAO()
@@ -651,7 +625,7 @@ void VAO::unbind() const
 
 VBO::VBO()
 {
-    // Optional: Initialize anything here, or leave empty
+    
 }
 
 VBO::~VBO()
@@ -773,8 +747,8 @@ void RenderEngine::render3DObj(const std::string& ObjectPath, int row, int col, 
     glm::mat4 mvp   = projectionMatrix * viewMatrix * model;
 
     shader.set_uniform_matrix_4fv("MVP", mvp);
-    shader.set_uniform_matrix_4fv("model", model);     // optionnel si tu l'utilises dans le shader
-    shader.set_uniform_matrix_4fv("view", viewMatrix); // idem
+    shader.set_uniform_matrix_4fv("model", model);     
+    shader.set_uniform_matrix_4fv("view", viewMatrix); 
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
@@ -813,19 +787,9 @@ void RenderEngine::render3DPieces(const glm::mat4& viewMatrix, const glm::mat4& 
     int i = 0;
     for (const std::string& path : setPaths)
     {
-        // Exemple de placement en ligne (modifie selon ton besoin)
         render3DObj(path, 0, i++, viewMatrix, projectionMatrix);
     }
 }
-
-// glm::mat4 RenderEngine::getViewMatrix() const
-// {
-//     if (App::get().isTrackballMode()) {
-//         return m_TrackballCamera.getViewMatrix();
-//     } else {
-//         return Camera.getViewMatrix();
-//     }
-// }
 
 void RenderEngine::cleanUp()
 {
@@ -845,7 +809,7 @@ void RenderEngine::cleanUp()
     if (shaderProgram)
     {
         glDeleteProgram(shaderProgram);
-        shaderProgram = 0; // Nullify the shader program to prevent use after deletion
+        shaderProgram = 0;
     }
 
     std::cout << "Cleanup: All resources deleted.\n";

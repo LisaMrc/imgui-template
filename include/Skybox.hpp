@@ -3,13 +3,12 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
-#include "ShaderLoader.hpp" // Ton système de shader
+#include "ShaderLoader.hpp"
 
 class Skybox {
 public:
     void init(const std::vector<std::string>& faces);
     void draw(const glm::mat4& view, const glm::mat4& projection);
-    // void draw(const glm::mat4& view, const glm::mat4& projection);
 private:
     GLuint        loadCubemap(const std::vector<std::string>& faces);
     GLuint        textureID;

@@ -120,7 +120,7 @@ GLuint Shader::compile_shader(const std::string& path, GLenum type)
         std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n"
                   << path << "\n"
                   << infoLog << std::endl;
-        return 0; // ⛔ important
+        return 0;
     }
 
     return shader;

@@ -45,22 +45,12 @@ void App::init()
 
     renderEngine.setSceneLighting(renderEngine.getSceneTimeOfDay());
 
-    // aspect = 800.0f / 600.0f;
-    // TODO (🪟) : get window dimensions dynamically
-
     renderEngine.projectionMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 }
 
 void App::update()
 {
     ImGui::PushFont(board.getFont(0));
-    // ImGui::ShowDemoWindow(); // This opens a window which shows tons of
-    // examples of what you can do with ImGui. You
-    // should check it out! Also, you can use the
-    // "Item Picker" in the top menu of that demo
-    // window: then click on any widget and it will
-    // show you the corresponding code directly in
-    // your IDE!
 
     ImGui::Begin("Chess");
 
@@ -68,80 +58,16 @@ void App::update()
     ImGui::PushFont(board.getFont(1));
 
     glm::mat4 view = camera.getViewMatrix();
-    // renderEngine.render3DObj("assets/pawn.obj", 1, 0, view, projection);
     renderEngine.setViewMatrix(view);
     skybox.draw(view, projection);
     camera.updateMatrices();
     board.draw();
-
-    // renderEngine.viewMatrix = glm::lookAt(
-    //     glm::vec3(4, 6, 4), // position caméra
-    //     glm::vec3(0, 0, 0), // point visé
-    //     glm::vec3(0, 1, 0)  // axe vertical
-    // );
 
     renderEngine.renderAll(board);
 
     ImGui::PopFont();
     ImGui::End();
 }
-
-// void App::handleEvent()
-// {
-//     GLFWwindow* window = glfwGetCurrentContext();
-//     if (!window)
-//         return;
-
-//     // Changer de caméra avec la touche C
-//     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-//     {
-//         if (!togglePressed)
-//         {
-//             CameraMode newMode = (camera.getMode() == CameraMode::Trackball)
-//                                      ? CameraMode::Freefly
-//                                      : CameraMode::Trackball;
-//             camera.setMode(newMode);
-//             togglePressed = true;
-//         }
-//     }
-//     else
-//     {
-//         togglePressed = false;
-//     }
-
-//     if (camera.getMode() == CameraMode::Trackball)
-//     {
-//         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-//             camera.moveFront(-0.1f); // Zoom in
-//         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-//             camera.moveFront(0.1f); // Zoom out
-//         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-//             camera.rotateLeft(-1.0f);
-//         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-//             camera.rotateLeft(1.0f);
-//     }
-
-//     if (camera.getMode() == CameraMode::Freefly)
-//     {
-//         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-//             camera.rotateUp(-1.0f);
-//         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-//             camera.rotateUp(1.0f);
-//         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-//             camera.rotateLeft(1.0f);
-//         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-//             camera.rotateLeft(-1.0f);
-//     }
-//     // Contrôles communs à tous les modes (ZQSD)
-//     // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-//     //     camera.rotateUp(-1.0f);
-//     // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-//     //     camera.rotateUp(1.0f);
-//     // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-//     //     camera.rotateLeft(1.0f);
-//     // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-//     //     camera.rotateLeft(-1.0f);
-// }
 
 void App::handleEvent()
 {

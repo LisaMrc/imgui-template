@@ -53,10 +53,6 @@ public:
     std::string                         toChessNotation(int row, int col);
     Position                            chessNotationToIndices(const std::string& notation);
     StockfishEngine                     stockfish;
-    // bool                                wasWhiteKingRemoved();
-    // bool                                wasBlackKingRemoved();
-    // void                                debug_removeWhiteKingButton();
-    // void                                debug_removeBlackKingButton();
     bool        gameOver = false;
     Tools       tools;
     Binomial    binomial;
@@ -106,7 +102,7 @@ private:
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
-    bool                     AImode = true;
+    bool                     AImode = false;
 
     bool        whitePlayed = false;
     float       currentTime;
@@ -115,7 +111,7 @@ private:
 
     bool isCastle = false;
 
-    std::optional<std::pair<int, int>> enPassantTarget; // Holds the square that can be captured via en passant
+    std::optional<std::pair<int, int>> enPassantTarget;
 
     void SwitchPlayer(double probability);
 

@@ -58,7 +58,7 @@ public:
 
                     size_t movePos = output.find("bestmove");
 
-                    // If we received a full response (e.g., "bestmove"), print it
+                    // If we received a full response like "bestmove", print it
                     if (movePos != std::string::npos)
                     {
                         bestMove = output.substr(movePos + 9, 4);
@@ -82,7 +82,7 @@ public:
         TerminateProcess(hProcess, 0);
         CloseHandle(hProcess);
         CloseHandle(hThread);
-        readingThread.detach(); // or join with better sync
+        readingThread.detach();
     }
 
     void WriteToEngine(const std::string& command)

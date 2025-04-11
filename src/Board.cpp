@@ -76,7 +76,6 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     if (!piece)
         return false;
 
-    // If the destination square is blocked, the move is invalid
     if (isBlocked(row, col))
     {
         return false;
@@ -199,24 +198,6 @@ void Board::removePiece(Piece* piece)
                      return p.get() == piece;
                  }),
                  pieces.end());
-
-    // auto it = std::find_if(pieces.begin(), pieces.end(), [piece](const std::unique_ptr<Piece>& p) {
-    //     return p.get() == piece;
-    // });
-
-    // obj3D myObj;
-
-    // if (it != pieces.end())
-    // {
-    //     myObj = renderEngine.gameObjects[1];
-    // }
-
-    // std::cout << std::distance(pieces.begin(), it)-5 << "e place\n";
-
-    // if (!myObj.piece)
-    //     return;
-
-    // Piece* myPiece = myObj.piece;
 }
 
 void Board::performCastle(King* king, int destRow, int destCol)
@@ -473,7 +454,6 @@ void Board::playAI()
 {
     stockfish.WriteToEngine("uci\n");
     Sleep(500); // Let Stockfish respond
-    // std::cout << stockfish.GetLastOutput() << "\n";
 
     std::string allMoves = "";
 
@@ -569,9 +549,6 @@ std::string Board::toChessNotation(int row, int col)
 
 Position Board::chessNotationToIndices(const std::string& notation)
 {
-    // The notation is assumed to be in the format "a1", "h8", etc.
-
-    // Validate input length
     if (notation.size() != 2)
     {
         throw std::invalid_argument("Invalid chess notation.");
@@ -580,21 +557,19 @@ Position Board::chessNotationToIndices(const std::string& notation)
     char col = notation[0]; // Column ('a' to 'h')
     char row = notation[1]; // Row ('1' to '8')
 
-    // Convert column from 'a'-'h' to 0-7
     int colIndex = col - 'a';
     if (colIndex < 0 || colIndex > 7)
     {
         throw std::invalid_argument("Invalid column in chess notation.");
     }
 
-    // Convert row from '1'-'8' to 7-0
     int rowIndex = '8' - row;
     if (rowIndex < 0 || rowIndex > 7)
     {
         throw std::invalid_argument("Invalid row in chess notation.");
     }
 
-    return {rowIndex, colIndex}; // Return row and column
+    return {rowIndex, colIndex};
 }
 
 void Board::move(int row, int col)
@@ -618,7 +593,6 @@ void Board::move(int row, int col)
                     removePiece(getPieceAt(capturedRow, col));
                 }
 
-                // Example: inside makeMove(selectedPiece, toRow, toCol)
                 if (selectedPiece->getType() == 'P' && abs(row - selectedPiece->row) == 2)
                 {
                     enPassantTarget = {(selectedPiece->row + row) / 2, selectedPiece->col};
@@ -672,7 +646,6 @@ void Board::move(int row, int col)
                         removePiece(getPieceAt(capturedRow, col));
                     }
 
-                    // Example: inside makeMove(selectedPiece, toRow, toCol)
                     if (selectedPiece->getType() == 'P' && abs(row - selectedPiece->row) == 2)
                     {
                         enPassantTarget = {(selectedPiece->row + row) / 2, selectedPiece->col};
@@ -762,7 +735,7 @@ void Board::update(int row, int col)
     int randomRow{};
     int randomCol{};
 
-    if (moveCount > 1 && static_cast<int>(moveCount) % 2 == 0 && !squareBlocked) // Trigger every 10 moves
+    if (moveCount > 1 && static_cast<int>(moveCount) % 2 == 0 && !squareBlocked)
     {
         Poisson leafFall(1.0); // for on average 1 leaf falling per event
         int     leavesFallen = leafFall.draw();
@@ -771,7 +744,7 @@ void Board::update(int row, int col)
 
         for (int i = 0; i < leavesFallen; ++i)
         {
-            randomRow = std::rand() % 8; // Assuming an 8x8 board
+            randomRow = std::rand() % 8;
             randomCol = std::rand() % 8;
 
             std::cout << "Leaf falls on tile: (" << randomRow << ", " << randomCol << ")\n";
@@ -780,7 +753,7 @@ void Board::update(int row, int col)
         }
     }
 
-    if (moveCount > 1 && static_cast<int>(moveCount) % 10 == 0) // Trigger every 15 moves
+    if (moveCount > 1 && static_cast<int>(moveCount) % 10 == 0)
     {
         squareBlocked = false;
         unblockSquare(randomRow, randomCol);

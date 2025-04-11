@@ -41,7 +41,7 @@ void AudioEngine::playRandomSong(std::stop_token stopToken)
             songIndex =
 
                 std::rand() % songs.size();
-        } while (songs.size() > 1 && songIndex == lastIndex); // avoid repeat
+        } while (songs.size() > 1 && songIndex == lastIndex);
 
         lastIndex                       = songIndex;
         const std::string& selectedSong = songs[songIndex];

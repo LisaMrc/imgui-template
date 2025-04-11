@@ -2,8 +2,6 @@
 
 class Player {
 private:
-    // TODO(🚀) : use this bool to shorten removed king detection
-    // bool                                   didTheyWin = false;
     bool isWhite = true;
 
 public:
