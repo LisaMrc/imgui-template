@@ -6,8 +6,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <unordered_map>
 #include <vector>
+#include "../../lib/quick_imgui/lib/glad/stb_image.h"
 #include "../include/Piece.hpp"
-#include "glad/glad.h"
+#include "ShaderLoader.hpp"
 
 class obj3D {
 public:
@@ -41,11 +42,33 @@ public:
         // Délié VAO après configuration
         glBindVertexArray(0);
     }
+
+    bool operator==(const obj3D& other) const
+    {
+        return (this->piece == other.piece); // Compare relevant members
+    }
 };
 
 struct MeshData {
     GLuint  vao;
     GLsizei indexCount;
+};
+
+struct MaterialMeshGroup {
+    GLuint    vao;
+    GLuint    vbo;
+    GLuint    ebo;
+    GLsizei   indexCount;
+    glm::vec3 diffuseColor;
+};
+
+struct Material {
+    glm::vec3 diffuseColor;
+};
+
+struct Face {
+    std::vector<unsigned int> vertexIndices;
+    std::string materialName;
 };
 
 class RenderEngine {
@@ -58,7 +81,12 @@ public:
     std::vector<GLuint>                       vaoList;
     std::vector<GLuint>                       vboList;
     std::vector<GLuint>                       eboList;
+    GLuint                                    chessboardTexture;
+    glm::vec3                                 chessboardColor;
+    std::vector<MaterialMeshGroup>            chessboardGroups;
 
+    GLuint
+         loadTexture(const std::string& path);
     void loadShader();
     void loadMeshes();
     void create3DObjects();
@@ -67,10 +95,17 @@ public:
 
     void      setViewMatrix(const glm::mat4& view);
     glm::vec3 convertTo3D(int row, int col);
-
-    void renderAll();
+    void      render3DPieces(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void      renderSkybox();
+    void      render3DObj(const std::string& ObjectPath, int row, int col, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    // glm::mat4 getViewMatrix() const;
+    void renderAll(Board&);
     void cleanUp();
     ~RenderEngine();
+
+private:
+    glmax::Shader shader;
+    // glm::mat4     viewMatrix = glm::mat4(1.0f);
 };
 
 class VAO {

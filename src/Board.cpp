@@ -1,5 +1,4 @@
 #include "../include/Board.hpp"
-#include <GLFW/glfw3.h>
 #include <algorithm>
 #include <iostream>
 #include <memory>
@@ -162,10 +161,48 @@ void Board::removePiece(Piece* piece)
         gameOver = true;
     }
 
+    auto it = std::find_if(pieces.begin(), pieces.end(), [piece](const std::unique_ptr<Piece>& p) {
+        return p.get() == piece;
+    });
+
+    obj3D myObj;
+
+    if (it != pieces.end())
+    {
+        myObj = renderEngine.gameObjects[std::distance(pieces.begin(), it)+1];
+    }
+
+    if(!myObj.piece)
+        return;
+
+    renderEngine.gameObjects.erase(std::remove_if(renderEngine.gameObjects.begin()+1, renderEngine.gameObjects.end(), [myObj](const obj3D& obj) {
+        std::cout << obj.piece->getType() << "\n";
+        return obj == myObj;
+    }),
+    renderEngine.gameObjects.end());
+
     pieces.erase(std::remove_if(pieces.begin(), pieces.end(), [piece](const std::unique_ptr<Piece>& p) {
                      return p.get() == piece;
                  }),
                  pieces.end());
+
+    // auto it = std::find_if(pieces.begin(), pieces.end(), [piece](const std::unique_ptr<Piece>& p) {
+    //     return p.get() == piece;
+    // });
+
+    // obj3D myObj;
+
+    // if (it != pieces.end())
+    // {
+    //     myObj = renderEngine.gameObjects[1];
+    // }
+
+    // std::cout << std::distance(pieces.begin(), it)-5 << "e place\n";
+
+    // if (!myObj.piece)
+    //     return;
+
+    // Piece* myPiece = myObj.piece;
 }
 
 void Board::performCastle(King* king, int destRow, int destCol)

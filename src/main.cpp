@@ -23,5 +23,6 @@ int main()
     audioThread.join();
     soundThread.join();
 
+    glfwTerminate(); // Nettoyage GLFW
     return 0;
 }

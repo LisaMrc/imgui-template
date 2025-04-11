@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <algorithm>
 #include <atomic>
@@ -14,8 +13,10 @@
 #include "Math.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
+#include "Render.hpp"
 #include "Stockfish.hpp"
 #include "imgui.h"
+#include <GLFW/glfw3.h>
 
 struct Position {
     int row;
@@ -25,10 +26,11 @@ struct Position {
 class Board {
 private:
 public:
-    Player white;
-    Player black;
-    Board()
-        : white(true), black(false) {}
+    Player        white;
+    Player        black;
+    RenderEngine& renderEngine;
+    Board(RenderEngine& t_renderEngine)
+        : white(true), black(false), renderEngine(t_renderEngine) {}
     std::vector<std::unique_ptr<Piece>> pieces;
     void                                init();
     void                                update(int, int);
@@ -95,7 +97,7 @@ private:
     float moveCount = 0;
 
     std::vector<std::string> movesPlayed;
-    bool                     AImode = false;
+    bool                     AImode = true;
 
     bool        whitePlayed = false;
     float       currentTime;
