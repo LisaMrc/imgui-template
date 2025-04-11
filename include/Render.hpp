@@ -10,6 +10,17 @@
 #include "../include/Piece.hpp"
 #include "ShaderLoader.hpp"
 
+enum class TimeOfDay {
+    Day,
+    Night,
+    Twilight
+};
+
+struct MeshData {
+    GLuint  vao;
+    GLsizei indexCount;
+};
+
 class obj3D {
 public:
     Piece*  piece = nullptr;
@@ -39,7 +50,7 @@ public:
         glEnableVertexAttribArray(0); // position only
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-        // Délié VAO après configuration
+        // Délier VAO après configuration
         glBindVertexArray(0);
     }
 
@@ -49,9 +60,8 @@ public:
     }
 };
 
-struct MeshData {
-    GLuint  vao;
-    GLsizei indexCount;
+struct Color {
+    float r, g, b;
 };
 
 struct MaterialMeshGroup {
@@ -72,18 +82,21 @@ struct Face {
 };
 
 class RenderEngine {
-public:
+private:
     GLuint                                    shaderProgram{};
     std::unordered_map<std::string, MeshData> meshMap;
-    std::vector<obj3D>                        gameObjects;
-    glm::mat4                                 projectionMatrix;
-    glm::mat4                                 viewMatrix;
     std::vector<GLuint>                       vaoList;
     std::vector<GLuint>                       vboList;
     std::vector<GLuint>                       eboList;
     GLuint                                    chessboardTexture;
     glm::vec3                                 chessboardColor;
     std::vector<MaterialMeshGroup>            chessboardGroups;
+    GLuint                                    lightColorLocation;
+
+public:
+    glm::mat4                                 projectionMatrix;
+    glm::mat4                                 viewMatrix;
+    std::vector<obj3D>                        gameObjects;
 
     GLuint
          loadTexture(const std::string& path);
@@ -93,13 +106,18 @@ public:
     void link3DObjectsToPieces(Board& board);
     void linkMeshesTo3DObjects();
 
-    void      setViewMatrix(const glm::mat4& view);
+    void      renderAll();
     glm::vec3 convertTo3D(int row, int col);
     void      render3DPieces(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
     void      renderSkybox();
     void      render3DObj(const std::string& ObjectPath, int row, int col, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
     // glm::mat4 getViewMatrix() const;
     void renderAll(Board&);
+
+    TimeOfDay getSceneTimeOfDay();
+    void      setSceneLighting(TimeOfDay timeOfDay);
+    void      setViewMatrix(const glm::mat4& view);
+
     void cleanUp();
     ~RenderEngine();
 

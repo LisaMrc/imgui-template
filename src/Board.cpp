@@ -76,6 +76,12 @@ bool Board::IsValidMove(Piece* piece, int row, int col)
     if (!piece)
         return false;
 
+    // If the destination square is blocked, the move is invalid
+    if (isBlocked(row, col))
+    {
+        return false;
+    }
+
     Piece* targetPiece = getPieceAt(row, col);
 
     if (!isPathClear(piece, row, col) && piece->getType() != 'N')
@@ -124,10 +130,18 @@ bool Board::isPathClear(Piece* piece, int destRow, int destCol)
 
     while (r != destRow || c != destCol)
     {
+        // If the square is blocked, return false
+        if (isBlocked(r, c))
+        {
+            std::cout << "Path is blocked by a leaf!" << std::endl;
+            return false;
+        }
+
         if (getPieceAt(r, c) != nullptr)
         {
             return false;
         }
+
         r += rowDirection;
         c += colDirection;
 
@@ -459,7 +473,6 @@ void Board::playAI()
 {
     stockfish.WriteToEngine("uci\n");
     Sleep(500); // Let Stockfish respond
-    // Sleep(500); // Let Stockfish respond
     // std::cout << stockfish.GetLastOutput() << "\n";
 
     std::string allMoves = "";
@@ -718,7 +731,7 @@ void Board::update(int row, int col)
         }
     }
 
-    // Exponential distribution
+    // Exponential distribution to simulate an event happening after a set amount of time
     if (!AImode)
     {
         if (moveCount > 1 && static_cast<int>(moveCount) % 15 == 0)
@@ -744,6 +757,33 @@ void Board::update(int row, int col)
         {
             exp.done = false;
         }
+    }
+
+    int randomRow{};
+    int randomCol{};
+
+    if (moveCount > 1 && static_cast<int>(moveCount) % 2 == 0 && !squareBlocked) // Trigger every 10 moves
+    {
+        Poisson leafFall(1.0); // for on average 1 leaf falling per event
+        int     leavesFallen = leafFall.draw();
+
+        squareBlocked = true;
+
+        for (int i = 0; i < leavesFallen; ++i)
+        {
+            randomRow = std::rand() % 8; // Assuming an 8x8 board
+            randomCol = std::rand() % 8;
+
+            std::cout << "Leaf falls on tile: (" << randomRow << ", " << randomCol << ")\n";
+
+            blockSquare(randomRow, randomCol);
+        }
+    }
+
+    if (moveCount > 1 && static_cast<int>(moveCount) % 10 == 0) // Trigger every 15 moves
+    {
+        squareBlocked = false;
+        unblockSquare(randomRow, randomCol);
     }
 }
 
